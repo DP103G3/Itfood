@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Itfood</string>
+    <string name="textLogin">Login</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="textOpen">Open</string>
+    <string name="textClose">Close</string>
+    <string name="textAllShop">All Shop</string>
+    <string name="textNewShop">New Shop</string>
+    <string name="textShopImage">the image of this shop</string>
 </resources>
