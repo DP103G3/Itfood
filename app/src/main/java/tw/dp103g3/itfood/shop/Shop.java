@@ -1,6 +1,7 @@
 package tw.dp103g3.itfood.shop;
 
 import java.util.Date;
+import java.util.List;
 
 public class Shop {
 	private int id;
@@ -16,11 +17,12 @@ public class Shop {
 	private String info;
 	private Date jointime;
 	private Date suspendtime;
-	private int tt_score;
+	private int ttscore;
 	private int ttrate;
+	private List<String> types;
 
 	public Shop(int id, String email, String password, String name, String tax, String address, double latitude,
-			double longitude, int area, byte state, String info, Date jointime, Date suspendtime, int tt_score,
+			double longitude, int area, byte state, String info, Date jointime, Date suspendtime, int ttscore,
 			int ttrate) {
 		super();
 		this.id = id;
@@ -36,12 +38,12 @@ public class Shop {
 		this.info = info;
 		this.jointime = jointime;
 		this.suspendtime = suspendtime;
-		this.tt_score = tt_score;
+		this.ttscore = ttscore;
 		this.ttrate = ttrate;
 	}
 
 	public Shop(int id, String name, String address, double latitude, double longitude, int area, byte state,
-			String info, int tt_score, int ttrate) {
+			String info, int ttscore, int ttrate) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -51,8 +53,25 @@ public class Shop {
 		this.area = area;
 		this.state = state;
 		this.info = info;
-		this.tt_score = tt_score;
+		this.ttscore = ttscore;
 		this.ttrate = ttrate;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + id;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || !(obj instanceof Shop)) {
+			return false;
+		}
+		Shop shop = (Shop) obj;
+		return this.getId() == shop.getId();
 	}
 
 	public int getId() {
@@ -159,12 +178,12 @@ public class Shop {
 		this.suspendtime = suspendtime;
 	}
 
-	public int getTt_score() {
-		return tt_score;
+	public int getTtscore() {
+		return ttscore;
 	}
 
-	public void setTt_score(int tt_score) {
-		this.tt_score = tt_score;
+	public void setTtscore(int ttscore) {
+		this.ttscore = ttscore;
 	}
 
 	public int getTtrate() {
@@ -173,6 +192,14 @@ public class Shop {
 
 	public void setTtrate(int ttrate) {
 		this.ttrate = ttrate;
+	}
+
+	public List<String> getTypes() {
+		return types;
+	}
+
+	public void setTypes(List<String> types) {
+		this.types = types;
 	}
 
 }

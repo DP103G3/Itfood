@@ -9,4 +9,7 @@
     <string name="textAllShop">All Shop</string>
     <string name="textNewShop">New Shop</string>
     <string name="textShopImage">the image of this shop</string>
+    <string name="textNoNetwork">no network connection available</string>
+    <string name="textNoShopsFound">no shops found</string>
+    <string name="textChinese">chinese restaurant</string>
 </resources>

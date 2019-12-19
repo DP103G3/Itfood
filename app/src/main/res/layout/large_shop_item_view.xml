@@ -3,10 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/smallRestaurantItemView"
-    android:layout_width="244dp"
-    android:layout_height="210dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="286dp"
+    android:layout_marginBottom="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
     android:foreground="?selectableItemBackground"
     app:cardBackgroundColor="#EFEBE9"
     app:cardCornerRadius="6dp"
@@ -19,24 +20,24 @@
         <ImageView
             android:id="@+id/ivShop"
             android:layout_width="match_parent"
-            android:layout_height="128dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:src="@drawable/no_image"
+            android:layout_height="195dp"
+            android:contentDescription="@string/textShopImage"
             android:scaleType="centerCrop"
-            android:contentDescription="@string/textShopImage" />
+            android:src="@drawable/no_image"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tvName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
             android:layout_marginStart="8dp"
+            android:layout_marginBottom="24dp"
+            android:textColor="#5B3F36"
+            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="@id/tvType"
             app:layout_constraintStart_toStartOf="parent"
-            tools:text="四海遊龍（新店北新店）"
-            android:textSize="16sp"
-            android:textColor="#5B3F36" />
+            tools:text="四海遊龍（新店北新店）" />
 
         <TextView
             android:id="@+id/tvType"
@@ -44,11 +45,11 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginBottom="24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="@id/tvRate"
-            tools:text="店內價，中餐"
+            android:textColor="#8d6e63"
             android:textSize="12sp"
-            android:textColor="#8d6e63" />
+            app:layout_constraintBottom_toBottomOf="@id/tvRate"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="店內價，中餐" />
 
         <TextView
             android:id="@+id/tvRate"
@@ -56,10 +57,22 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginBottom="4dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            tools:text="4.7"
+            android:textColor="#8d6e63"
             android:textSize="12sp"
-            android:textColor="#8d6e63" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="4.7" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="0dp" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

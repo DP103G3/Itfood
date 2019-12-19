@@ -27,7 +27,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setUpActionBar();
         initDrawer();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        NavController navController =
+                Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupWithNavController(navigationView, navController);
     }
 
