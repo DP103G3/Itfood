@@ -12,6 +12,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.WindowManager;
 
 import com.google.android.material.navigation.NavigationView;
 
@@ -25,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         setUpActionBar();
         initDrawer();
         NavController navController =
@@ -41,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void initDrawer() {
         drawerLayout = findViewById(R.id.drawerLayout);
+        drawerLayout.setFitsSystemWindows(true);
+        drawerLayout.setClipToPadding(false);
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(
                 this, drawerLayout, R.string.textOpen, R.string.textClose);
         drawerLayout.addDrawerListener(actionBarDrawerToggle);

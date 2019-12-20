@@ -5,6 +5,15 @@ package tw.dp103g3.itfood.favorite;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,34 +26,19 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.PopupMenu;
-import android.widget.TextView;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
-import org.w3c.dom.Text;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
+import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.member.Member;
-import tw.dp103g3.itfood.shop.MainFragment;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
@@ -65,7 +59,7 @@ public class FavoriteFragment extends Fragment {
     private ImageTask shopImageTask;
     private ConstraintLayout layoutFavoriteNoItem;
     private TextView tvFavoriteNoItem;
-    private ImageView ivFavoriteNoItem;
+    private ImageView ivFavoriteNoItem, ivBack;
     private Button btBackToMain;
 
     @Override
@@ -85,6 +79,7 @@ public class FavoriteFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         final NavController navController = Navigation.findNavController(view);
         toolbar = view.findViewById(R.id.toolbarFavorite);
+        toolbar.setPadding(0, Common.getStatusBarHeight(activity), 0, 0);
         activity.setSupportActionBar(toolbar);
         rvFavorite = view.findViewById(R.id.rvFavorite);
         rvFavorite.setLayoutManager(new LinearLayoutManager(activity));
@@ -98,6 +93,10 @@ public class FavoriteFragment extends Fragment {
         btBackToMain.setOnClickListener(v -> navController.popBackStack());
 
         layoutFavoriteNoItem.setVisibility(View.GONE);
+
+        ivBack.setOnClickListener(v -> {
+            Navigation.findNavController(v).popBackStack();
+        });
 
         Bundle bundle = getArguments();
         if (bundle == null || bundle.getSerializable("member") == null) {
@@ -297,6 +296,7 @@ public class FavoriteFragment extends Fragment {
 
     private void handleViews(){
         layoutFavoriteNoItem = this.getView().findViewById(R.id.layoutFavoriteNoItem);
+        ivBack = this.getView().findViewById(R.id.ivBack);
         ivFavoriteNoItem = this.getView().findViewById(R.id.ivFavoriteNoItem);
         tvFavoriteNoItem = this.getView().findViewById(R.id.tvFavoriteNoItem);
         btBackToMain = this.getView().findViewById(R.id.btBackToMain);

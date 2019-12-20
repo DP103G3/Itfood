@@ -1,6 +1,7 @@
 package tw.dp103g3.itfood.shop;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -8,7 +9,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,7 +21,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -28,6 +33,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -47,6 +53,7 @@ public class MainFragment extends Fragment {
     private CommonTask getAllShopTask;
     private ImageTask shopImageTask;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private ScrollView scrollView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,8 +70,14 @@ public class MainFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         toolbar = view.findViewById(R.id.toolbar);
+        toolbar.setPadding(0, Common.getStatusBarHeight(activity), 0, 0);
         activity.setSupportActionBar(toolbar);
-        shops = getShops();
+        if (shops == null) {
+            shops = getShops();
+        }
+        scrollView = view.findViewById(R.id.scrollView);
+        scrollView.setVisibility(Common.networkConnected(activity) || !shops.isEmpty() ?
+                View.VISIBLE : View.GONE);
         rvNewShop = view.findViewById(R.id.rvNewShop);
         rvNewShop.setLayoutManager(new GridLayoutManager(
                 activity, 1, RecyclerView.HORIZONTAL, false));
@@ -72,10 +85,16 @@ public class MainFragment extends Fragment {
         rvChineseShop.setLayoutManager(new GridLayoutManager(
                 activity, 1, RecyclerView.HORIZONTAL, false));
         rvAllShop = view.findViewById(R.id.rvAllShop);
+        rvAllShop.setPadding(0, 0, 0, Common.getNavigationBarHeight(activity));
         rvAllShop.setLayoutManager(new LinearLayoutManager(activity));
 
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(() -> {
+            if (Common.networkConnected(activity)) {
+                shops = getShops();
+            }
+            scrollView.setVisibility(Common.networkConnected(activity) || !shops.isEmpty() ?
+                    View.VISIBLE : View.GONE);
             swipeRefreshLayout.setRefreshing(true);
             showShops();
             swipeRefreshLayout.setRefreshing(false);
@@ -89,7 +108,7 @@ public class MainFragment extends Fragment {
     }
 
     private List<Shop> getShops() {
-        List<Shop> shops = null;
+        List<Shop> shops = new ArrayList<>();
         if (Common.networkConnected(activity)) {
             String url = Common.URL + "/ShopServlet";
             JsonObject jsonObject = new JsonObject();
@@ -106,14 +125,16 @@ public class MainFragment extends Fragment {
                 Log.e(TAG, e.toString());
             }
         } else {
-            Common.ShowToast(activity, R.string.textNoNetwork);
+            Common.showToast(activity, R.string.textNoNetwork);
         }
         return shops;
     }
 
     private void setAdapter(RecyclerView recyclerView, List<Shop> shops, int itemViewResId) {
         if (shops == null || shops.isEmpty()) {
-            Common.ShowToast(activity, R.string.textNoShopsFound);
+            if (Common.networkConnected(activity)) {
+                Common.showToast(activity, R.string.textNoShopsFound);
+            }
         }
         ShopAdapter shopAdapter = (ShopAdapter) recyclerView.getAdapter();
         if (shopAdapter == null) {
@@ -140,7 +161,7 @@ public class MainFragment extends Fragment {
         private int imageSize;
         private int itemViewResId;
 
-        public ShopAdapter(Context context, List<Shop> shops, int itemViewResId) {
+        private ShopAdapter(Context context, List<Shop> shops, int itemViewResId) {
             this.context = context;
             this.shops = shops;
             this.itemViewResId = itemViewResId;
@@ -159,7 +180,7 @@ public class MainFragment extends Fragment {
         private class MyViewHolder extends RecyclerView.ViewHolder {
             ImageView ivShop;
             TextView tvName, tvType, tvRate;
-            public MyViewHolder(View itemView) {
+            private MyViewHolder(View itemView) {
                 super(itemView);
                 ivShop = itemView.findViewById(R.id.ivShop);
                 tvName = itemView.findViewById(R.id.tvName);
@@ -170,7 +191,7 @@ public class MainFragment extends Fragment {
 
         @NonNull
         @Override
-        public ShopAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public ShopAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View itemView = LayoutInflater.from(context)
                     .inflate(itemViewResId, parent, false);
             return new MyViewHolder(itemView);
@@ -193,6 +214,12 @@ public class MainFragment extends Fragment {
             holder.tvName.setText(shop.getName());
             holder.tvType.setText(type);
             holder.tvRate.setText(String.format(Locale.getDefault(), "%.1f", rate));
+            holder.itemView.setOnClickListener(v -> {
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("shop", shop);
+                Navigation.findNavController(v)
+                        .navigate(R.id.action_mainFragment_to_shopFragment, bundle);
+            });
         }
     }
 }

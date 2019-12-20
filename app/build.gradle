@@ -4,7 +4,7 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
     defaultConfig {
-        applicationId "tw.kffatkalo.itfood"
+        applicationId "tw.dp103g3.itfood"
         minSdkVersion 24
         targetSdkVersion 29
         versionCode 1
@@ -36,5 +36,4 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.android.support:appcompat-v7:28.0.0'
 }

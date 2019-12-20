@@ -9,5 +9,10 @@
             android:id="@+id/loginFragment"
             android:icon="@drawable/login"
             android:title="@string/textLogin" />
+
+        <item
+            android:id="@+id/favoriteFragment"
+            android:icon="@drawable/favorite"
+            android:title="@string/textFavorite" />
     </group>
 </menu>

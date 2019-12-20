@@ -16,4 +16,5 @@
     <string name="btBackToMain">回到首頁</string>
     <string name="tvFavoriteNoItem">你還沒有收藏店家～ 立即瀏覽人氣店家！</string>
     <string name="Delete">刪除</string>
+    <string name="textFavorite">Favorite</string>
 </resources>
