@@ -12,4 +12,8 @@
     <string name="textNoNetwork">no network connection available</string>
     <string name="textNoShopsFound">no shops found</string>
     <string name="textChinese">chinese restaurant</string>
+    <string name="tvFavoriteTitle">收藏店家</string>
+    <string name="btBackToMain">回到首頁</string>
+    <string name="tvFavoriteNoItem">你還沒有收藏店家～ 立即瀏覽人氣店家！</string>
+    <string name="Delete">刪除</string>
 </resources>

@@ -15,4 +15,9 @@
         android:name="tw.dp103g3.itfood.shop.MainFragment"
         android:label="fragment_main"
         tools:layout="@layout/fragment_main" />
+    <fragment
+        android:id="@+id/favoriteFragment"
+        android:name="tw.dp103g3.itfood.favorite.FavoriteFragment"
+        android:label="fragment_favorite"
+        tools:layout="@layout/fragment_favorite" />
 </navigation>
