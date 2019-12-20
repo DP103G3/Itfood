@@ -12,16 +12,5 @@
     <color name="colorAccent">#D81B60</color>
     <color name="colorBackground">#D7CCC8</color>
     <color name="colorItemBackground">#EFEBE9</color>
-    <color name="TextOnP">#5B3F36</color>
-    <color name="Primary">#FFA726</color>
-    <color name="PLight">#ffd95b</color>
-    <color name="PDark">#c77800</color>
-    <color name="Secondary">#fb8c00</color>
-    <color name="SLight">#ffbd45</color>
-    <color name="SDark">#c25e00</color>
-    <color name="TextOnS">#4e342e</color>
-    <color name="NormalText">#8d6e63</color>
-    <color name="CardBackground">#EFEBE9</color>
-    <color name="Background">#D7CC</color>
 
 </resources>
