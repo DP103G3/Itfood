@@ -9,5 +9,10 @@
         <item name="android:textColorPrimary">@color/colorTextOnP</item>
     </style>
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
+    <style name="ItFoodTheme.toolBarExpand">
+        <item name="android:textColorPrimary">@color/colorWhite</item>
+    </style>
+    <style name="ItFoodTheme.toolBarCollapsed">
+        <item name="android:textColorPrimary">@color/colorTextOnP</item>
+    </style>
 </resources>

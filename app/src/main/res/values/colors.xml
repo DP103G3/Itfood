@@ -4,13 +4,13 @@
     <color name="colorPrimaryDark">#c77800</color>
     <color name="colorPrimaryLight">#ffd95b</color>
     <color name="colorSecondary">#fb8c00</color>
-    <color name="colorSecondaryDark">#ffbd45</color>
-    <color name="colorSecondaryLight">#c25e00</color>
+    <color name="colorSecondaryDark">#c25e00</color>
+    <color name="colorSecondaryLight">#ffbd45</color>
     <color name="colorTextOnP">#5B3F36</color>
     <color name="colorTextOnS">#4e342e</color>
     <color name="colorNormalText">#8d6e63</color>
     <color name="colorAccent">#D81B60</color>
     <color name="colorBackground">#D7CCC8</color>
     <color name="colorItemBackground">#EFEBE9</color>
-
+    <color name="colorWhite">#fff3e0</color>
 </resources>

@@ -22,7 +22,7 @@
             app:navGraph="@navigation/navigation_graph" />
 
     </FrameLayout>
-
+<!--
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigationView"
         android:layout_width="300dp"
@@ -30,5 +30,5 @@
         android:layout_gravity="start"
         app:headerLayout="@layout/user_info"
         app:menu="@menu/navigation_menu" />
-
+-->
 </androidx.drawerlayout.widget.DrawerLayout>

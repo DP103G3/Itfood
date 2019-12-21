@@ -1,7 +1,14 @@
 package tw.dp103g3.itfood.shop;
 
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,30 +18,22 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-
-import com.google.android.material.appbar.CollapsingToolbarLayout;
+import java.util.Locale;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
+import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
-
-/**
- * A simple {@link Fragment} subclass.
- */
 public class ShopFragment extends Fragment {
     private final static String TAG = "TAG_ShopFragment";
     private AppCompatActivity activity;
-    private Toolbar toolbar;
+    private Toolbar toolbar, tbTitle;
     private ImageView ivBack, ivShop;
     private ImageTask shopImageTask, dishImageTask;
+    private CommonTask getdishTask;
+    private Shop shop;
+    private TextView tvName, tvRate;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,20 +51,40 @@ public class ShopFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         toolbar = view.findViewById(R.id.toolbar);
+        tbTitle = view.findViewById(R.id.tbTitle);
         ViewGroup.LayoutParams params = toolbar.getLayoutParams();
+        ViewGroup.LayoutParams titleParams = tbTitle.getLayoutParams();
         params.height += Common.getStatusBarHeight(activity);
+        titleParams.height += Common.getStatusBarHeight(activity);
         toolbar.setLayoutParams(params);
+        tbTitle.setLayoutParams(titleParams);
         toolbar.setPadding(0, Common.getStatusBarHeight(activity), 0, 0);
+        tbTitle.setPadding(0, Common.getStatusBarHeight(activity), 0, 0);
         activity.setSupportActionBar(toolbar);
         ActionBar actionBar = activity.getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(false);
-
         ivBack = view.findViewById(R.id.ivBack);
         ivBack.setOnClickListener(v -> {
             Navigation.findNavController(v).popBackStack();
         });
 
+        Bundle bundle = getArguments();
+        shop = (Shop) bundle.getSerializable("shop");
         ivShop = view.findViewById(R.id.ivShop);
-
+        String url = Common.URL + "/ShopServlet";
+        int imageSize = getResources().getDisplayMetrics().widthPixels;
+        shopImageTask = new ImageTask(url, shop.getId(), imageSize);
+        try {
+            Bitmap bitmap = shopImageTask.execute().get();
+            ivShop.setImageBitmap(bitmap);
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+        }
+        tvName = view.findViewById(R.id.tvName);
+        tvRate = view.findViewById(R.id.tvRate);
+        tvName.setText(shop.getName());
+        double rate = (double) shop.getTtscore() / shop.getTtrate();
+        tvRate.setText(String.format(Locale.getDefault(),
+                "%.1f(%d)", rate, shop.getTtrate()));
     }
 }
