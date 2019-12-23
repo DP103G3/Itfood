@@ -1,6 +1,7 @@
 package tw.dp103g3.itfood.shop;
 
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,11 +19,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.List;
 import java.util.Locale;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
+import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
@@ -33,7 +39,9 @@ public class ShopFragment extends Fragment {
     private ImageTask shopImageTask, dishImageTask;
     private CommonTask getdishTask;
     private Shop shop;
+    private List<Dish> dishes;
     private TextView tvName, tvRate;
+    private RecyclerView rvMenu;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,7 +79,7 @@ public class ShopFragment extends Fragment {
         Bundle bundle = getArguments();
         shop = (Shop) bundle.getSerializable("shop");
         ivShop = view.findViewById(R.id.ivShop);
-        String url = Common.URL + "/ShopServlet";
+        String url = Url.URL + "/ShopServlet";
         int imageSize = getResources().getDisplayMetrics().widthPixels;
         shopImageTask = new ImageTask(url, shop.getId(), imageSize);
         try {
@@ -86,5 +94,24 @@ public class ShopFragment extends Fragment {
         double rate = (double) shop.getTtscore() / shop.getTtrate();
         tvRate.setText(String.format(Locale.getDefault(),
                 "%.1f(%d)", rate, shop.getTtrate()));
+
+        rvMenu = view.findViewById(R.id.rvMenu);
+        rvMenu.setLayoutManager(new LinearLayoutManager(activity));
+
     }
+
+//    private void setAdapter(List<Dish> dishes) {
+//        rvMenu.setAdapter(new MenuAdapter(activity, dishes));
+//    }
+
+//    private class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MyViewHolder> {
+//        private Context context;
+//        private List<Dish> dishes;
+//        private int imageSize;
+//
+//        public MenuAdapter(Context context, List<Dish> dishes) {
+//            this.context = context;
+//            this.dishes = dishes;
+//        }
+//    }
 }

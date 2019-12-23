@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
+import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
@@ -122,7 +123,7 @@ public class MainFragment extends Fragment {
     private List<Shop> getShops() {
         List<Shop> shops = new ArrayList<>();
         if (Common.networkConnected(activity)) {
-            String url = Common.URL + "/ShopServlet";
+            String url = Url.URL + "/ShopServlet";
             JsonObject jsonObject = new JsonObject();
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
             jsonObject.addProperty("action", "getAllShow");
@@ -212,7 +213,7 @@ public class MainFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull ShopAdapter.MyViewHolder holder, int position) {
             final Shop shop = shops.get(position);
-            String url = Common.URL + "/ShopServlet";
+            String url = Url.URL + "/ShopServlet";
             List<String> types = shop.getTypes();
             StringBuilder typeSb = new StringBuilder();
             for (String line : types) {

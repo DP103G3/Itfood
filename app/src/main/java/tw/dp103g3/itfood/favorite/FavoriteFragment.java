@@ -38,6 +38,7 @@ import java.util.Locale;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
+import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
@@ -132,7 +133,7 @@ public class FavoriteFragment extends Fragment {
     private List<Favorite> getFavorites(int memId) {
         List<Favorite> favorites = null;
         if (Common.networkConnected(activity)) {
-            String url = Common.URL + "/FavoriteServlet";
+            String url = Url.URL + "/FavoriteServlet";
             JsonObject jsonObject = new JsonObject();
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
             jsonObject.addProperty("action", "findByMemberId");
@@ -156,7 +157,7 @@ public class FavoriteFragment extends Fragment {
     private Shop getShopById(int shopId){
         Shop shop = null;
         if (Common.networkConnected(activity)) {
-            String url = Common.URL + "/ShopServlet";
+            String url = Url.URL + "/ShopServlet";
             JsonObject jsonObject = new JsonObject();
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
             jsonObject.addProperty("action", "getShopById");
@@ -239,7 +240,7 @@ public class FavoriteFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull FavoriteFragment.ShopAdapter.MyViewHolder holder, int position) {
             final Shop shop = shops.get(position);
-            String url = Common.URL + "/ShopServlet";
+            String url = Url.URL + "/ShopServlet";
             List<String> types = shop.getTypes();
             StringBuilder typeSb = new StringBuilder();
             for (String line : types) {
@@ -259,7 +260,7 @@ public class FavoriteFragment extends Fragment {
                 popupMenu.setOnMenuItemClickListener(item -> {
                     if(item.getItemId() == R.id.delete){
                         if (Common.networkConnected(activity)){
-                            String url1 = Common.URL + "/FavoriteServlet";
+                            String url1 = Url.URL + "/FavoriteServlet";
                             Gson gson = new Gson();
                             JsonObject jsonObject = new JsonObject();
                             Favorite favorite = new Favorite(memId, shop.getId());
