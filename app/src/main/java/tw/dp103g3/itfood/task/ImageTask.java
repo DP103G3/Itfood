@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.google.gson.JsonObject;
@@ -50,10 +51,11 @@ public class ImageTask extends AsyncTask<Object, Integer, Bitmap> {
         if (isCancelled() || imageView == null) {
             return;
         }
+        imageView.setVisibility(View.VISIBLE);
         if (bitmap != null) {
             imageView.setImageBitmap(bitmap);
         } else {
-            imageView.setImageResource(R.drawable.no_image);
+            imageView.setVisibility(View.GONE);
         }
     }
 

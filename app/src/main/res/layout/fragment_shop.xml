@@ -5,9 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/colorBackground"
     tools:context=".shop.ShopFragment">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary">
@@ -17,7 +19,6 @@
             android:layout_height="match_parent"
             app:contentScrim="?attr/colorPrimary"
             app:titleEnabled="true"
-            app:title="1234"
             app:collapsedTitleGravity="center"
             app:expandedTitleGravity="center"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
@@ -42,27 +43,24 @@
                 android:id="@+id/tvName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="?attr/actionBarSize"
-                android:layout_marginEnd="?attr/actionBarSize"
-                android:layout_gravity="center_horizontal|bottom"
-                tools:text="雙醬咖哩（中壢中央店）"
-                android:gravity="center_horizontal"
-                android:textSize="20sp"
-                android:textColor="@color/colorWhite"
                 android:layout_marginBottom="140dp"
-                app:layout_collapseMode="parallax"/>
+                android:layout_gravity="center_horizontal|bottom"
+                android:textColor="@color/colorWhite"
+                android:textSize="20sp"
+                tools:text="雙醬咖哩（中壢中央店）"
+                app:layout_collapseMode="parallax" />
 
             <TextView
                 android:id="@+id/tvRate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|top"
-                tools:text="4.8"
-                android:textSize="16sp"
+                android:layout_marginTop="170dp"
+                android:layout_gravity="center_horizontal"
                 android:textColor="@color/colorWhite"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:layout_marginTop="164dp"
-                app:layout_collapseMode="parallax"/>
+                tools:text="4.8"
+                app:layout_collapseMode="parallax" />
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/tbTitle"
@@ -77,8 +75,10 @@
                     android:layout_height="match_parent">
 
                     <TextView
+                        android:id="@+id/tvTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:gravity="center"
                         android:layout_gravity="center"
                         android:text="雙醬咖哩（中壢中央店）"
                         android:textColor="@color/colorWhite"
@@ -106,26 +106,16 @@
                         android:src="@drawable/back"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
-<!--
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="雙醬咖哩（中壢中央店）"
-                        android:layout_gravity="center"
-                        android:textSize="20sp"
-                        android:textColor="@color/colorTextOnS"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/ivBack"
-                        app:layout_constraintTop_toTopOf="parent" />
-                        -->
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.appcompat.widget.Toolbar>
+
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvMenu"
+        android:id="@+id/rvDish"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="8dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
