@@ -115,6 +115,34 @@ public class CommentFragment extends Fragment {
             } else {
                 Common.showToast(activity, R.string.textNoNetwork);
             }
+            if (Common.networkConnected(activity)) {
+                String URL = Url.URL + "/ShopServlet";
+                int ttScore = shop.getTtscore();
+                int ttRate = shop.getTtrate();
+                ttScore += cmt_score;
+                ttRate += 1;
+                shop.setTtscore(ttScore);
+                shop.setTtrate(ttRate);
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("action", "update");
+                jsonObject.addProperty("shop", new Gson().toJson(shop));
+
+                int count = 0;
+                try {
+                    String result = new CommonTask(URL, jsonObject.toString()).execute().get();
+                    count = Integer.valueOf(result);
+                } catch (Exception e){
+                    Log.e(TAG, e.toString());
+                }
+                if (count == 0){
+                    Common.showToast(getActivity(), R.string.textPostCommentFail);
+                } else{
+                    Common.showToast(getActivity(), R.string.textPostCommentSuccess);
+                }
+
+            } else {
+                Common.showToast(activity, R.string.textNoNetwork);
+            }
 
             Navigation.findNavController(view).popBackStack();
 
