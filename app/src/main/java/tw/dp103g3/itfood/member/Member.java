@@ -1,8 +1,9 @@
 package tw.dp103g3.itfood.member;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Member {
+public class Member implements Serializable {
 	private int mem_id;
 	private String mem_name;
 	private String mem_password;

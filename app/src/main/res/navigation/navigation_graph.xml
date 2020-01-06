@@ -29,4 +29,9 @@
         android:name="tw.dp103g3.itfood.favorite.FavoriteFragment"
         android:label="fragment_favorite"
         tools:layout="@layout/fragment_favorite" />
+    <fragment
+        android:id="@+id/commentFragment"
+        android:name="tw.dp103g3.itfood.comment.CommentFragment"
+        android:label="fragment_comment"
+        tools:layout="@layout/fragment_comment" />
 </navigation>

@@ -18,4 +18,8 @@
     <string name="Delete">刪除</string>
     <string name="textFavorite">Favorite</string>
     <string name="textNoDishesFound">no dishes found</string>
+    <string name="btPost" >發布</string>
+    <string name="etComment">說明你對此店家的感受</string>
+    <string name="textPostCommentFail">Post comment failed. Please try again later.</string>
+    <string name="textPostCommentSuccess">Comment posted successfully.</string>
 </resources>

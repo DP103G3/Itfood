@@ -95,9 +95,7 @@ public class FavoriteFragment extends Fragment {
 
         layoutFavoriteNoItem.setVisibility(View.GONE);
 
-        ivBack.setOnClickListener(v -> {
-            Navigation.findNavController(v).popBackStack();
-        });
+        ivBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
 
         Bundle bundle = getArguments();
         if (bundle == null || bundle.getSerializable("member") == null) {
