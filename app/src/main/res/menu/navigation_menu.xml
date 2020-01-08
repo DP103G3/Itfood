@@ -14,5 +14,8 @@
             android:id="@+id/favoriteFragment"
             android:icon="@drawable/favorite"
             android:title="@string/textFavorite" />
+        <item
+            android:icon="@drawable/myorder"
+            android:title="My Order" />
     </group>
 </menu>
