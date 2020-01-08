@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutShopComment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
@@ -136,8 +137,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:text="@string/comment"
-            android:textSize="16sp"
             android:textColor="@color/colorTextOnP"
+            android:textSize="16sp"
             app:layout_constraintStart_toEndOf="@+id/tvCommentsTotal"
             app:layout_constraintTop_toTopOf="@+id/tvCommentsTotal" />
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -150,12 +151,125 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/layoutCommentLoggedIn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layoutCommentedTrue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorItemBackground"
+                    android:paddingStart="16dp"
+                    android:paddingTop="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="16dp">
+
+                    <TextView
+                        android:id="@+id/tvUsername"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="Wen" />
+
+                    <TextView
+                        android:id="@+id/tvCommentTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/tvUsername"
+                        tools:text="12月 21, 2019" />
+
+                    <TextView
+                        android:id="@+id/tvCommentDetail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/tvCommentTime"
+                        tools:text="好喝" />
+
+                    <RatingBar
+                        android:id="@+id/ratingBar"
+                        style="@android:style/Widget.Material.RatingBar.Small"
+                        android:layout_width="79dp"
+                        android:layout_height="16dp"
+                        android:isIndicator="true"
+                        android:numStars="5"
+                        android:stepSize="1"
+                        app:layout_constraintBottom_toBottomOf="@+id/textView"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageButton
+                        android:id="@+id/btCommentOptionMenu"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:backgroundTint="@android:color/transparent"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/round_more_vert_black_24dp"
+                        android:tint="@color/colorTextOnP"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/ratingBar" />
+
+                    <TextView
+                        android:id="@+id/textView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        android:alpha="80"
+                        android:text="@string/yourComment"
+                        android:textSize="12sp"
+                        app:layout_constraintEnd_toStartOf="@+id/ratingBar"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layoutCommentedFalse"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorItemBackground">
+
+                    <Button
+                        android:id="@+id/btPostComment"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="80dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="80dp"
+                        android:layout_marginBottom="8dp"
+                        android:backgroundTint="@color/colorSecondary"
+                        android:fontFamily="@font/noto_sans"
+                        android:text="@string/btPostComment"
+                        android:textColor="@color/colorTextOnS"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvComments"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

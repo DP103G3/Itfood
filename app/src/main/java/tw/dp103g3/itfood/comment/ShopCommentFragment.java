@@ -3,12 +3,14 @@ package tw.dp103g3.itfood.comment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,7 +20,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -26,6 +31,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+
 
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
@@ -41,6 +47,8 @@ import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
+import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
+
 
 public class ShopCommentFragment extends Fragment {
     private final static String TAG = "TAG_ShopCommentFragment";
@@ -52,7 +60,10 @@ public class ShopCommentFragment extends Fragment {
     private ImageTask shopImageTask;
     private CommonTask getMemberTask, getCommentTask;
     private List<Comment> comments;
-
+    private LinearLayout layoutCommentLoggedIn, layoutShopComment;
+    private ConstraintLayout layoutCommentedTrue, layoutCommentedFalse;
+    private Button btPostComment;
+    private SharedPreferences preferences;
 
 
     @Override
@@ -71,14 +82,93 @@ public class ShopCommentFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initToolbar(R.id.toolbar, view);
-        ivShop = view.findViewById(R.id.ivShop);
-        ivBack = view.findViewById(R.id.ivBack);
-        tvCommentsTotal = view.findViewById(R.id.tvCommentsTotal);
-        tvName = view.findViewById(R.id.tvName);
-        tvRatingTotal = view.findViewById(R.id.tvRatingTotal);
-        tvAverageRating = view.findViewById(R.id.tvAverageRating);
-        rvComments = view.findViewById(R.id.rvComments);
+        layoutShopComment = view.findViewById(R.id.layoutShopComment);
+
+        TextView tvUsername, tvCommentTime,tvCommentDetail;
+        RatingBar ratingBar;
+        ImageButton btCommentOptionMenu;
+        tvUsername = view.findViewById(R.id.tvUsername);
+        tvCommentTime = view.findViewById(R.id.tvCommentTime);
+        tvCommentDetail= view.findViewById(R.id.tvCommentDetail);
+        ratingBar = view.findViewById(R.id.ratingBar);
+        btCommentOptionMenu = view.findViewById(R.id.btCommentOptionMenu);
+
+        handleViews();
+
+        //確認使用者為訪客或會員，從SharedPreferences取得"mem_id"，如果是0的就是沒有登入
+        preferences = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
+
+        int mem_id = preferences.getInt("mem_id", 0);
+
+        btPostComment.setOnClickListener(v -> {
+            Bundle sendBundle = new Bundle();
+            Bundle gotBundle = getArguments();
+            Shop shop = (Shop) gotBundle.getSerializable("shop");
+            Member member = getMember(mem_id);
+            sendBundle.putSerializable("member",member);
+            sendBundle.putSerializable("shop", shop);
+            Navigation.findNavController(v).navigate(R.id.action_shopCommentFragment_to_commentFragment, sendBundle);
+        });
+
+        //如果preferences中的mem_id為0即代表為登入
+        if (mem_id == 0) {
+            layoutCommentLoggedIn.setVisibility(View.GONE);
+        } else {
+            if (Common.networkConnected(activity)) {
+                String url = Url.URL + "/CommentServlet";
+                JsonObject jsonObject = new JsonObject();
+                Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                jsonObject.addProperty("action", "findByCaseWithState");
+                jsonObject.addProperty("id", mem_id);
+                jsonObject.addProperty("type", "member");
+                jsonObject.addProperty("state", 1);
+                String jsonOut = jsonObject.toString();
+                getCommentTask = new CommonTask(url , jsonOut);
+
+                try{
+                    Comment comment;
+                    String jsonIn = getCommentTask.execute().get();
+                    Type listType = new TypeToken<List<Comment>>() {
+                    }.getType();
+                    comments = gson.fromJson(jsonIn, listType);
+                    if (comments != null && !comments.isEmpty()){
+                    comment = comments.get(0);}
+                    else{
+                        comment = null;
+                    }
+
+                    System.out.println(TAG + "會員comment:" +jsonIn );
+                    if(comment != null ){
+                        layoutCommentedFalse.setVisibility(View.GONE);
+
+                        Member member =  getMember(mem_id);
+                        String rawMemberEmail = member.getMemEmail();
+                        String[] splitEmail = rawMemberEmail.split("@");
+                        //將會員的電子郵件由“＠”分開為兩部分，取前面顯示
+                        String memberEmail = splitEmail[0];
+
+                        ratingBar.setRating(comment.getCmt_score());
+                        tvUsername.setText(memberEmail);
+                        tvCommentDetail.setText(comment.getCmt_detail());
+                        tvCommentTime.setText(new SimpleDateFormat("MM月 dd, yyyy", Locale.getDefault()).format(comment.getCmt_time()));
+
+                        btCommentOptionMenu.setOnClickListener(v -> {
+
+                        });
+
+                    } else{
+                        layoutCommentedTrue.setVisibility(View.GONE);
+                    }
+                } catch (Exception e){
+                    System.out.println(TAG + e.toString());
+                }
+            } else{
+                Common.showToast(activity, R.string.textNoNetwork);
+            }
+        }
+
+        int color = Color.argb(255, 255, 255, 255);
+        ivBack.setColorFilter(color);
 
         Bundle bundle = getArguments();
         shop = (Shop) bundle.getSerializable("shop");
@@ -93,19 +183,38 @@ public class ShopCommentFragment extends Fragment {
         }
         tvName.setText(shop.getName());
         double rate = (double) shop.getTtscore() / shop.getTtrate();
-        tvAverageRating.setText(String.format(Locale.getDefault(),"%.1f", rate));
-        tvRatingTotal.setText(String.format("(%s)",String.valueOf(shop.getTtrate())));
+        tvAverageRating.setText(String.format(Locale.getDefault(), "%.1f", rate));
+        tvRatingTotal.setText(String.format("(%s)", String.valueOf(shop.getTtrate())));
         rvComments.setLayoutManager(new LinearLayoutManager(activity));
+
         comments = getComments();
+
+        int index = -1;
+        for (Comment comment : comments){
+            if (comment.getMem_id() == mem_id){
+                index = comments.indexOf(comment);
+            }
+        }
+        if (index != -1){
+            comments.remove(index);
+            tvCommentsTotal.setText(String.valueOf(comments.size()+1));
+        }  else {
+            tvCommentsTotal.setText(String.valueOf(comments.size()));
+        }
+
+
         ShowComments(comments);
-        tvCommentsTotal.setText(String.valueOf(comments.size()));
+
+
         ivBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
+
+
 
     }
 
-    private List<Comment> getComments(){
+    private List<Comment> getComments() {
         List<Comment> comments = new ArrayList<>();
-        if (Common.networkConnected(activity)){
+        if (Common.networkConnected(activity)) {
             String url = Url.URL + "/CommentServlet";
             JsonObject jsonObject = new JsonObject();
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
@@ -115,23 +224,23 @@ public class ShopCommentFragment extends Fragment {
             jsonObject.addProperty("state", 1);
             String jsonOut = jsonObject.toString();
             getCommentTask = new CommonTask(url, jsonOut);
-            try{
+            try {
                 String jsonIn = getCommentTask.execute().get();
-                Type listType = new TypeToken<List<Comment>>(){
+                Type listType = new TypeToken<List<Comment>>() {
                 }.getType();
                 comments = gson.fromJson(jsonIn, listType);
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else{
+        } else {
             Common.showToast(activity, R.string.textNoNetwork);
         }
         return comments;
     }
 
-    private Member getMember(int mem_id){
+    private Member getMember(int mem_id) {
         Member member = null;
-        if (Common.networkConnected(activity)){
+        if (Common.networkConnected(activity)) {
             String url = Url.URL + "/MemberServlet";
             JsonObject jsonObject = new JsonObject();
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
@@ -139,31 +248,29 @@ public class ShopCommentFragment extends Fragment {
             jsonObject.addProperty("mem_id", mem_id);
             String jsonOut = jsonObject.toString();
             getMemberTask = new CommonTask(url, jsonOut);
-            try{
+            try {
                 String jsonIn = getMemberTask.execute().get();
                 member = gson.fromJson(jsonIn, Member.class);
-            } catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
             Common.showToast(activity, R.string.textNoNetwork);
         }
-        return  member;
+        return member;
     }
 
 
-
-
-    private void ShowComments(List<Comment> comments){
-        if(comments == null || comments.isEmpty()){
-            if(Common.networkConnected(activity)){
-                Common.showToast(activity,R.string.textNoComments);
-            } else{
+    private void ShowComments(List<Comment> comments) {
+        if (comments == null || comments.isEmpty()) {
+            if (Common.networkConnected(activity)) {
+                Common.showToast(activity, R.string.textNoComments);
+            } else {
                 Common.showToast(activity, R.string.textNoNetwork);
             }
         }
         CommentAdapter commentAdapter = (CommentAdapter) rvComments.getAdapter();
-        if (commentAdapter == null){
+        if (commentAdapter == null) {
             rvComments.setAdapter(new CommentAdapter(activity, comments));
         } else {
             commentAdapter.setComments(comments);
@@ -175,7 +282,7 @@ public class ShopCommentFragment extends Fragment {
         private Context context;
         private List<Comment> comments;
 
-        CommentAdapter(Context context, List<Comment> comments){
+        CommentAdapter(Context context, List<Comment> comments) {
             this.context = context;
             this.comments = comments;
         }
@@ -189,10 +296,11 @@ public class ShopCommentFragment extends Fragment {
             return comments.size();
         }
 
-        private class MyViewHolder extends RecyclerView.ViewHolder{
+        private class MyViewHolder extends RecyclerView.ViewHolder {
             TextView tvUsername, tvCommentTime, tvCommentDetail;
             RatingBar ratingBar;
-            MyViewHolder(@NonNull View itemView){
+
+            MyViewHolder(@NonNull View itemView) {
                 super(itemView);
                 tvUsername = itemView.findViewById(R.id.tvUsername);
                 tvCommentTime = itemView.findViewById(R.id.tvCommentTime);
@@ -205,7 +313,7 @@ public class ShopCommentFragment extends Fragment {
         @NonNull
         @Override
         public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View itemView = LayoutInflater.from(context).inflate(R.layout.comment_item_view,parent,false);
+            View itemView = LayoutInflater.from(context).inflate(R.layout.comment_item_view, parent, false);
             return new MyViewHolder(itemView);
         }
 
@@ -225,18 +333,26 @@ public class ShopCommentFragment extends Fragment {
             holder.tvCommentTime.setText(new SimpleDateFormat("MM月 dd, yyyy", Locale.getDefault()).format(comment.getCmt_time()));
 
 
-
         }
 
 
-
     }
 
-    private void initToolbar(int resId, View view) {
-        Toolbar toolbar = view.findViewById(resId);
-        ViewGroup.LayoutParams params = toolbar.getLayoutParams();
-        params.height += Common.getStatusBarHeight(activity);
-        toolbar.setLayoutParams(params);
-        toolbar.setPadding(0, Common.getStatusBarHeight(activity), 0, 0);
+    public void handleViews() {
+        ivShop = layoutShopComment.findViewById(R.id.ivShop);
+        ivBack = layoutShopComment.findViewById(R.id.ivBack);
+        tvCommentsTotal = layoutShopComment.findViewById(R.id.tvCommentsTotal);
+        tvName = layoutShopComment.findViewById(R.id.tvName);
+        tvRatingTotal = layoutShopComment.findViewById(R.id.tvRatingTotal);
+        tvAverageRating = layoutShopComment.findViewById(R.id.tvAverageRating);
+        rvComments = layoutShopComment.findViewById(R.id.rvComments);
+        layoutCommentLoggedIn = layoutShopComment.findViewById(R.id.layoutCommentLoggedIn);
+        layoutCommentedFalse = layoutShopComment.findViewById(R.id.layoutCommentedFalse);
+        layoutCommentedTrue = layoutShopComment.findViewById(R.id.layoutCommentedTrue);
+        btPostComment = layoutShopComment.findViewById(R.id.btPostComment);
     }
+
 }
+
+
+// TODO 增加“新增評論”按鈕，以及修改登入會員評論內容、評分、刪除評論功能

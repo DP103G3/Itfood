@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 public class Common {
     private static final double EARTH_RADIUS = 6378.137;
+    public static final String PREFERENCES_MEMBER = "member";
 
     public static boolean networkConnected(Activity activity) {
         ConnectivityManager connectivityManager =

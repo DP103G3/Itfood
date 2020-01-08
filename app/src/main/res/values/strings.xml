@@ -29,4 +29,8 @@
     <string name="textPostCommentSuccess">Comment posted successfully.</string>
     <string name="comment">評論</string>
     <string name="textNoComments">no comments found</string>
+    <string name="btPostComment">發表評論</string>
+    <string name="edit">編輯</string>
+    <string name="deleteComment">刪除評論</string>
+    <string name="yourComment">您的評論</string>
 </resources>

@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -35,7 +36,8 @@ import tw.dp103g3.itfood.task.CommonTask;
 public class CommentFragment extends Fragment {
 
     private Activity activity;
-    private Button btPost, btClose;
+    private Button btPost;
+    private ImageButton btClose;
     private TextView tvShopName, tvMemberName;
     private RatingBar rbRating;
     private EditText etComment;
