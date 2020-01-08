@@ -1,8 +1,5 @@
 package tw.dp103g3.itfood.favorite;
 
-//TODO TOOLBAR加入MENUOPTION、TITLE
-//TODO itemView add onClickListener navigate to Shop Detail.
-
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,6 +30,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -59,14 +57,13 @@ public class FavoriteFragment extends Fragment {
     private List<Shop> shops;
     private ImageTask shopImageTask;
     private ConstraintLayout layoutFavoriteNoItem;
-    private TextView tvFavoriteNoItem;
     private ImageView ivFavoriteNoItem, ivBack;
     private Button btBackToMain;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        activity = (AppCompatActivity)getActivity();
+        activity = (AppCompatActivity) getActivity();
     }
 
     @Override
@@ -85,9 +82,9 @@ public class FavoriteFragment extends Fragment {
         rvFavorite = view.findViewById(R.id.rvFavorite);
         rvFavorite.setLayoutManager(new LinearLayoutManager(activity));
 
-        try{
+        try {
             handleViews();
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             System.out.println(TAG + e.toString());
             navController.popBackStack();
         }
@@ -97,35 +94,38 @@ public class FavoriteFragment extends Fragment {
 
         ivBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
 
-        Bundle bundle = getArguments();
-        if (bundle == null || bundle.getSerializable("member") == null) {
-            Common.showToast(activity, "error");
-            navController.popBackStack();
-            return;
-        }
+        //待登入判定功能完成後方更改
+//        Bundle bundle = getArguments();
+//        if (bundle == null || bundle.getSerializable("member") == null) {
+//            Common.showToast(activity, "error");
+//            navController.popBackStack();
+//            return;
+//        }
 
-        member = (Member) bundle.getSerializable("member");
-        try{
+        //member = (Member) bundle.getSerializable("member");
+        member = new Member(1, "莊雨軒", "123456789", "rerg@gmail.com", "0982731622", new Date(), null, 1);
+
+        try {
             memId = member.getMemId();
-        } catch (Exception e){
+        } catch (Exception e) {
             System.out.println(TAG + e.toString());
             Common.showToast(activity, "error");
             navController.popBackStack();
             return;
         }
         favorites = getFavorites(memId);
-        if (favorites == null || favorites.isEmpty()){
+        if (favorites == null || favorites.isEmpty()) {
             rvFavorite.setVisibility(View.GONE);
             layoutFavoriteNoItem.setVisibility(View.VISIBLE);
-        }
-        shops = new ArrayList<>();
-        for(int i = 0; i < favorites.size(); i ++){
-            shops.add(getShopById(favorites.get(i).getShopId()));
-        }
+        } else {
+            shops = new ArrayList<>();
+            for (int i = 0; i < favorites.size(); i++) {
+                shops.add(getShopById(favorites.get(i).getShopId()));
+            }
 
-        showShops();
+            showShops();
+        }
     }
-
 
 
     private List<Favorite> getFavorites(int memId) {
@@ -152,7 +152,7 @@ public class FavoriteFragment extends Fragment {
         return favorites;
     }
 
-    private Shop getShopById(int shopId){
+    private Shop getShopById(int shopId) {
         Shop shop = null;
         if (Common.networkConnected(activity)) {
             String url = Url.URL + "/ShopServlet";
@@ -218,6 +218,7 @@ public class FavoriteFragment extends Fragment {
         private class MyViewHolder extends RecyclerView.ViewHolder {
             ImageView ivShop;
             TextView tvName, tvType, tvRate;
+
             private MyViewHolder(View itemView) {
                 super(itemView);
                 ivShop = itemView.findViewById(R.id.ivShop);
@@ -251,13 +252,20 @@ public class FavoriteFragment extends Fragment {
             shopImageTask.execute();
             holder.tvName.setText(shop.getName());
             holder.tvType.setText(type);
-            holder.tvRate.setText(String.format(Locale.getDefault(), "%.1f", rate));
+            holder.tvRate.setText(String.format(Locale.getDefault(), "%.1f (%d)", rate ,shop.getTtrate()));
+
+            holder.itemView.setOnClickListener(v -> {
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("shop", shop);
+                Navigation.findNavController(v).navigate(R.id.action_favoriteFragment_to_shopFragment, bundle);
+            });
+
             holder.itemView.setOnLongClickListener(v -> {
-                PopupMenu popupMenu = new PopupMenu(activity, v , Gravity.END);
+                PopupMenu popupMenu = new PopupMenu(activity, v, Gravity.END);
                 popupMenu.inflate(R.menu.favorite_menu);
                 popupMenu.setOnMenuItemClickListener(item -> {
-                    if(item.getItemId() == R.id.delete){
-                        if (Common.networkConnected(activity)){
+                    if (item.getItemId() == R.id.delete) {
+                        if (Common.networkConnected(activity)) {
                             String url1 = Url.URL + "/FavoriteServlet";
                             Gson gson = new Gson();
                             JsonObject jsonObject = new JsonObject();
@@ -266,22 +274,22 @@ public class FavoriteFragment extends Fragment {
                             jsonObject.addProperty("action", "favoriteDelete");
                             jsonObject.addProperty("favorite", jsonOut);
                             int count = 0;
-                            try{
+                            try {
                                 favoriteDeleteTask = new CommonTask(url1, jsonObject.toString());
                                 String result = favoriteDeleteTask.execute().get();
                                 count = Integer.valueOf(result);
-                            } catch (Exception e){
+                            } catch (Exception e) {
                                 Log.e(TAG, e.toString());
                             }
-                            if(count == 0){
+                            if (count == 0) {
                                 Common.showToast(activity, "delete fail");
-                            } else{
+                            } else {
                                 shops.remove(shop);
                                 ShopAdapter.this.notifyDataSetChanged();
                                 FavoriteFragment.this.shops.remove(shop);
                                 //Common.showToast(activity, "delete successfully");
                             }
-                        } else{
+                        } else {
                             Common.showToast(activity, R.string.textNoNetwork);
                         }
                     }
@@ -293,11 +301,10 @@ public class FavoriteFragment extends Fragment {
         }
     }
 
-    private void handleViews(){
+    private void handleViews() {
         layoutFavoriteNoItem = this.getView().findViewById(R.id.layoutFavoriteNoItem);
         ivBack = this.getView().findViewById(R.id.ivBack);
         ivFavoriteNoItem = this.getView().findViewById(R.id.ivFavoriteNoItem);
-        tvFavoriteNoItem = this.getView().findViewById(R.id.tvFavoriteNoItem);
         btBackToMain = this.getView().findViewById(R.id.btBackToMain);
         ivFavoriteNoItem.setImageResource(R.drawable.coffee);
 
