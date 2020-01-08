@@ -108,6 +108,7 @@ public class ShopFragment extends Fragment {
                 tvRate.setTextColor(color);
                 PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(getResources().getColor(R.color.colorWhite, activity.getTheme()), PorterDuff.Mode.SRC_ATOP);
                 ivBack.getDrawable().setColorFilter(colorFilter);
+                ivComment.getDrawable().setColorFilter(colorFilter);
             } else {
                 color = Color.argb((- changeOffset - offset) * 255 / (appBarLayout.getTotalScrollRange() - changeOffset), 91, 63, 54);
                 tvName.setTextColor(Color.argb(0, 0, 0, 0));
@@ -115,6 +116,7 @@ public class ShopFragment extends Fragment {
                 tvRate.setTextColor(Color.argb(0, 0, 0, 0));
                 PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(getResources().getColor(R.color.colorTextOnP, activity.getTheme()), PorterDuff.Mode.SRC_ATOP);
                 ivBack.getDrawable().setColorFilter(colorFilter);
+                ivComment.getDrawable().setColorFilter(colorFilter);
             }
         });
         double rate = (double) shop.getTtscore() / shop.getTtrate();
