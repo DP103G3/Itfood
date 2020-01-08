@@ -23,6 +23,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import tw.dp103g3.itfood.Common;
@@ -44,6 +45,7 @@ public class CommentFragment extends Fragment {
     private Shop shop;
     private Member member;
     private final static String TAG = "TAG_CommentFragment";
+    private Comment comment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,6 +71,12 @@ public class CommentFragment extends Fragment {
         btClose.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
 
         Bundle bundle = getArguments();
+        if (bundle.getString("action").equals("edit")){
+            int cmt_id = bundle.getInt("cmt_id");
+            comment = getComment(cmt_id);
+            etComment.setText(comment.getCmt_detail());
+            rbRating.setRating(comment.getCmt_score());
+        }
         try {
             shop = (Shop) bundle.getSerializable("shop");
             member = (Member) bundle.getSerializable("member");
@@ -96,9 +104,21 @@ public class CommentFragment extends Fragment {
 
             if (Common.networkConnected(activity)) {
                 String URL = Url.URL + "/CommentServlet";
-                Comment comment = new Comment(cmt_score, cmt_detail, shop_id, mem_id, cmt_state);
+                int cmt_id = 0;
+                if(comment != null){
+                cmt_id = comment.getCmt_id();
+                }
+
+                comment = new Comment(cmt_score, cmt_detail, shop_id, mem_id, cmt_state);
+
                 JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("action", "commentInsert");
+                if (bundle.getString("action").equals("insert")) {
+                    jsonObject.addProperty("action", "commentInsert");
+                } else if(bundle.getString("action").equals("edit")){
+                    jsonObject.addProperty("action", "commentUpdate");
+                    comment.setCmt_id(cmt_id);
+                }
+
                 jsonObject.addProperty("comment", new Gson().toJson(comment));
 
                 int count = 0;
@@ -121,13 +141,18 @@ public class CommentFragment extends Fragment {
                 String URL = Url.URL + "/ShopServlet";
                 int ttScore = shop.getTtscore();
                 int ttRate = shop.getTtrate();
-                ttScore += cmt_score;
-                ttRate += 1;
+                if (bundle.getString("action").equals("insert")) {
+                    ttScore += cmt_score;
+                    ttRate += 1;
+                }  else if(bundle.getString("action").equals("update")){
+                    ttScore = ttScore - comment.getCmt_score() + cmt_score;
+                }
+
                 shop.setTtscore(ttScore);
                 shop.setTtrate(ttRate);
                 JsonObject jsonObject = new JsonObject();
                 jsonObject.addProperty("action", "update");
-                jsonObject.addProperty("shop", new Gson().toJson(shop));
+                jsonObject.addProperty("shop", new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create().toJson(shop));
 
                 int count = 0;
                 try {
@@ -151,5 +176,27 @@ public class CommentFragment extends Fragment {
         });
 
 
+    }
+
+    private Comment getComment(int cmt_id){
+        Comment comment = null;
+        if (Common.networkConnected(activity)) {
+            String url = Url.URL + "/CommentServlet";
+            JsonObject jsonObject = new JsonObject();
+            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+            jsonObject.addProperty("action", "findByCommentId");
+            jsonObject.addProperty("cmt_id", cmt_id);
+            String jsonOut = jsonObject.toString();
+            CommonTask getMemberTask = new CommonTask(url, jsonOut);
+            try {
+                String jsonIn = getMemberTask.execute().get();
+                comment = gson.fromJson(jsonIn, Comment.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            Common.showToast(activity, R.string.textNoNetwork);
+        }
+        return comment;
     }
 }

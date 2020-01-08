@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -18,12 +19,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -42,6 +46,7 @@ import java.util.Locale;
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.MainActivity;
 import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
@@ -57,14 +62,12 @@ public class ShopCommentFragment extends Fragment {
     private TextView tvCommentsTotal, tvName, tvRatingTotal, tvAverageRating;
     private RecyclerView rvComments;
     private Shop shop;
-    private ImageTask shopImageTask;
-    private CommonTask getMemberTask, getCommentTask;
-    private List<Comment> comments;
+    private CommonTask getCommentTask;
     private LinearLayout layoutCommentLoggedIn, layoutShopComment;
     private ConstraintLayout layoutCommentedTrue, layoutCommentedFalse;
     private Button btPostComment;
-    private SharedPreferences preferences;
-
+    private Member member;
+    private int cmt_id;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -84,33 +87,35 @@ public class ShopCommentFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         layoutShopComment = view.findViewById(R.id.layoutShopComment);
 
-        TextView tvUsername, tvCommentTime,tvCommentDetail;
+        TextView tvUsername, tvCommentTime, tvCommentDetail;
         RatingBar ratingBar;
         ImageButton btCommentOptionMenu;
         tvUsername = view.findViewById(R.id.tvUsername);
         tvCommentTime = view.findViewById(R.id.tvCommentTime);
-        tvCommentDetail= view.findViewById(R.id.tvCommentDetail);
+        tvCommentDetail = view.findViewById(R.id.tvCommentDetail);
         ratingBar = view.findViewById(R.id.ratingBar);
         btCommentOptionMenu = view.findViewById(R.id.btCommentOptionMenu);
 
         handleViews();
 
         //確認使用者為訪客或會員，從SharedPreferences取得"mem_id"，如果是0的就是沒有登入
-        preferences = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
+        SharedPreferences preferences = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
 
-        int mem_id = preferences.getInt("mem_id", 0);
+        int mem_id = preferences.getInt("mem_id", 1); //TODO 完成後設為0
+        member = getMember(mem_id);
 
         btPostComment.setOnClickListener(v -> {
             Bundle sendBundle = new Bundle();
             Bundle gotBundle = getArguments();
             Shop shop = (Shop) gotBundle.getSerializable("shop");
-            Member member = getMember(mem_id);
-            sendBundle.putSerializable("member",member);
+            sendBundle.putString("action", "insert");
+            sendBundle.putSerializable("member", member);
             sendBundle.putSerializable("shop", shop);
             Navigation.findNavController(v).navigate(R.id.action_shopCommentFragment_to_commentFragment, sendBundle);
         });
 
         //如果preferences中的mem_id為0即代表為登入
+        List<Comment> comments;
         if (mem_id == 0) {
             layoutCommentLoggedIn.setVisibility(View.GONE);
         } else {
@@ -123,25 +128,25 @@ public class ShopCommentFragment extends Fragment {
                 jsonObject.addProperty("type", "member");
                 jsonObject.addProperty("state", 1);
                 String jsonOut = jsonObject.toString();
-                getCommentTask = new CommonTask(url , jsonOut);
+                getCommentTask = new CommonTask(url, jsonOut);
 
-                try{
+                try {
                     Comment comment;
                     String jsonIn = getCommentTask.execute().get();
                     Type listType = new TypeToken<List<Comment>>() {
                     }.getType();
                     comments = gson.fromJson(jsonIn, listType);
-                    if (comments != null && !comments.isEmpty()){
-                    comment = comments.get(0);}
-                    else{
+                    if (comments != null && !comments.isEmpty()) {
+                        comment = comments.get(0);
+                    } else {
                         comment = null;
                     }
 
-                    System.out.println(TAG + "會員comment:" +jsonIn );
-                    if(comment != null ){
+                    System.out.println(TAG + "會員comment:" + jsonIn);
+                    if (comment != null) {
                         layoutCommentedFalse.setVisibility(View.GONE);
 
-                        Member member =  getMember(mem_id);
+                        Member member = getMember(mem_id);
                         String rawMemberEmail = member.getMemEmail();
                         String[] splitEmail = rawMemberEmail.split("@");
                         //將會員的電子郵件由“＠”分開為兩部分，取前面顯示
@@ -153,16 +158,17 @@ public class ShopCommentFragment extends Fragment {
                         tvCommentTime.setText(new SimpleDateFormat("MM月 dd, yyyy", Locale.getDefault()).format(comment.getCmt_time()));
 
                         btCommentOptionMenu.setOnClickListener(v -> {
-
+                            cmt_id = comment.getCmt_id();
+                            showPopupMenu(v);
                         });
 
-                    } else{
+                    } else {
                         layoutCommentedTrue.setVisibility(View.GONE);
                     }
-                } catch (Exception e){
+                } catch (Exception e) {
                     System.out.println(TAG + e.toString());
                 }
-            } else{
+            } else {
                 Common.showToast(activity, R.string.textNoNetwork);
             }
         }
@@ -174,7 +180,7 @@ public class ShopCommentFragment extends Fragment {
         shop = (Shop) bundle.getSerializable("shop");
         String url = Url.URL + "/ShopServlet";
         int imageSize = getResources().getDisplayMetrics().widthPixels;
-        shopImageTask = new ImageTask(url, shop.getId(), imageSize);
+        ImageTask shopImageTask = new ImageTask(url, shop.getId(), imageSize);
         try {
             Bitmap bitmap = shopImageTask.execute().get();
             ivShop.setImageBitmap(bitmap);
@@ -190,15 +196,15 @@ public class ShopCommentFragment extends Fragment {
         comments = getComments();
 
         int index = -1;
-        for (Comment comment : comments){
-            if (comment.getMem_id() == mem_id){
+        for (Comment comment : comments) {
+            if (comment.getMem_id() == mem_id) {
                 index = comments.indexOf(comment);
             }
         }
-        if (index != -1){
+        if (index != -1) {
             comments.remove(index);
-            tvCommentsTotal.setText(String.valueOf(comments.size()+1));
-        }  else {
+            tvCommentsTotal.setText(String.valueOf(comments.size() + 1));
+        } else {
             tvCommentsTotal.setText(String.valueOf(comments.size()));
         }
 
@@ -207,7 +213,6 @@ public class ShopCommentFragment extends Fragment {
 
 
         ivBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
-
 
 
     }
@@ -247,7 +252,7 @@ public class ShopCommentFragment extends Fragment {
             jsonObject.addProperty("action", "findById");
             jsonObject.addProperty("mem_id", mem_id);
             String jsonOut = jsonObject.toString();
-            getMemberTask = new CommonTask(url, jsonOut);
+            CommonTask getMemberTask = new CommonTask(url, jsonOut);
             try {
                 String jsonIn = getMemberTask.execute().get();
                 member = gson.fromJson(jsonIn, Member.class);
@@ -338,7 +343,29 @@ public class ShopCommentFragment extends Fragment {
 
     }
 
-    public void handleViews() {
+    private Comment getComment(int cmt_id){
+        Comment comment = null;
+        if (Common.networkConnected(activity)) {
+            String url = Url.URL + "/CommentServlet";
+            JsonObject jsonObject = new JsonObject();
+            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+            jsonObject.addProperty("action", "findByCommentId");
+            jsonObject.addProperty("cmt_id", cmt_id);
+            String jsonOut = jsonObject.toString();
+            CommonTask getMemberTask = new CommonTask(url, jsonOut);
+            try {
+                String jsonIn = getMemberTask.execute().get();
+                comment = gson.fromJson(jsonIn, Comment.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            Common.showToast(activity, R.string.textNoNetwork);
+        }
+        return comment;
+    }
+
+    private void handleViews() {
         ivShop = layoutShopComment.findViewById(R.id.ivShop);
         ivBack = layoutShopComment.findViewById(R.id.ivBack);
         tvCommentsTotal = layoutShopComment.findViewById(R.id.tvCommentsTotal);
@@ -352,7 +379,62 @@ public class ShopCommentFragment extends Fragment {
         btPostComment = layoutShopComment.findViewById(R.id.btPostComment);
     }
 
+    private void showPopupMenu(View view) {
+        PopupMenu popupMenu = new PopupMenu(activity, view);
+        popupMenu.getMenuInflater().inflate(R.menu.comment_option_menu, popupMenu.getMenu());
+        popupMenu.show();
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.delete: {
+                        Comment comment = getComment(cmt_id);
+                        comment.setCmt_state(0);
+                        JsonObject jsonObject = new JsonObject();
+                        Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                        String jsonOut = gson.toJson(comment, Comment.class);
+
+                        jsonObject.addProperty("action", "commentUpdate");
+                        jsonObject.addProperty("comment", jsonOut);
+
+                        CommonTask commonTask = new CommonTask(Url.URL + "/CommentServlet", jsonObject.toString());
+
+                        int count = 0;
+                        try{
+                            String jsonIn = commonTask.execute().get();
+                            count = Integer.valueOf(jsonIn);
+                        } catch (Exception e){
+                            System.out.println(TAG + e.toString());
+                        }
+                        if (count == 0){
+                            Common.showToast(activity, "delete failed");
+                        } else {
+                            Common.showToast(activity, "message deleted");
+                        }
+
+                    }
+                    case R.id.edit: {
+                        Bundle bundle = new Bundle();
+                        bundle.putString("action", "edit");
+                        bundle.putSerializable("member", member );
+                        bundle.putSerializable("cmt_id", cmt_id);
+                        bundle.putSerializable("shop", shop);
+                        System.out.println(TAG + "output:" + bundle.toString());
+                        Navigation.findNavController(view).navigate(R.id.action_shopCommentFragment_to_commentFragment, bundle);
+
+                    }
+                }
+                return false;
+            }
+
+        });
+        popupMenu.setOnDismissListener(menu -> {
+        });
+
+
+    }
+
 }
 
 
-// TODO 增加“新增評論”按鈕，以及修改登入會員評論內容、評分、刪除評論功能
+//  TODO 以及修改登入會員評論內容、評分、刪除評論功能

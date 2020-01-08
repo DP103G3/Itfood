@@ -9,6 +9,7 @@ public class Shop implements Serializable {
 	private String email;
 	private String password;
 	private String name;
+	private String phone;
 	private String tax;
 	private String address;
 	private double latitude;
@@ -22,7 +23,7 @@ public class Shop implements Serializable {
 	private int ttrate;
 	private List<String> types;
 
-	public Shop(int id, String email, String password, String name, String tax, String address, double latitude,
+	public Shop(int id, String email, String password, String name, String phone, String tax, String address, double latitude,
 			double longitude, int area, byte state, String info, Date jointime, Date suspendtime, int ttscore,
 			int ttrate) {
 		super();
@@ -30,6 +31,7 @@ public class Shop implements Serializable {
 		this.email = email;
 		this.password = password;
 		this.name = name;
+		this.phone = phone;
 		this.tax = tax;
 		this.address = address;
 		this.latitude = latitude;
@@ -43,17 +45,21 @@ public class Shop implements Serializable {
 		this.ttrate = ttrate;
 	}
 
-	public Shop(int id, String name, String address, double latitude, double longitude, int area, byte state,
-			String info, int ttscore, int ttrate) {
+	public Shop(int id, String email,String password, String name,String phone, String address, double latitude, double longitude, int area, byte state,
+			String info, Date jointime, int ttscore, int ttrate) {
 		super();
 		this.id = id;
+		this.email = email;
+		this.password = password;
 		this.name = name;
+		this.phone = phone;
 		this.address = address;
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.area = area;
 		this.state = state;
 		this.info = info;
+		this.jointime = jointime;
 		this.ttscore = ttscore;
 		this.ttrate = ttrate;
 	}
@@ -105,6 +111,14 @@ public class Shop implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 
 	public String getTax() {
