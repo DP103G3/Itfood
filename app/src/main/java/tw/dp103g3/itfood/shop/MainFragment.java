@@ -1,22 +1,37 @@
 package tw.dp103g3.itfood.shop;
 
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.ScrollView;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -34,34 +49,47 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.address.Address;
+import tw.dp103g3.itfood.main.MainActivity;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
 public class MainFragment extends Fragment {
     private final static String TAG = "TAG_MainFragment";
-    private DrawerLayout drawerLayout;
-    private AppCompatActivity activity;
+    private MainActivity activity;
     private RecyclerView rvNewShop, rvAllShop, rvChineseShop;
-    private Toolbar toolbar;
     private List<Shop> shops;
-    private CommonTask getAllShopTask;
+    private List<Address> addresses;
+    private CommonTask getAllShopTask, getAllAddressTask;
     private ImageTask shopImageTask;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ScrollView scrollView;
+    private Spinner spAddress;
+    private Member member;
+    private Address selectedAddress;
+    private Gson gson;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        activity = (AppCompatActivity) getActivity();
+        activity = (MainActivity) getActivity();
+        activity.checkLocationSettings();
     }
 
     @Override
@@ -72,18 +100,36 @@ public class MainFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        drawerLayout = view.findViewById(R.id.drawerLayout);
-        ActionBarDrawerToggle actionBarDrawerToggle =
-                new ActionBarDrawerToggle(activity, drawerLayout, R.string.textOpen, R.string.textClose);
-        actionBarDrawerToggle.syncState();
-        NavigationView navigationView = view.findViewById(R.id.navigationView);
-        toolbar = view.findViewById(R.id.toolbar);
-        toolbar.setPadding(0, Common.getStatusBarHeight(activity), 0, 0);
-        activity.setSupportActionBar(toolbar);
-        NavController navController = Navigation.findNavController(view);
-        NavigationUI.setupWithNavController(navigationView, navController);
-        NavigationUI.setupWithNavController(toolbar, navController, drawerLayout);
+        gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+        Address localAddress = null;
+        addresses = getAddresses(1);
+        File file = new File(activity.getFilesDir(), "localAddress");
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+            localAddress = (Address) in.readObject();
+            Log.d(TAG, String.valueOf(localAddress.getLatitude()));
+        } catch (IOException | ClassNotFoundException e) {
+            Log.e(TAG, e.toString());
+        }
+        addresses.add(0, localAddress);
+        List<String> addressNames = new ArrayList<>();
+        for (int i = 0; i < addresses.size(); i++) {
+            addressNames.add(addresses.get(i).getName());
+        }
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(activity, android.R.layout.simple_spinner_dropdown_item, addressNames);
+        spAddress = view.findViewById(R.id.spAddress);
+        spAddress.setAdapter(arrayAdapter);
+        spAddress.setSelection(0, true);
+        selectedAddress = addresses.get(0);
+        spAddress.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedAddress = addresses.get(position);
+                showShops();
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
 
         if (shops == null) {
             shops = getShops();
@@ -116,6 +162,29 @@ public class MainFragment extends Fragment {
         showShops();
     }
 
+    private List<Address> getAddresses(int mem_id) {
+        List<Address> adresses = new ArrayList<>();
+        if (Common.networkConnected(activity)) {
+            String url = Url.URL + "/AddressServlet";
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("action", "getAllShow");
+            jsonObject.addProperty("mem_id", mem_id);
+            String jsonOut = jsonObject.toString();
+            getAllAddressTask = new CommonTask(url, jsonOut);
+            try {
+                String jsonIn = getAllAddressTask.execute().get();
+                Type listType = new TypeToken<List<Address>>(){
+                }.getType();
+                adresses = gson.fromJson(jsonIn, listType);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            Common.showToast(activity, R.string.textNoNetwork);
+        }
+        return adresses;
+    }
+
     private List<Shop> typeFilter(String type) {
         return shops.stream().filter(v -> v.getTypes().contains(type)).collect(Collectors.toList());
     }
@@ -125,7 +194,6 @@ public class MainFragment extends Fragment {
         if (Common.networkConnected(activity)) {
             String url = Url.URL + "/ShopServlet";
             JsonObject jsonObject = new JsonObject();
-            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
             jsonObject.addProperty("action", "getAllShow");
             String jsonOut = jsonObject.toString();
             getAllShopTask = new CommonTask(url, jsonOut);
@@ -144,11 +212,6 @@ public class MainFragment extends Fragment {
     }
 
     private void setAdapter(RecyclerView recyclerView, List<Shop> shops, int itemViewResId) {
-        if (shops == null || shops.isEmpty()) {
-            if (Common.networkConnected(activity)) {
-                Common.showToast(activity, R.string.textNoShopsFound);
-            }
-        }
         ShopAdapter shopAdapter = (ShopAdapter) recyclerView.getAdapter();
         if (shopAdapter == null) {
             recyclerView.setAdapter(new ShopAdapter(activity, shops, itemViewResId));
@@ -156,16 +219,28 @@ public class MainFragment extends Fragment {
             shopAdapter.setShops(shops);
             shopAdapter.notifyDataSetChanged();
         }
-
     }
 
     private void showShops() {
+        if (shops == null || shops.isEmpty()) {
+            if (Common.networkConnected(activity)) {
+                Common.showToast(activity, R.string.textNoShopsFound);
+            }
+            shops = new ArrayList<>();
+        }
+        shops = shops.stream().filter( v -> Common.Distance(v.getLatitude(), v.getLongitude(),
+                selectedAddress.getLatitude(), selectedAddress.getLongitude()) < 5000).collect(Collectors.toList());
         List<Shop> newShop = shops.stream()
                 .filter(v -> System.currentTimeMillis() - v.getJointime().getTime() <= 2592000000L)
                 .collect(Collectors.toList());
         setAdapter(rvNewShop, newShop, R.layout.small_shop_item_view);
         setAdapter(rvChineseShop, typeFilter("中式"), R.layout.small_shop_item_view);
-        setAdapter(rvAllShop, shops, R.layout.large_shop_item_view);
+        Comparator<Shop> cmp = Comparator.<Shop, Double>comparing(v ->
+                Common.Distance(v.getLatitude(), v.getLongitude(),
+                        selectedAddress.getLatitude(), selectedAddress.getLongitude()));
+        List<Shop> sortedShops = shops.stream().sorted(cmp)
+                .collect(Collectors.toList());
+        setAdapter(rvAllShop, sortedShops, R.layout.large_shop_item_view);
     }
 
     private class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> {
@@ -238,15 +313,16 @@ public class MainFragment extends Fragment {
     }
 
     @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                drawerLayout.closeDrawer(GravityCompat.START);
-            } else {
-                drawerLayout.openDrawer(GravityCompat.START);
-            }
-            return true;
+    public void onStop() {
+        super.onStop();
+        if (getAllAddressTask != null) {
+            getAllAddressTask.cancel(true); getAllAddressTask = null;
         }
-        return super.onOptionsItemSelected(item);
+        if (getAllShopTask != null) {
+            getAllShopTask.cancel(true); getAllShopTask = null;
+        }
+        if (shopImageTask != null) {
+            shopImageTask.cancel(true); shopImageTask = null;
+        }
     }
 }

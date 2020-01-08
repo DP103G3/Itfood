@@ -10,6 +10,7 @@ import android.os.Build;
 import android.widget.Toast;
 
 public class Common {
+    private static final double EARTH_RADIUS = 6378.137;
 
     public static boolean networkConnected(Activity activity) {
         ConnectivityManager connectivityManager =
@@ -60,5 +61,22 @@ public class Common {
             result = context.getResources().getDimensionPixelSize(resourceId);
         }
         return result;
+    }
+
+    public static double Distance(double latitude1, double longitude1, double latitude2, double longitude2) {
+        double radLatitude1 = rad(latitude1);
+        double radLatitude2 = rad(latitude2);
+        double a = radLatitude1 - radLatitude2;
+        double b = rad(longitude1) - rad(longitude2);
+        double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2)
+                + Math.cos(radLatitude1) * Math.cos(radLatitude2) * Math.pow(Math.sin(b / 2), 2)));
+        s = s * EARTH_RADIUS;
+        s = Math.round(s * 10000d) / 10000d;
+        s = s * 1000;
+        return s;
+    }
+
+    public static double rad(double d) {
+        return d * Math.PI / 180;
     }
 }

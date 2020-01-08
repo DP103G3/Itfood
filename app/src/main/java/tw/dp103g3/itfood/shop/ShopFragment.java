@@ -11,14 +11,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,10 +30,17 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
@@ -45,13 +52,16 @@ public class ShopFragment extends Fragment {
     private final static String TAG = "TAG_ShopFragment";
     private AppCompatActivity activity;
     private AppBarLayout appBarLayout;
-    private ImageView ivBack, ivShop, ivComment;
+    private ImageView ivBack, ivShop, ivCart, ivComment;
     private ImageTask shopImageTask, dishImageTask;
     private CommonTask getdishTask;
     private Shop shop;
     private List<Dish> dishes;
+    private Map<Integer, Integer> orderDetails;
     private TextView tvName, tvTime, tvRate;
     private RecyclerView rvDish;
+    private Gson gson;
+    private File orderDetail;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,14 +78,22 @@ public class ShopFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        initToolbar(R.id.toolbar, view);
-        initToolbar(R.id.tbTitle, view);
+        orderDetail = new File(activity.getFilesDir(), "orderDetail");
+        try (BufferedReader in = new BufferedReader(new FileReader(orderDetail))) {
+            String inStr = in.readLine();
+            Type type = new TypeToken<Map<Integer, Integer>>(){}.getType();
+            gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+            orderDetails = gson.fromJson(inStr, type);
+            orderDetails.forEach((v,u) -> Log.d(TAG, String.format("%d, %d", v, u)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         tvTime = view.findViewById(R.id.tvTime);
         ivBack = view.findViewById(R.id.ivBack);
         ivBack.setOnClickListener(v -> {
             Navigation.findNavController(v).popBackStack();
         });
-
+        ivCart = view.findViewById(R.id.ivCart);
         Bundle bundle = getArguments();
         shop = (Shop) bundle.getSerializable("shop");
         ivComment = view.findViewById(R.id.ivComment);
@@ -100,14 +118,15 @@ public class ShopFragment extends Fragment {
         appBarLayout = view.findViewById(R.id.appBarLayout);
         appBarLayout.addOnOffsetChangedListener((appBarLayout, offset) -> {
             int color;
-            int changeOffset = 150;
+            int changeOffset = 220;
             if (offset > - changeOffset) {
-                color = Color.argb((int) ((200 + offset) * 1.28) - 1, 255, 243, 210);
+                color = Color.argb((changeOffset + offset) * 255 / 220, 255, 243, 210);
                 tvName.setTextColor(color);
                 tvTime.setTextColor(color);
                 tvRate.setTextColor(color);
                 PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(getResources().getColor(R.color.colorWhite, activity.getTheme()), PorterDuff.Mode.SRC_ATOP);
                 ivBack.getDrawable().setColorFilter(colorFilter);
+                ivCart.getDrawable().setColorFilter(colorFilter);
                 ivComment.getDrawable().setColorFilter(colorFilter);
             } else {
                 color = Color.argb((- changeOffset - offset) * 255 / (appBarLayout.getTotalScrollRange() - changeOffset), 91, 63, 54);
@@ -116,6 +135,7 @@ public class ShopFragment extends Fragment {
                 tvRate.setTextColor(Color.argb(0, 0, 0, 0));
                 PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(getResources().getColor(R.color.colorTextOnP, activity.getTheme()), PorterDuff.Mode.SRC_ATOP);
                 ivBack.getDrawable().setColorFilter(colorFilter);
+                ivCart.getDrawable().setColorFilter(colorFilter);
                 ivComment.getDrawable().setColorFilter(colorFilter);
             }
         });
@@ -124,19 +144,11 @@ public class ShopFragment extends Fragment {
                 "%.1f(%d)", rate, shop.getTtrate()));
 
         rvDish = view.findViewById(R.id.rvDish);
-        rvDish.setPadding(0, rvDish.getPaddingTop(), 0, Common.getNavigationBarHeight(activity) * 2 + Common.getStatusBarHeight(activity) + 20);
+        rvDish.setPadding(0, rvDish.getPaddingTop(), 0, Common.getNavigationBarHeight(activity) + 20);
         rvDish.setLayoutManager(new LinearLayoutManager(activity));
         dishes = getDishes();
         ShowDishes(dishes);
 
-    }
-
-    private void initToolbar(int resId, View view) {
-        Toolbar toolbar = view.findViewById(resId);
-        ViewGroup.LayoutParams params = toolbar.getLayoutParams();
-        params.height += Common.getStatusBarHeight(activity);
-        toolbar.setLayoutParams(params);
-        toolbar.setPadding(0, Common.getStatusBarHeight(activity), 0, 0);
     }
 
     private List<Dish> getDishes() {
@@ -199,14 +211,30 @@ public class ShopFragment extends Fragment {
         }
 
         private class MyViewHolder extends RecyclerView.ViewHolder {
+            int dishId, count;
             ImageView ivDish;
             TextView tvDishName, tvInfo, tvPrice;
+            ImageButton ibAdd, ibRemove;
+            EditText etCount;
             public MyViewHolder(@NonNull View itemView) {
                 super(itemView);
                 ivDish = itemView.findViewById(R.id.ivDish);
                 tvDishName = itemView.findViewById(R.id.tvDishName);
                 tvInfo = itemView.findViewById(R.id.tvInfo);
                 tvPrice = itemView.findViewById(R.id.tvPrice);
+                ibAdd = itemView.findViewById(R.id.ibAdd);
+                ibRemove = itemView.findViewById(R.id.ibRemove);
+                etCount = itemView.findViewById(R.id.etCount);
+            }
+            void onEditCountClick(View view) {
+                if (view.getId() == R.id.ibAdd) {
+                    count++;
+                } else {
+                    count--;
+                }
+                Log.d(TAG, String.valueOf(dishId));
+                orderDetails.put(dishId, count);
+                etCount.setText(String.valueOf(count));
             }
         }
 
@@ -221,15 +249,33 @@ public class ShopFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull DishAdapter.MyViewHolder holder, int position) {
             final Dish dish = dishes.get(position);
+            holder.dishId = dish.getId();
             String url = Url.URL + "/DishServlet";
             String dishName = dish.getName();
             String info = dish.getInfo();
             int price = dish.getPrice();
+            holder.count = orderDetails.get(dish.getId()) != null ? orderDetails.get(dish.getId()) : 0;
             holder.tvDishName.setText(dishName);
             holder.tvInfo.setText(info);
-            holder.tvPrice.setText("$" + String.valueOf(price));
+            holder.tvPrice.setText(String.format(Locale.getDefault(), "$ %d", price));
             dishImageTask = new ImageTask(url, dish.getId(), imageSize, holder.ivDish);
             dishImageTask.execute();
+            holder.ibAdd.setOnClickListener(holder::onEditCountClick);
+            holder.ibRemove.setOnClickListener(holder::onEditCountClick);
+            holder.etCount.setText(String.valueOf(holder.count));
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail));) {
+            out.write(gson.toJson(orderDetails));
+        } catch (IOException e) {
+            Log.e(TAG, e.toString());
+        }
+        PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(getResources().getColor(R.color.colorTextOnP, activity.getTheme()), PorterDuff.Mode.SRC_ATOP);
+        ivBack.getDrawable().setColorFilter(colorFilter);
+        ivCart.getDrawable().setColorFilter(colorFilter);
     }
 }

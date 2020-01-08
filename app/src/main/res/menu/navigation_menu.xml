@@ -6,16 +6,18 @@
         android:checkableBehavior="none">
 
         <item
-            android:id="@+id/loginFragment"
-            android:icon="@drawable/login"
-            android:title="@string/textLogin" />
+            android:id="@+id/mainFragment"
+            android:icon="@drawable/home"
+            android:title="@string/textHome" />
 
         <item
-            android:id="@+id/favoriteFragment"
-            android:icon="@drawable/favorite"
-            android:title="@string/textFavorite" />
+            android:id="@+id/orderFragment"
+            android:icon="@drawable/order"
+            android:title="@string/textOrder" />
+
         <item
-            android:icon="@drawable/myorder"
-            android:title="My Order" />
+            android:id="@+id/personFragment"
+            android:icon="@drawable/person"
+            android:title="@string/textPerson" />
     </group>
 </menu>
