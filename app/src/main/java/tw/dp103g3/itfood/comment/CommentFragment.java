@@ -85,7 +85,7 @@ public class CommentFragment extends Fragment {
         }
 
         btPost.setOnClickListener(v -> {
-            int cmt_score = (int) rbRating.getRating()*2;
+            int cmt_score = (int) rbRating.getRating();
             String cmt_detail = etComment.getText().toString();
             int shop_id = shop.getId();
             int mem_id = member.getMemId();

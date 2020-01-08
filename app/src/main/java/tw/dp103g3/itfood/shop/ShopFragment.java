@@ -45,7 +45,7 @@ public class ShopFragment extends Fragment {
     private final static String TAG = "TAG_ShopFragment";
     private AppCompatActivity activity;
     private AppBarLayout appBarLayout;
-    private ImageView ivBack, ivShop;
+    private ImageView ivBack, ivShop, ivComment;
     private ImageTask shopImageTask, dishImageTask;
     private CommonTask getdishTask;
     private Shop shop;
@@ -78,6 +78,12 @@ public class ShopFragment extends Fragment {
 
         Bundle bundle = getArguments();
         shop = (Shop) bundle.getSerializable("shop");
+        ivComment = view.findViewById(R.id.ivComment);
+
+        ivComment.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.action_shopFragment_to_shopCommentFragment, bundle);
+        });
+
         ivShop = view.findViewById(R.id.ivShop);
         String url = Url.URL + "/ShopServlet";
         int imageSize = getResources().getDisplayMetrics().widthPixels;
