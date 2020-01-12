@@ -3,6 +3,7 @@ package tw.dp103g3.itfood.order;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -41,6 +42,7 @@ import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 
 import static tw.dp103g3.itfood.Common.DATE_FORMAT;
+import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -65,6 +67,7 @@ public class OrderTabFragment extends Fragment {
     private CommonTask getOrderTask, getShopTask, getOrderDetailTask, getDishTask;
     private List<Order> orders;
     private ConstraintLayout layoutEmpty;
+    private SharedPreferences pref;
 
 
 
@@ -103,7 +106,8 @@ public class OrderTabFragment extends Fragment {
         counter = getArguments().getInt(ARG_COUNT);
         layoutEmpty = view.findViewById(R.id.layoutEmpty);
 
-        mem_id = 1;
+        pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
+        mem_id = pref.getInt("mem_id", 0);
 
         orders = getOrders(mem_id, counter);
 

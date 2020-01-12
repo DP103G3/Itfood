@@ -45,29 +45,22 @@ public class OrderFragment extends Fragment {
     private final static String TAG = "TAG_OrderFragment";
     private Activity activity;
     private Member member;
-    private SharedPreferences pref;
     private final static int NOT_LOGGED_IN = 0;
     private final static int NO_ITEM = 1;
     private final static int NORMAL = 2;
-    int mem_id, status;
-    CommonTask getMemberTask, getOrderTask;
-    Button btLogin, btBackToMain;
-    NavController navController;
-    TabLayout tabLayout;
-    ViewPager2 viewPager2;
+    private int mem_id, status;
+    private NavController navController;
 
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         activity = getActivity();
-        pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
+        SharedPreferences pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = pref.getInt("mem_id", 0);
-
-        mem_id = 1;
 
         if (mem_id == 0) {
             status = NOT_LOGGED_IN;
-        } else if (mem_id != 0) {
+        } else {
             member = getMember(mem_id);
             if (getOrders(mem_id) == null || getOrders(mem_id).isEmpty()) {
                 status = NO_ITEM;
@@ -102,14 +95,14 @@ public class OrderFragment extends Fragment {
         navController = Navigation.findNavController(view);
         switch (status) {
             case NOT_LOGGED_IN: {
-                btLogin = view.findViewById(R.id.btLogin);
+                Button btLogin = view.findViewById(R.id.btLogin);
                 btLogin.setOnClickListener(v -> {
                     navController.navigate(R.id.action_orderFragment_to_loginFragment);
                 });
                 break;
             }
             case NO_ITEM: {
-                btBackToMain = view.findViewById(R.id.btBackToMain);
+                Button btBackToMain = view.findViewById(R.id.btBackToMain);
                 btBackToMain.setOnClickListener(v -> {
                     navController.navigate(R.id.action_orderFragment_to_mainFragment);
                 });
@@ -117,8 +110,8 @@ public class OrderFragment extends Fragment {
             }
             case NORMAL: {
                 member = getMember(mem_id);
-                tabLayout = view.findViewById(R.id.tabLayOut);
-                viewPager2 = view.findViewById(R.id.viewPager);
+                TabLayout tabLayout = view.findViewById(R.id.tabLayOut);
+                ViewPager2 viewPager2 = view.findViewById(R.id.viewPager);
 
                 viewPager2.setAdapter(createCardAdapter());
 
@@ -172,7 +165,7 @@ public class OrderFragment extends Fragment {
             jsonObject.addProperty("action", "findById");
             jsonObject.addProperty("mem_id", mem_id);
             String jsonOut = jsonObject.toString();
-            getMemberTask = new CommonTask(url, jsonOut);
+            CommonTask getMemberTask = new CommonTask(url, jsonOut);
             try {
                 String jsonIn = getMemberTask.execute().get();
                 member = gson.fromJson(jsonIn, Member.class);
@@ -214,7 +207,7 @@ public class OrderFragment extends Fragment {
             jsonObject.addProperty("type", "member");
             jsonObject.addProperty("id", mem_id);
             String jsonOut = jsonObject.toString();
-            getOrderTask = new CommonTask(url, jsonOut);
+            CommonTask getOrderTask = new CommonTask(url, jsonOut);
             try {
                 String jsonIn = getOrderTask.execute().get();
                 Type listType = new TypeToken<List<Order>>() {
