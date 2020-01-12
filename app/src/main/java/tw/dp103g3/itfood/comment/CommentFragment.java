@@ -1,15 +1,11 @@
 package tw.dp103g3.itfood.comment;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import android.util.Log;
@@ -37,9 +33,6 @@ import tw.dp103g3.itfood.task.CommonTask;
 public class CommentFragment extends Fragment {
 
     private Activity activity;
-    private Button btPost;
-    private ImageButton btClose;
-    private TextView tvShopName, tvMemberName;
     private RatingBar rbRating;
     private EditText etComment;
     private Shop shop;
@@ -61,10 +54,10 @@ public class CommentFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        btPost = view.findViewById(R.id.btPost);
-        btClose = view.findViewById(R.id.btClose);
-        tvShopName = view.findViewById(R.id.tvShopName);
-        tvMemberName = view.findViewById(R.id.tvMemberName);
+        Button btPost = view.findViewById(R.id.btPost);
+        ImageButton btClose = view.findViewById(R.id.btClose);
+        TextView tvShopName = view.findViewById(R.id.tvShopName);
+        TextView tvMemberName = view.findViewById(R.id.tvMemberName);
         rbRating = view.findViewById(R.id.rbRating);
         etComment = view.findViewById(R.id.etComment);
 

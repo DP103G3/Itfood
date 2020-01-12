@@ -6,21 +6,20 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -46,7 +45,6 @@ import java.util.Locale;
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
-import tw.dp103g3.itfood.main.MainActivity;
 import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
@@ -343,7 +341,7 @@ public class ShopCommentFragment extends Fragment {
 
     }
 
-    private Comment getComment(int cmt_id){
+    private Comment getComment(int cmt_id) {
         Comment comment = null;
         if (Common.networkConnected(activity)) {
             String url = Url.URL + "/CommentServlet";
@@ -383,50 +381,64 @@ public class ShopCommentFragment extends Fragment {
         PopupMenu popupMenu = new PopupMenu(activity, view);
         popupMenu.getMenuInflater().inflate(R.menu.comment_option_menu, popupMenu.getMenu());
         popupMenu.show();
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.delete: {
+        popupMenu.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.delete: {
+                    if (Common.networkConnected(activity)) {
                         Comment comment = getComment(cmt_id);
-                        comment.setCmt_state(0);
-                        JsonObject jsonObject = new JsonObject();
-                        Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-                        String jsonOut = gson.toJson(comment, Comment.class);
+                        if (comment.getCmt_state() != 0) {
+                            comment.setCmt_state(0);
+                            shop.setTtrate(shop.getTtrate() - 1);
+                            shop.setTtscore(shop.getTtscore() - comment.getCmt_score());
+                            JsonObject jsonObject = new JsonObject();
+                            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                            String jsonOut = gson.toJson(comment, Comment.class);
 
-                        jsonObject.addProperty("action", "commentUpdate");
-                        jsonObject.addProperty("comment", jsonOut);
+                            jsonObject.addProperty("action", "commentUpdate");
+                            jsonObject.addProperty("comment", jsonOut);
 
-                        CommonTask commonTask = new CommonTask(Url.URL + "/CommentServlet", jsonObject.toString());
+                            CommonTask commonTask = new CommonTask(Url.URL + "/CommentServlet", jsonObject.toString());
 
-                        int count = 0;
-                        try{
-                            String jsonIn = commonTask.execute().get();
-                            count = Integer.valueOf(jsonIn);
-                        } catch (Exception e){
-                            System.out.println(TAG + e.toString());
-                        }
-                        if (count == 0){
-                            Common.showToast(activity, "delete failed");
+                            int count = 0;
+                            try {
+                                String jsonIn = commonTask.execute().get();
+                                count = Integer.valueOf(jsonIn);
+                            } catch (Exception e) {
+                                System.out.println(TAG + e.toString());
+                            }
+                            if (count == 0) {
+                                Common.showToast(activity, "delete failed");
+                            } else {
+                                Common.showToast(activity, "message deleted");
+                                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                if (Build.VERSION.SDK_INT >= 26) {
+                                    ft.setReorderingAllowed(false);
+                                }
+                                ft.detach(this).attach(this).commit();
+                            }
                         } else {
-                            Common.showToast(activity, "message deleted");
+                            Common.showToast(activity, "delete error");
                         }
-
+                    } else {
+                        Common.showToast(activity, R.string.textNoNetwork);
                     }
-                    case R.id.edit: {
-                        Bundle bundle = new Bundle();
-                        bundle.putString("action", "edit");
-                        bundle.putSerializable("member", member );
-                        bundle.putSerializable("cmt_id", cmt_id);
-                        bundle.putSerializable("shop", shop);
-                        System.out.println(TAG + "output:" + bundle.toString());
-                        Navigation.findNavController(view).navigate(R.id.action_shopCommentFragment_to_commentFragment, bundle);
 
-                    }
+                    break;
+
                 }
-                return false;
-            }
+                case R.id.edit: {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("action", "edit");
+                    bundle.putSerializable("member", member);
+                    bundle.putSerializable("cmt_id", cmt_id);
+                    bundle.putSerializable("shop", shop);
+                    System.out.println(TAG + "output:" + bundle.toString());
+                    Navigation.findNavController(view).navigate(R.id.action_shopCommentFragment_to_commentFragment, bundle);
+                    break;
 
+                }
+            }
+            return true;
         });
         popupMenu.setOnDismissListener(menu -> {
         });
@@ -435,6 +447,3 @@ public class ShopCommentFragment extends Fragment {
     }
 
 }
-
-
-//  TODO 以及修改登入會員評論內容、評分、刪除評論功能
