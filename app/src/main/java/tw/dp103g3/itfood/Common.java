@@ -12,6 +12,7 @@ import android.widget.Toast;
 public class Common {
     private static final double EARTH_RADIUS = 6378.137;
     public static final String PREFERENCES_MEMBER = "member";
+    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     public static boolean networkConnected(Activity activity) {
         ConnectivityManager connectivityManager =
@@ -76,6 +77,8 @@ public class Common {
         s = s * 1000;
         return s;
     }
+
+
 
     public static double rad(double d) {
         return d * Math.PI / 180;

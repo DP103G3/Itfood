@@ -23,7 +23,7 @@
     <string name="textPerson">Person</string>
     <string name="textLocationAccessNotGranted">Permission to access location should be granted</string>
     <string name="textLocalPosition">local position</string>
-    <string name="btPost" >發布</string>
+    <string name="btPost">發布</string>
     <string name="etComment">說明你對此店家的感受</string>
     <string name="textPostCommentFail">Post comment failed. Please try again later.</string>
     <string name="textPostCommentSuccess">Comment posted successfully.</string>
@@ -33,4 +33,17 @@
     <string name="edit">編輯</string>
     <string name="deleteComment">刪除評論</string>
     <string name="yourComment">您的評論</string>
+    <string name="myorder">我的訂單</string>
+    <string name="notloggedin">你還沒有登入。 馬上登入瀏覽美味餐點！</string>
+    <string name="noorder">你還未訂餐，立即瀏覽人氣店家美味餐點！</string>
+    <string name="unconfirmed">待接單</string>
+    <string name="making">製作中</string>
+    <string name="delivering">運送中</string>
+    <string name="done">已完成</string>
+    <string name="unpickup">待取餐</string>
+    <string name="ordertotal">訂單金額 :</string>
+    <string name="SELFPICK">自取</string>
+    <string name="TAKEOUT">外送</string>
+    <string name="canceled">已取消</string>
+    <string name="emtpyorder">尚未有訂單</string>
 </resources>

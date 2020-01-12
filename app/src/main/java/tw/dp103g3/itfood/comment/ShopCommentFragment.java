@@ -50,6 +50,7 @@ import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
+import static android.provider.Settings.System.DATE_FORMAT;
 import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 
 
@@ -246,7 +247,7 @@ public class ShopCommentFragment extends Fragment {
         if (Common.networkConnected(activity)) {
             String url = Url.URL + "/MemberServlet";
             JsonObject jsonObject = new JsonObject();
-            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+            Gson gson = new GsonBuilder().setDateFormat(Common.DATE_FORMAT).create();
             jsonObject.addProperty("action", "findById");
             jsonObject.addProperty("mem_id", mem_id);
             String jsonOut = jsonObject.toString();
@@ -346,7 +347,7 @@ public class ShopCommentFragment extends Fragment {
         if (Common.networkConnected(activity)) {
             String url = Url.URL + "/CommentServlet";
             JsonObject jsonObject = new JsonObject();
-            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+            Gson gson = new GsonBuilder().setDateFormat(Common.DATE_FORMAT).create();
             jsonObject.addProperty("action", "findByCommentId");
             jsonObject.addProperty("cmt_id", cmt_id);
             String jsonOut = jsonObject.toString();
@@ -362,6 +363,8 @@ public class ShopCommentFragment extends Fragment {
         }
         return comment;
     }
+
+
 
     private void handleViews() {
         ivShop = layoutShopComment.findViewById(R.id.ivShop);
@@ -391,7 +394,7 @@ public class ShopCommentFragment extends Fragment {
                             shop.setTtrate(shop.getTtrate() - 1);
                             shop.setTtscore(shop.getTtscore() - comment.getCmt_score());
                             JsonObject jsonObject = new JsonObject();
-                            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                            Gson gson = new GsonBuilder().setDateFormat(Common.DATE_FORMAT).create();
                             String jsonOut = gson.toJson(comment, Comment.class);
 
                             jsonObject.addProperty("action", "commentUpdate");
