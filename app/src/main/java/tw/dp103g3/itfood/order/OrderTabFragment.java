@@ -109,6 +109,9 @@ public class OrderTabFragment extends Fragment {
         pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = pref.getInt("mem_id", 0);
 
+//        //TODO delete
+//        mem_id = 1;
+
         orders = getOrders(mem_id, counter);
 
         if(orders.isEmpty()){
@@ -347,7 +350,7 @@ public class OrderTabFragment extends Fragment {
                 }
                 case DELIVERING :{
                     order_state_text = "運送中";
-                    if (order.getOrder_delivery() != null){
+                    if (order.getOrder_ideal() != null){
                         order_time_text = "預計送達時間 : " + simpleDateFormat.format(order_ideal);
                     }
                     holder.btAction.setText("顯示QR CODE");

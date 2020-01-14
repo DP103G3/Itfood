@@ -100,7 +100,7 @@ public class ShopCommentFragment extends Fragment {
         //確認使用者為訪客或會員，從SharedPreferences取得"mem_id"，如果是0的就是沒有登入
         SharedPreferences preferences = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
 
-        int mem_id = preferences.getInt("mem_id", 1); //TODO 完成後設為0
+        int mem_id = preferences.getInt("mem_id", 0); //TODO 完成後設為0
         member = getMember(mem_id);
 
         btPostComment.setOnClickListener(v -> {
@@ -113,7 +113,7 @@ public class ShopCommentFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.action_shopCommentFragment_to_commentFragment, sendBundle);
         });
 
-        //如果preferences中的mem_id為0即代表為登入
+        //如果preferences中的mem_id為0即代表為未登入
         List<Comment> comments;
         if (mem_id == 0) {
             layoutCommentLoggedIn.setVisibility(View.GONE);
