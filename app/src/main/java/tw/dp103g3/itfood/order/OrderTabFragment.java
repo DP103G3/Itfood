@@ -47,7 +47,8 @@ import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class OrderTabFragment extends Fragment {
+public class
+OrderTabFragment extends Fragment {
     private static final String TAG = "TAG_OrderTabFragment";
 
     private static final String ARG_COUNT = "param1";
