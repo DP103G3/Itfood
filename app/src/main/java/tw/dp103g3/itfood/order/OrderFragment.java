@@ -58,6 +58,9 @@ public class OrderFragment extends Fragment {
         SharedPreferences pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = pref.getInt("mem_id", 0);
 
+//        // TODO delete
+//        mem_id = 1;
+
         if (mem_id == 0) {
             status = NOT_LOGGED_IN;
         } else {
@@ -104,7 +107,7 @@ public class OrderFragment extends Fragment {
             case NO_ITEM: {
                 Button btBackToMain = view.findViewById(R.id.btBackToMain);
                 btBackToMain.setOnClickListener(v -> {
-                    navController.navigate(R.id.action_orderFragment_to_mainFragment);
+                    navController.navigate(R.id.action_mainFragment_to_orderFragment);
                 });
                 break;
             }

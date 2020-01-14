@@ -2,6 +2,7 @@ package tw.dp103g3.itfood.shop;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -48,6 +49,8 @@ import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
+import static tw.dp103g3.itfood.Common.PREFERENCES_CART;
+
 public class ShopFragment extends Fragment {
     private final static String TAG = "TAG_ShopFragment";
     private AppCompatActivity activity;
@@ -62,11 +65,13 @@ public class ShopFragment extends Fragment {
     private RecyclerView rvDish;
     private Gson gson;
     private File orderDetail;
+    private SharedPreferences pref;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = (AppCompatActivity) getActivity();
+        pref = activity.getSharedPreferences(PREFERENCES_CART, Context.MODE_PRIVATE);
     }
 
     @Override
@@ -78,6 +83,7 @@ public class ShopFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+
         orderDetail = new File(activity.getFilesDir(), "orderDetail");
         try (BufferedReader in = new BufferedReader(new FileReader(orderDetail))) {
             String inStr = in.readLine();
@@ -234,6 +240,16 @@ public class ShopFragment extends Fragment {
                 }
                 Log.d(TAG, String.valueOf(dishId));
                 orderDetails.put(dishId, count);
+                if (count <= 0){
+                    orderDetails.remove(dishId);
+                }
+                try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail));) {
+                    out.write(gson.toJson(orderDetails));
+                } catch (IOException e) {
+                    Log.e(TAG, e.toString());
+                }
+
+                orderDetails.remove(33);
                 etCount.setText(String.valueOf(count));
             }
         }
@@ -269,11 +285,12 @@ public class ShopFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail));) {
-            out.write(gson.toJson(orderDetails));
-        } catch (IOException e) {
-            Log.e(TAG, e.toString());
+        if (!orderDetails.isEmpty()){
+            pref.edit().putString("shop_name", shop.getName()).apply();
+        } else {
+            pref.edit().remove("shop_name").apply();
         }
+
         PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(getResources().getColor(R.color.colorTextOnP, activity.getTheme()), PorterDuff.Mode.SRC_ATOP);
         ivBack.getDrawable().setColorFilter(colorFilter);
         ivCart.getDrawable().setColorFilter(colorFilter);

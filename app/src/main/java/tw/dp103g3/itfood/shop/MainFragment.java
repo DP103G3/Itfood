@@ -49,8 +49,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Member;
@@ -59,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -84,12 +87,16 @@ public class MainFragment extends Fragment {
     private Member member;
     private Address selectedAddress;
     private Gson gson;
+    private ImageView ivCart;
+    private File orderDetail;
+    private Map<Integer, Integer> orderDetails;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = (MainActivity) getActivity();
         activity.checkLocationSettings();
+
     }
 
     @Override
@@ -100,6 +107,17 @@ public class MainFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        ivCart = view.findViewById(R.id.ivCart);
+
+        checkCart();
+
+        ivCart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Navigation.findNavController(v).navigate(R.id.action_mainFragment_to_shoppingCartFragment2);
+            }
+        });
+
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
         Address localAddress = null;
         addresses = getAddresses(1);
@@ -128,7 +146,8 @@ public class MainFragment extends Fragment {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
 
         if (shops == null) {
@@ -173,7 +192,7 @@ public class MainFragment extends Fragment {
             getAllAddressTask = new CommonTask(url, jsonOut);
             try {
                 String jsonIn = getAllAddressTask.execute().get();
-                Type listType = new TypeToken<List<Address>>(){
+                Type listType = new TypeToken<List<Address>>() {
                 }.getType();
                 adresses = gson.fromJson(jsonIn, listType);
             } catch (Exception e) {
@@ -228,7 +247,7 @@ public class MainFragment extends Fragment {
             }
             shops = new ArrayList<>();
         }
-        shops = shops.stream().filter( v -> Common.Distance(v.getLatitude(), v.getLongitude(),
+        shops = shops.stream().filter(v -> Common.Distance(v.getLatitude(), v.getLongitude(),
                 selectedAddress.getLatitude(), selectedAddress.getLongitude()) < 5000).collect(Collectors.toList());
         List<Shop> newShop = shops.stream()
                 .filter(v -> System.currentTimeMillis() - v.getJointime().getTime() <= 2592000000L)
@@ -268,6 +287,7 @@ public class MainFragment extends Fragment {
         private class MyViewHolder extends RecyclerView.ViewHolder {
             ImageView ivShop;
             TextView tvName, tvType, tvRate;
+
             private MyViewHolder(View itemView) {
                 super(itemView);
                 ivShop = itemView.findViewById(R.id.ivShop);
@@ -316,13 +336,39 @@ public class MainFragment extends Fragment {
     public void onStop() {
         super.onStop();
         if (getAllAddressTask != null) {
-            getAllAddressTask.cancel(true); getAllAddressTask = null;
+            getAllAddressTask.cancel(true);
+            getAllAddressTask = null;
         }
         if (getAllShopTask != null) {
-            getAllShopTask.cancel(true); getAllShopTask = null;
+            getAllShopTask.cancel(true);
+            getAllShopTask = null;
         }
         if (shopImageTask != null) {
-            shopImageTask.cancel(true); shopImageTask = null;
+            shopImageTask.cancel(true);
+            shopImageTask = null;
         }
+    }
+
+    private void checkCart() {
+        orderDetail = new File(activity.getFilesDir(), "orderDetail");
+        try (BufferedReader in = new BufferedReader(new FileReader(orderDetail))) {
+            String inStr = in.readLine();
+            Type type = new TypeToken<Map<Integer, Integer>>() {
+            }.getType();
+            gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+            orderDetails = gson.fromJson(inStr, type);
+            orderDetails.forEach((v, u) -> Log.d(TAG, String.format("%d, %d", v, u)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (orderDetails.isEmpty()) {
+            ivCart.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        checkCart();
     }
 }
