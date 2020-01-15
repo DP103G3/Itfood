@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,9 +37,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import tw.dp103g3.itfood.shop.Dish;
 import tw.dp103g3.itfood.task.CommonTask;
@@ -67,11 +71,17 @@ public class ShoppingCartFragment extends Fragment {
     private List<Dish> dishes;
     private String shopName;
     private NavController navController;
+    private static SparseIntArray totals;
+    private View fragmentView;
+    private TextView tvTotalBefore, tvTotalAfter;
+    private int totalBefore, totalAfter;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();
+        totals = new SparseIntArray();
         cartPref = activity.getSharedPreferences(PREFERENCES_CART, Context.MODE_PRIVATE);
         memberPref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         shopName = cartPref.getString("shop_name", "");
@@ -103,7 +113,12 @@ public class ShoppingCartFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        fragmentView = view;
+        tvTotalAfter = view.findViewById(R.id.tvTotalAfter);
+        tvTotalBefore = view.findViewById(R.id.tvTotalBefore);
         navController = Navigation.findNavController(view);
+
 
         btLogin = view.findViewById(R.id.btLogin);
         if (mem_id != 0){
@@ -120,7 +135,6 @@ public class ShoppingCartFragment extends Fragment {
         rvDish = view.findViewById(R.id.rvDish);
 
         rvDish.setLayoutManager(new LinearLayoutManager(activity));
-
         ShowDishes(dishes);
 
 
@@ -196,6 +210,8 @@ public class ShoppingCartFragment extends Fragment {
             }
             void onEditCountClick(View view) {
                 Dish dish = getDish(dishId);
+                totalBefore = 0;
+                totalAfter = 0;
                 if (view.getId() == R.id.btAdd) {
                     count++;
                 } else {
@@ -224,6 +240,16 @@ public class ShoppingCartFragment extends Fragment {
                 if(orderDetails.isEmpty()){
                     navController.popBackStack();
                 }
+                totals.append(dishId, dish.getPrice() * count);
+                for (int i = 0; i < totals.size(); i++ ){
+                    totalBefore += totals.valueAt(i);
+                }
+                totalAfter = totalBefore + 30;
+                tvTotalBefore.setText(String.format(Locale.getDefault(), "$ %d", totalBefore));
+                tvTotalAfter.setText(String.format(Locale.getDefault(), "$ %d", totalAfter));
+
+
+
             }
         }
 
@@ -240,13 +266,37 @@ public class ShoppingCartFragment extends Fragment {
             final Dish dish = dishes.get(position);
             holder.dishId = dish.getId();
             String dishName = dish.getName();
-            int price = dish.getPrice();
+
+
             holder.count = orderDetails.get(dish.getId()) != null ? orderDetails.get(dish.getId()) : 0;
+
+            int price = dish.getPrice();
+            int total = price * holder.count;
+
             holder.tvDishName.setText(dishName);
-            holder.tvDishPrice.setText(String.format(Locale.getDefault(), "$ %d", price * holder.count));
+            holder.tvDishPrice.setText(String.format(Locale.getDefault(), "$ %d", total));
             holder.ibAdd.setOnClickListener(holder::onEditCountClick);
             holder.ibRemove.setOnClickListener(holder::onEditCountClick);
             holder.tvCount.setText(String.valueOf(holder.count));
+
+            totals.append(dish.getId(), total);
+
+        }
+
+        @Override
+        public void onViewAttachedToWindow(@NonNull MyViewHolder holder) {
+            super.onViewAttachedToWindow(holder);
+            Log.d(TAG, "TOTALS " + totals.toString());
+            totalBefore = 0;
+            totalAfter = 0;
+            for (int i = 0; i < totals.size(); i++ ){
+                totalBefore += totals.valueAt(i);
+            }
+            totalAfter = totalBefore + 30;
+            tvTotalBefore.setText(String.format(Locale.getDefault(), "$ %d", totalBefore));
+            tvTotalAfter.setText(String.format(Locale.getDefault(), "$ %d", totalAfter));
         }
     }
+
+
 }

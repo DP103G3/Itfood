@@ -47,4 +47,7 @@
     <string name="canceled">已取消</string>
     <string name="emtpyorder">尚未有訂單</string>
     <string name="login">登入</string>
+    <string name="小計">小計</string>
+    <string name="ServiceFee">服務費</string>
+    <string name="Total">總計</string>
 </resources>

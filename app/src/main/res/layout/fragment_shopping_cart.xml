@@ -47,14 +47,141 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
                 android:background="@color/colorItemBackground"
+                android:backgroundTint="@color/colorItemBackground"
                 app:cardCornerRadius="4dp">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvDish"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp">
 
                 </androidx.recyclerview.widget.RecyclerView>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:background="@color/colorItemBackground"
+                app:cardCornerRadius="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorItemBackground"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/textView8"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="8dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/noto_sans"
+                            android:text="@string/小計"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/tvTotalBefore"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginBottom="16dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/noto_sans"
+                            android:text="TextView"
+                            android:textAlignment="viewEnd"
+                            android:textSize="16sp"
+                            tools:text="$ 325" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/textView11"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginBottom="8dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/noto_sans"
+                            android:text="@string/ServiceFee"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/tvServiceFee"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginBottom="16dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/noto_sans"
+                            android:text="$ 30"
+                            android:textAlignment="viewEnd"
+                            android:textSize="16sp"
+                            tools:text="$ 30" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:id="@+id/divider2"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/listDivider" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/textView13"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/noto_sans"
+                            android:text="@string/Total"
+                            android:textColor="@android:color/black"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvTotalAfter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginBottom="16dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/noto_sans"
+                            android:text="TextView"
+                            android:textAlignment="viewEnd"
+                            android:textColor="@android:color/black"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            tools:text="$ 355" />
+                    </LinearLayout>
+                </LinearLayout>
+
             </androidx.cardview.widget.CardView>
 
         </LinearLayout>
