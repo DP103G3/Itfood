@@ -1,5 +1,7 @@
 package tw.dp103g3.itfood.address;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.Serializable;
 
 public class Address implements Serializable {
@@ -52,7 +54,9 @@ public class Address implements Serializable {
 		this.longitude = longitude;
 	}
 
-
+	public LatLng getLatLng() {
+		return new LatLng(getLatitude(), getLongitude());
+	}
 
 	public int getId() {
 		return id;

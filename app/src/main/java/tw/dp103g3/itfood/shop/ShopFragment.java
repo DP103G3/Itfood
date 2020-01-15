@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -20,7 +21,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,7 +41,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -46,6 +51,7 @@ import java.util.Map;
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.DateTimePickerDialog;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
@@ -53,6 +59,7 @@ import static tw.dp103g3.itfood.Common.PREFERENCES_CART;
 
 public class ShopFragment extends Fragment {
     private final static String TAG = "TAG_ShopFragment";
+    private SimpleDateFormat simpleDateFormat;
     private AppCompatActivity activity;
     private AppBarLayout appBarLayout;
     private ImageView ivBack, ivShop, ivCart, ivComment;
@@ -61,11 +68,14 @@ public class ShopFragment extends Fragment {
     private Shop shop;
     private List<Dish> dishes;
     private Map<Integer, Integer> orderDetails;
-    private TextView tvName, tvTime, tvRate;
+    private Toolbar tbTitle;
+    private Button btTime;
+    private TextView tvName, tvRate;
     private RecyclerView rvDish;
     private Gson gson;
     private File orderDetail;
     private SharedPreferences pref;
+    private NavController navController;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -83,29 +93,44 @@ public class ShopFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-
+        navController = Navigation.findNavController(view);
+        simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd EEEE HH:mm");
+        tbTitle = view.findViewById(R.id.tbTitle);
         orderDetail = new File(activity.getFilesDir(), "orderDetail");
         try (BufferedReader in = new BufferedReader(new FileReader(orderDetail))) {
             String inStr = in.readLine();
-            Type type = new TypeToken<Map<Integer, Integer>>(){}.getType();
             gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
-            orderDetails = gson.fromJson(inStr, type);
+            JsonObject jsonObject = gson.fromJson(inStr, JsonObject.class);
+            String orderDetailsStr = jsonObject.get("orderDetails").getAsString();
+            Type type = new TypeToken<Map<Integer, Integer>>(){}.getType();
+            orderDetails = gson.fromJson(orderDetailsStr, type) != null ?
+                    gson.fromJson(orderDetailsStr, type) : new HashMap<Integer, Integer>();
             orderDetails.forEach((v,u) -> Log.d(TAG, String.format("%d, %d", v, u)));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        tvTime = view.findViewById(R.id.tvTime);
+        btTime = view.findViewById(R.id.btTime);
+        btTime.setOnClickListener(v -> {
+            DateTimePickerDialog dialog = new DateTimePickerDialog(activity, System.currentTimeMillis());
+            dialog.setOnDateTimeSetListener((alertDialog, date) -> {
+                btTime.setText(simpleDateFormat.format(date));
+            });
+            dialog.show();
+        });
         ivBack = view.findViewById(R.id.ivBack);
         ivBack.setOnClickListener(v -> {
             Navigation.findNavController(v).popBackStack();
         });
         ivCart = view.findViewById(R.id.ivCart);
+        ivCart.setOnClickListener(v -> {
+            navController.navigate(R.id.action_shopFragment_to_shoppingCartFragment);
+        });
         Bundle bundle = getArguments();
         shop = (Shop) bundle.getSerializable("shop");
         ivComment = view.findViewById(R.id.ivComment);
 
         ivComment.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.action_shopFragment_to_shopCommentFragment, bundle);
+            navController.navigate(R.id.action_shopFragment_to_shopCommentFragment, bundle);
         });
 
         ivShop = view.findViewById(R.id.ivShop);
@@ -126,18 +151,20 @@ public class ShopFragment extends Fragment {
             int color;
             int changeOffset = 220;
             if (offset > - changeOffset) {
+                tbTitle.setPadding(0, 0, 0, 0);
                 color = Color.argb((changeOffset + offset) * 255 / 220, 255, 243, 210);
                 tvName.setTextColor(color);
-                tvTime.setTextColor(color);
+                btTime.setTextColor(color);
                 tvRate.setTextColor(color);
                 PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(getResources().getColor(R.color.colorWhite, activity.getTheme()), PorterDuff.Mode.SRC_ATOP);
                 ivBack.getDrawable().setColorFilter(colorFilter);
                 ivCart.getDrawable().setColorFilter(colorFilter);
                 ivComment.getDrawable().setColorFilter(colorFilter);
             } else {
+                tbTitle.setPadding(0, 0, tbTitle.getHeight(), 0);
                 color = Color.argb((- changeOffset - offset) * 255 / (appBarLayout.getTotalScrollRange() - changeOffset), 91, 63, 54);
                 tvName.setTextColor(Color.argb(0, 0, 0, 0));
-                tvTime.setTextColor(color);
+                btTime.setTextColor(color);
                 tvRate.setTextColor(Color.argb(0, 0, 0, 0));
                 PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(getResources().getColor(R.color.colorTextOnP, activity.getTheme()), PorterDuff.Mode.SRC_ATOP);
                 ivBack.getDrawable().setColorFilter(colorFilter);
@@ -236,7 +263,7 @@ public class ShopFragment extends Fragment {
                 if (view.getId() == R.id.ibAdd) {
                     count++;
                 } else {
-                    count--;
+                    count = count <= 0 ? 0 : count - 1;
                 }
                 Log.d(TAG, String.valueOf(dishId));
                 orderDetails.put(dishId, count);
@@ -244,12 +271,20 @@ public class ShopFragment extends Fragment {
                     orderDetails.remove(dishId);
                 }
                 try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail));) {
-                    out.write(gson.toJson(orderDetails));
+                    JsonObject jsonObject = new JsonObject();
+                    jsonObject.addProperty("shopId", shop.getId());
+                    jsonObject.addProperty("orderDetails", gson.toJson(orderDetails));
+                    out.write(jsonObject.toString());
                 } catch (IOException e) {
                     Log.e(TAG, e.toString());
                 }
-
-                orderDetails.remove(33);
+//                try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail));) {
+//                    out.write(gson.toJson(orderDetails));
+//                } catch (IOException e) {
+//                    Log.e(TAG, e.toString());
+//                }
+//                orderDetails.remove(33);
+                Common.checkCart(activity, ivCart);
                 etCount.setText(String.valueOf(count));
             }
         }
@@ -283,14 +318,27 @@ public class ShopFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        Common.checkCart(activity, ivCart);
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("shopId", shop.getId());
+        jsonObject.addProperty("orderDetails", gson.toJson(orderDetails));
+        try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail));) {
+            out.write(gson.toJson(jsonObject));
+        } catch (IOException e) {
+            Log.e(TAG, e.toString());
+        }
         if (!orderDetails.isEmpty()){
             pref.edit().putString("shop_name", shop.getName()).apply();
         } else {
             pref.edit().remove("shop_name").apply();
         }
-
         PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(getResources().getColor(R.color.colorTextOnP, activity.getTheme()), PorterDuff.Mode.SRC_ATOP);
         ivBack.getDrawable().setColorFilter(colorFilter);
         ivCart.getDrawable().setColorFilter(colorFilter);

@@ -1,18 +1,9 @@
 package tw.dp103g3.itfood.shop;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ScrollView;
-import android.widget.Spinner;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,10 +11,27 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -38,61 +46,55 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.address.Address;
-import tw.dp103g3.itfood.main.MainActivity;
 import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
-public class MainFragment extends Fragment {
-    private final static String TAG = "TAG_MainFragment";
-    private MainActivity activity;
-    private ImageView ivCart, ivMap;
-    private RecyclerView rvNewShop, rvAllShop, rvChineseShop;
-    private List<Shop> shops;
+
+/**
+ * A simple {@link Fragment} subclass.
+ */
+public class MapFragment extends Fragment {
+    private static final String TAG = "TAG_MapFragment";
+    private Activity activity;
+    private GoogleMap map;
+    private Address selectedAddress;
+    private Gson gson;
+    private NavController navController;
+    private ImageView ivCart;
+    private Member member;
     private List<Address> addresses;
     private CommonTask getAllShopTask, getAllAddressTask;
     private ImageTask shopImageTask;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private ScrollView scrollView;
     private Spinner spAddress;
-    private Member member;
-    private Address selectedAddress;
-    private Gson gson;
-    private File orderDetail;
-    private Map<Integer, Integer> orderDetails;
-    private NavController navController;
-    private View view;
+    private List<Shop> shops;
+    private RecyclerView rvShop;
+    private List<Marker> markers;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        activity = (MainActivity) getActivity();
-        activity.checkLocationSettings();
+        activity = getActivity();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_main, container, false);
+        return inflater.inflate(R.layout.fragment_map, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        this.view = view;
-        ivCart = view.findViewById(R.id.ivCart);
         navController = Navigation.findNavController(view);
         member = new Member();
         member.setMemId(1);
-        Common.checkCart(activity, ivCart);
-        ivCart.setOnClickListener(v -> navController.
-                navigate(R.id.action_mainFragment_to_shoppingCartFragment));
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
         Address localAddress = null;
         addresses = getAddresses(member.getMemId()) != null ?
@@ -119,45 +121,48 @@ public class MainFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedAddress = addresses.get(position);
+                moveMap(selectedAddress.getLatLng());
                 showShops();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
-
-        if (shops == null) {
-            shops = getShops();
-        }
-        ivMap = view.findViewById(R.id.ivMap);
-        ivMap.setOnClickListener(v -> {
-            navController.navigate(R.id.action_mainFragment_to_mapFragment);
+        ivCart = view.findViewById(R.id.ivCart);
+        ivCart.setOnClickListener(v -> {
+            navController.navigate(R.id.action_mapFragment_to_shoppingCartFragment);
         });
-        scrollView = view.findViewById(R.id.scrollView);
-        scrollView.setVisibility(Common.networkConnected(activity) || !shops.isEmpty() ?
-                View.VISIBLE : View.GONE);
-        rvNewShop = view.findViewById(R.id.rvNewShop);
-        rvNewShop.setLayoutManager(new GridLayoutManager(
-                activity, 1, RecyclerView.HORIZONTAL, false));
-        rvChineseShop = view.findViewById(R.id.rvChineseShop);
-        rvChineseShop.setLayoutManager(new GridLayoutManager(
-                activity, 1, RecyclerView.HORIZONTAL, false));
-        rvAllShop = view.findViewById(R.id.rvAllShop);
-        rvAllShop.setPadding(0, 0, 0, Common.getNavigationBarHeight(activity));
-        rvAllShop.setLayoutManager(new LinearLayoutManager(activity));
-
-        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            if (Common.networkConnected(activity)) {
-                shops = getShops();
-            }
-            scrollView.setVisibility(Common.networkConnected(activity) || !shops.isEmpty() ?
-                    View.VISIBLE : View.GONE);
-            swipeRefreshLayout.setRefreshing(true);
-            showShops();
-            swipeRefreshLayout.setRefreshing(false);
+        shops = getShops();
+        markers = new ArrayList<>();
+        MapView mapView = view.findViewById(R.id.mapView);
+        mapView.onCreate(savedInstanceState);
+        mapView.onStart();
+        mapView.getMapAsync(googleMap -> {
+            map = googleMap;
+            moveMap(selectedAddress.getLatLng());
+            shops.forEach(v -> markers.add(map.addMarker(new MarkerOptions()
+                    .position(v.getLatLng()).title(v.getName())
+                    .snippet(v.getAddress()).alpha(0.5f))));
+            map.setOnMarkerClickListener(v -> {
+                v.setAlpha(1);
+                v.showInfoWindow();
+                return true;
+            });
+            map.setOnInfoWindowCloseListener(v -> v.setAlpha(0.5f));
+            map.setOnInfoWindowClickListener(v -> moveMap(v.getPosition()));
+            map.setOnInfoWindowLongClickListener(v -> {
+                Optional<Shop> shopOptional = shops.stream()
+                        .filter(shop -> shop.getLatLng().equals(v.getPosition())).findAny();
+                if (shopOptional.isPresent()) {
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("shop", shopOptional.get());
+                    navController.navigate(R.id.action_mapFragment_to_shopFragment, bundle);
+                }
+            });
         });
-
+        rvShop = view.findViewById(R.id.rvShop);
+        rvShop.setLayoutManager(new GridLayoutManager(activity, 1,
+                RecyclerView.HORIZONTAL, false));
         showShops();
     }
 
@@ -172,7 +177,7 @@ public class MainFragment extends Fragment {
             getAllAddressTask = new CommonTask(url, jsonOut);
             try {
                 String jsonIn = getAllAddressTask.execute().get();
-                Type listType = new TypeToken<List<Address>>() {
+                Type listType = new TypeToken<List<Address>>(){
                 }.getType();
                 adresses = gson.fromJson(jsonIn, listType);
             } catch (Exception e) {
@@ -184,8 +189,23 @@ public class MainFragment extends Fragment {
         return adresses;
     }
 
-    private List<Shop> typeFilter(String type) {
-        return shops.stream().filter(v -> v.getTypes().contains(type)).collect(Collectors.toList());
+    private void moveMap(LatLng latLng) {
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(latLng)
+                .zoom(17)
+                .build();
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+        map.animateCamera(cameraUpdate);
+    }
+
+    private void setAdapter(RecyclerView recyclerView, List<Shop> shops, int itemViewResId) {
+        ShopAdapter shopAdapter = (ShopAdapter) recyclerView.getAdapter();
+        if (shopAdapter == null) {
+            recyclerView.setAdapter(new ShopAdapter(activity, shops, itemViewResId));
+        } else {
+            shopAdapter.setShops(shops);
+            shopAdapter.notifyDataSetChanged();
+        }
     }
 
     private List<Shop> getShops() {
@@ -210,16 +230,6 @@ public class MainFragment extends Fragment {
         return shops;
     }
 
-    private void setAdapter(RecyclerView recyclerView, List<Shop> shops, int itemViewResId) {
-        ShopAdapter shopAdapter = (ShopAdapter) recyclerView.getAdapter();
-        if (shopAdapter == null) {
-            recyclerView.setAdapter(new ShopAdapter(activity, shops, itemViewResId));
-        } else {
-            shopAdapter.setShops(shops);
-            shopAdapter.notifyDataSetChanged();
-        }
-    }
-
     private void showShops() {
         if (shops == null || shops.isEmpty()) {
             if (Common.networkConnected(activity)) {
@@ -227,20 +237,12 @@ public class MainFragment extends Fragment {
             }
             shops = new ArrayList<>();
         }
-        shops = shops.stream().filter(v -> Common.Distance(v.getLatitude(), v.getLongitude(),
-                selectedAddress.getLatitude(), selectedAddress.getLongitude()) < 5000)
-                .collect(Collectors.toList());
-        List<Shop> newShop = shops.stream()
-                .filter(v -> System.currentTimeMillis() - v.getJointime().getTime() <= 2592000000L)
-                .collect(Collectors.toList());
-        setAdapter(rvNewShop, newShop, R.layout.small_shop_item_view);
-        setAdapter(rvChineseShop, typeFilter("中式"), R.layout.small_shop_item_view);
         Comparator<Shop> cmp = Comparator.<Shop, Double>comparing(v ->
                 Common.Distance(v.getLatitude(), v.getLongitude(),
                         selectedAddress.getLatitude(), selectedAddress.getLongitude()));
         List<Shop> sortedShops = shops.stream().sorted(cmp)
                 .collect(Collectors.toList());
-        setAdapter(rvAllShop, sortedShops, R.layout.large_shop_item_view);
+        setAdapter(rvShop, sortedShops, R.layout.map_shop_item_view);
     }
 
     private class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> {
@@ -268,6 +270,7 @@ public class MainFragment extends Fragment {
         private class MyViewHolder extends RecyclerView.ViewHolder {
             ImageView ivShop;
             TextView tvName, tvType, tvRate;
+
             private MyViewHolder(View itemView) {
                 super(itemView);
                 ivShop = itemView.findViewById(R.id.ivShop);
@@ -279,14 +282,14 @@ public class MainFragment extends Fragment {
 
         @NonNull
         @Override
-        public ShopAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View itemView = LayoutInflater.from(context)
                     .inflate(itemViewResId, parent, false);
             return new MyViewHolder(itemView);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull ShopAdapter.MyViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
             final Shop shop = shops.get(position);
             String url = Url.URL + "/ShopServlet";
             List<String> types = shop.getTypes();
@@ -304,27 +307,14 @@ public class MainFragment extends Fragment {
             holder.tvRate.setText(String.format(Locale.getDefault(),
                     "%.1f(%d)", rate, shop.getTtrate()));
             holder.itemView.setOnClickListener(v -> {
+                moveMap(shop.getLatLng());
+            });
+            holder.itemView.setOnLongClickListener(v -> {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("shop", shop);
-                navController.navigate(R.id.action_mainFragment_to_shopFragment, bundle);
+                navController.navigate(R.id.action_mapFragment_to_shopFragment, bundle);
+                return true;
             });
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (getAllAddressTask != null) {
-            getAllAddressTask.cancel(true);
-            getAllAddressTask = null;
-        }
-        if (getAllShopTask != null) {
-            getAllShopTask.cancel(true);
-            getAllShopTask = null;
-        }
-        if (shopImageTask != null) {
-            shopImageTask.cancel(true);
-            shopImageTask = null;
         }
     }
 
@@ -332,7 +322,19 @@ public class MainFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Common.checkCart(activity, ivCart);
-        navController = Navigation.findNavController(view);
-        Log.d(TAG, "1");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (getAllAddressTask != null) {
+            getAllAddressTask.cancel(true); getAllAddressTask = null;
+        }
+        if (getAllShopTask != null) {
+            getAllShopTask.cancel(true); getAllShopTask = null;
+        }
+        if (shopImageTask != null) {
+            shopImageTask.cancel(true); shopImageTask = null;
+        }
     }
 }

@@ -74,12 +74,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <TextView
-                        android:id="@+id/tvTime"
+                    <Button
+                        android:id="@+id/btTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:layout_gravity="center"
+                        android:background="#00000000"
                         android:text="雙醬咖哩（中壢中央店）"
                         android:textColor="@color/colorWhite"
                         android:textSize="20sp" />
@@ -114,7 +115,7 @@
                         android:foreground="?selectableItemBackground"
                         android:scaleType="center"
                         android:src="@drawable/shopping_cart"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/ivComment"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView

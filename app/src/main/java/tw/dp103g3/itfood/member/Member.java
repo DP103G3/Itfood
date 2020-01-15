@@ -13,7 +13,7 @@ public class Member implements Serializable {
 	private Date mem_suspendtime;
 	private int mem_state;
 
-	
+	public Member() {};
 	
 	public Member(int mem_id, String mem_name, String mem_password, String mem_email, String mem_phone,
 			Date mem_joindate, Date mem_suspendtime, int mem_state) {

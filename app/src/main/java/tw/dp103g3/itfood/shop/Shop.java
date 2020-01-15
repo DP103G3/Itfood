@@ -1,5 +1,7 @@
 package tw.dp103g3.itfood.shop;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -79,6 +81,10 @@ public class Shop implements Serializable {
 		}
 		Shop shop = (Shop) obj;
 		return this.getId() == shop.getId();
+	}
+
+	public LatLng getLatLng() {
+		return new LatLng(getLatitude(), getLongitude());
 	}
 
 	public int getId() {

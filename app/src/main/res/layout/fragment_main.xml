@@ -39,7 +39,16 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/logo"
-                app:layout_constraintEnd_toStartOf="@id/ivCart" />
+                app:layout_constraintEnd_toStartOf="@id/ivMap" />
+
+            <ImageView
+                android:id="@+id/ivMap"
+                android:layout_width="?attr/actionBarSize"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_constraintEnd_toStartOf="@id/ivCart"
+                app:layout_constraintTop_toTopOf="parent"
+                android:src="@drawable/map"
+                android:scaleType="center" />
 
             <ImageView
                 android:id="@+id/ivCart"

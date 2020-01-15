@@ -7,9 +7,26 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Common {
+    private static final String TAG = "TAG_Common";
     private static final double EARTH_RADIUS = 6378.137;
     public static final String PREFERENCES_MEMBER = "member";
     public static final String PREFERENCES_CART = "cart";
@@ -79,8 +96,28 @@ public class Common {
         return s;
     }
 
-
-
+    public static void checkCart(Activity activity, ImageView ivCart) {
+        Map<Integer, Integer> orderDetails = new HashMap<>();
+        File orderDetail = new File(activity.getFilesDir(), "orderDetail");
+        try (BufferedReader in = new BufferedReader(new FileReader(orderDetail))) {
+            String inStr = in.readLine();
+            Type type = new TypeToken<Map<Integer, Integer>>() {
+            }.getType();
+            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+            JsonObject jsonObject = gson.fromJson(inStr, JsonObject.class);
+//            int shopId = jsonObject.get("shopId").getAsInt();
+            String odStr = jsonObject.get("orderDetails").getAsString();
+            orderDetails = gson.fromJson(odStr, type);
+            orderDetails.forEach((v, u) -> Log.d(TAG, String.format("%d, %d", v, u)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (orderDetails.isEmpty()) {
+            ivCart.setVisibility(View.GONE);
+        } else {
+            ivCart.setVisibility(View.VISIBLE);
+        }
+    }
     public static double rad(double d) {
         return d * Math.PI / 180;
     }

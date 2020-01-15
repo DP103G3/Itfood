@@ -28,6 +28,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         bottomNavigationView = findViewById(R.id.bottomNavigation);
+        bottomNavigationView.setPadding(0, 0, 0, 0);
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupWithNavController(bottomNavigationView, navController);
         File localAddress = new File(this.getFilesDir(), "localAddress");
@@ -72,7 +74,10 @@ public class MainActivity extends AppCompatActivity {
         }
         if (!orderDetail.exists()) {
             try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail))) {
-                out.write(gson.toJson(new HashMap<Integer, Integer>()));
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("shopId", 1);
+                jsonObject.addProperty("orderDetails", gson.toJson(new HashMap<Integer, Integer>()));
+                out.write(jsonObject.toString());
             } catch (IOException e) {
                 Log.e(TAG, e.toString());
             }
@@ -93,12 +98,9 @@ public class MainActivity extends AppCompatActivity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY  );
     }
 
     public void checkLocationSettings() {

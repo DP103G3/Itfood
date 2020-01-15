@@ -62,7 +62,7 @@ public class ShoppingCartFragment extends Fragment {
     private Activity activity;
     private Button btLogin;
     private File orderDetail;
-    private int mem_id;
+    private int mem_id, shop_id;
     private Map<Integer, Integer> orderDetails;
     private Gson gson;
     private RecyclerView rvDish;
@@ -90,10 +90,13 @@ public class ShoppingCartFragment extends Fragment {
         orderDetail = new File(activity.getFilesDir(), "orderDetail");
 
         try (BufferedReader in = new BufferedReader(new FileReader(orderDetail))) {
-            String inStr = in.readLine();
-            Type type = new TypeToken<Map<Integer, Integer>>(){}.getType();
             gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
-            orderDetails = gson.fromJson(inStr, type);
+            String inStr = in.readLine();
+            JsonObject jsonObject = gson.fromJson(inStr, JsonObject.class);
+            shop_id = jsonObject.get("shopId").getAsInt();
+            String odStr = jsonObject.get("orderDetails").getAsString();
+            Type type = new TypeToken<Map<Integer, Integer>>(){}.getType();
+            orderDetails = gson.fromJson(odStr, type);
             orderDetails.forEach((v,u) -> Log.d(TAG, String.format("%d, %d", v, u)));
         } catch (IOException e) {
             e.printStackTrace();
@@ -231,7 +234,10 @@ public class ShoppingCartFragment extends Fragment {
                     dishAdapter.notifyDataSetChanged();
                 }
                 try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail));) {
-                    out.write(gson.toJson(orderDetails));
+                    JsonObject jsonObject = new JsonObject();
+                    jsonObject.addProperty("shopId", shop_id);
+                    jsonObject.addProperty("orderDetails", gson.toJson(orderDetails));
+                    out.write(jsonObject.toString());
                 } catch (IOException e) {
                     Log.e(TAG, e.toString());
                 }
