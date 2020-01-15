@@ -140,9 +140,13 @@ public class MapFragment extends Fragment {
         mapView.getMapAsync(googleMap -> {
             map = googleMap;
             moveMap(selectedAddress.getLatLng());
-            shops.forEach(v -> markers.add(map.addMarker(new MarkerOptions()
-                    .position(v.getLatLng()).title(v.getName())
-                    .snippet(v.getAddress()).alpha(0.5f))));
+            shops.forEach(v -> {
+                Marker marker = map.addMarker(new MarkerOptions()
+                        .position(v.getLatLng()).title(v.getName())
+                        .snippet(v.getAddress()).alpha(0.5f));
+                marker.setTag(v.getId());
+                markers.add(marker);
+            });
             map.setOnMarkerClickListener(v -> {
                 v.setAlpha(1);
                 v.showInfoWindow();
@@ -152,7 +156,7 @@ public class MapFragment extends Fragment {
             map.setOnInfoWindowClickListener(v -> moveMap(v.getPosition()));
             map.setOnInfoWindowLongClickListener(v -> {
                 Optional<Shop> shopOptional = shops.stream()
-                        .filter(shop -> shop.getLatLng().equals(v.getPosition())).findAny();
+                        .filter(shop -> shop.getId() == (Integer) v.getTag()).findAny();
                 if (shopOptional.isPresent()) {
                     Bundle bundle = new Bundle();
                     bundle.putSerializable("shop", shopOptional.get());
