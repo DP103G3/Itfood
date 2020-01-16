@@ -190,7 +190,9 @@ public class ShopCommentFragment extends Fragment {
         double rate = (double) shop.getTtscore() / shop.getTtrate();
         tvAverageRating.setText(String.format(Locale.getDefault(), "%.1f", rate));
         tvRatingTotal.setText(String.format("(%s)", String.valueOf(shop.getTtrate())));
+        rvComments.setPadding(0, 0, 0, Common.getNavigationBarHeight(activity));
         rvComments.setLayoutManager(new LinearLayoutManager(activity));
+
 
         comments = getComments();
 
@@ -207,9 +209,7 @@ public class ShopCommentFragment extends Fragment {
             tvCommentsTotal.setText(String.valueOf(comments.size()));
         }
 
-
         ShowComments(comments);
-
 
         ivBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
 
@@ -265,83 +265,6 @@ public class ShopCommentFragment extends Fragment {
     }
 
 
-    private void ShowComments(List<Comment> comments) {
-        if (comments == null || comments.isEmpty()) {
-            if (Common.networkConnected(activity)) {
-                Common.showToast(activity, R.string.textNoComments);
-            } else {
-                Common.showToast(activity, R.string.textNoNetwork);
-            }
-        }
-        CommentAdapter commentAdapter = (CommentAdapter) rvComments.getAdapter();
-        if (commentAdapter == null) {
-            rvComments.setAdapter(new CommentAdapter(activity, comments));
-        } else {
-            commentAdapter.setComments(comments);
-            commentAdapter.notifyDataSetChanged();
-        }
-    }
-
-    private class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.MyViewHolder> {
-        private Context context;
-        private List<Comment> comments;
-
-        CommentAdapter(Context context, List<Comment> comments) {
-            this.context = context;
-            this.comments = comments;
-        }
-
-        void setComments(List<Comment> comments) {
-            this.comments = comments;
-        }
-
-        @Override
-        public int getItemCount() {
-            return comments.size();
-        }
-
-        private class MyViewHolder extends RecyclerView.ViewHolder {
-            TextView tvUsername, tvCommentTime, tvCommentDetail;
-            RatingBar ratingBar;
-
-            MyViewHolder(@NonNull View itemView) {
-                super(itemView);
-                tvUsername = itemView.findViewById(R.id.tvUsername);
-                tvCommentTime = itemView.findViewById(R.id.tvCommentTime);
-                tvCommentDetail = itemView.findViewById(R.id.tvCommentDetail);
-                ratingBar = itemView.findViewById(R.id.ratingBar);
-
-            }
-        }
-
-        @NonNull
-        @Override
-        public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View itemView = LayoutInflater.from(context).inflate(R.layout.comment_item_view, parent, false);
-            return new MyViewHolder(itemView);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-            final Comment comment = comments.get(position);
-            Member member = getMember(comment.getMem_id());
-
-            String rawMemberEmail = member.getMemEmail();
-            String[] splitEmail = rawMemberEmail.split("@");
-            //將會員的電子郵件由“＠”分開為兩部分，取前面顯示
-            String memberEmail = splitEmail[0];
-
-            holder.ratingBar.setRating(comment.getCmt_score());
-            holder.tvUsername.setText(memberEmail);
-            holder.tvCommentDetail.setText(comment.getCmt_detail());
-            holder.tvCommentTime.setText(new SimpleDateFormat("MM月 dd, yyyy", Locale.getDefault()).format(comment.getCmt_time()));
-
-
-        }
-
-
-    }
-
     private Comment getComment(int cmt_id) {
         Comment comment = null;
         if (Common.networkConnected(activity)) {
@@ -363,7 +286,6 @@ public class ShopCommentFragment extends Fragment {
         }
         return comment;
     }
-
 
 
     private void handleViews() {
@@ -445,6 +367,82 @@ public class ShopCommentFragment extends Fragment {
         });
         popupMenu.setOnDismissListener(menu -> {
         });
+
+
+    }
+
+    private void ShowComments(List<Comment> comments) {
+        if (comments == null || comments.isEmpty()) {
+            if (Common.networkConnected(activity)) {
+                Common.showToast(activity, R.string.textNoComments);
+            } else {
+                Common.showToast(activity, R.string.textNoNetwork);
+            }
+        }
+        CommentAdapter commentAdapter = (CommentAdapter) rvComments.getAdapter();
+        if (commentAdapter == null) {
+            rvComments.setAdapter(new CommentAdapter(activity, comments));
+        } else {
+            commentAdapter.setComments(comments);
+            commentAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.MyViewHolder> {
+        private Context context;
+        private List<Comment> comments;
+
+        CommentAdapter(Context context, List<Comment> comments) {
+            this.context = context;
+            this.comments = comments;
+        }
+
+        void setComments(List<Comment> comments) {
+            this.comments = comments;
+        }
+
+        @Override
+        public int getItemCount() {
+            return comments.size();
+        }
+
+        private class MyViewHolder extends RecyclerView.ViewHolder {
+            TextView tvUsername, tvCommentTime, tvCommentDetail;
+            RatingBar ratingBar;
+
+            MyViewHolder(@NonNull View itemView) {
+                super(itemView);
+                tvUsername = itemView.findViewById(R.id.tvUsername);
+                tvCommentTime = itemView.findViewById(R.id.tvCommentTime);
+                tvCommentDetail = itemView.findViewById(R.id.tvCommentDetail);
+                ratingBar = itemView.findViewById(R.id.ratingBar);
+
+            }
+        }
+
+        @NonNull
+        @Override
+        public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View itemView = LayoutInflater.from(context).inflate(R.layout.comment_item_view, parent, false);
+            return new MyViewHolder(itemView);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+            final Comment comment = comments.get(position);
+
+            Member member = getMember(comment.getMem_id());
+            String rawMemberEmail = member.getMemEmail();
+            String[] splitEmail = rawMemberEmail.split("@");
+            //將會員的電子郵件由“＠”分開為兩部分，取前面顯示
+            String memberEmail = splitEmail[0];
+            holder.tvUsername.setText(memberEmail);
+            holder.ratingBar.setRating(comment.getCmt_score());
+            holder.tvCommentDetail.setText(comment.getCmt_detail());
+            holder.tvCommentTime.setText(new SimpleDateFormat("MM月 dd, yyyy", Locale.getDefault()).format(comment.getCmt_time()));
+
+
+        }
 
 
     }

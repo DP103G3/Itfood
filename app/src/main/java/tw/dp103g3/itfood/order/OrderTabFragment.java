@@ -1,6 +1,8 @@
 package tw.dp103g3.itfood.order;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -18,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -41,6 +44,7 @@ import tw.dp103g3.itfood.shop.Dish;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 
+import static android.view.View.GONE;
 import static tw.dp103g3.itfood.Common.DATE_FORMAT;
 import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 
@@ -69,6 +73,7 @@ OrderTabFragment extends Fragment {
     private List<Order> orders;
     private ConstraintLayout layoutEmpty;
     private SharedPreferences pref;
+    private ProgressBar progressBar;
 
 
 
@@ -103,6 +108,7 @@ OrderTabFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        progressBar = view.findViewById(R.id.progressBar);
         rvOrder = view.findViewById(R.id.rvOrder);
         counter = getArguments().getInt(ARG_COUNT);
         layoutEmpty = view.findViewById(R.id.layoutEmpty);
@@ -111,7 +117,7 @@ OrderTabFragment extends Fragment {
         mem_id = pref.getInt("mem_id", 0);
 
 //        //TODO delete
-//        mem_id = 1;
+        mem_id = 1;
 
         orders = getOrders(mem_id, counter);
 
@@ -119,11 +125,36 @@ OrderTabFragment extends Fragment {
             layoutEmpty.setVisibility(View.VISIBLE);
         }
 
+        rvOrder.setPadding(0, 0, 0, Common.getNavigationBarHeight(activity));
         rvOrder.setLayoutManager(new LinearLayoutManager(activity));
 
-        ShowOrders(orders);
 
+    }
 
+    @Nullable
+    @Override
+    public Animator onCreateAnimator(int transit, boolean enter, int nextAnim) {
+        if (nextAnim != 0x0) {
+            Animator animator = AnimatorInflater.loadAnimator(getActivity(), nextAnim);
+            animator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {}
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    // We just need know animation ending when fragment entered and no need to know when exited
+                    if (enter) {
+                        // here add data to recyclerview adapter
+                        ShowOrders(orders);
+                    }
+                }
+                @Override
+                public void onAnimationCancel(Animator animation) {}
+                @Override
+                public void onAnimationRepeat(Animator animation) {}
+            });
+            return animator;
+        }
+        return null;
     }
 
     @Override
@@ -133,7 +164,7 @@ OrderTabFragment extends Fragment {
         orders = getOrders(mem_id, counter);
         ShowOrders(orders);
         if (!orders.isEmpty()){
-            layoutEmpty.setVisibility(View.GONE);
+            layoutEmpty.setVisibility(GONE);
         } else {
             layoutEmpty.setVisibility(View.VISIBLE);
         }
@@ -299,19 +330,10 @@ OrderTabFragment extends Fragment {
             final Order order = orders.get(position);
             Shop shop = getShop(order.getShop_id());
             List<OrderDetail> orderDetails = getOrderDetails(order.getOrder_id());
-            int order_id = order.getOrder_id();
-            int del_id = order.getDel_id();
-            int shop_id = order.getShop_id();
-            int mem_id = order.getMem_id();
-            int pay_id = order.getPay_id();
             Date order_time = order.getOrder_time();
             Date order_ideal = order.getOrder_ideal();
             Date order_delivery = order.getOrder_delivery();
-            int adrs_id = order.getAdrs_id();
-            String order_name = order.getOrder_name();
-            String order_phone = order.getOrder_phone();
             int order_ttprice = order.getOrder_ttprice();
-            int order_area = order.getOrder_area();
             int order_state = order.getOrder_state();
             int order_type = order.getOrder_type();
 
@@ -385,6 +407,9 @@ OrderTabFragment extends Fragment {
 
             holder.rvOrderDetail.setLayoutManager(new LinearLayoutManager(activity));
             holder.rvOrderDetail.setAdapter(new OrderDetailAdapter(activity, orderDetails));
+            progressBar.setVisibility(GONE);
+
+
 
         }
 
@@ -449,6 +474,7 @@ OrderTabFragment extends Fragment {
             }
 
             holder.tvDishName.setText(dish.getName());
+
 
         }
 

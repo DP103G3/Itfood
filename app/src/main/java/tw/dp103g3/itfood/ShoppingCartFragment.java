@@ -1,6 +1,8 @@
 package tw.dp103g3.itfood;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -10,10 +12,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -22,8 +28,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -75,12 +84,20 @@ public class ShoppingCartFragment extends Fragment {
     private View fragmentView;
     private TextView tvTotalBefore, tvTotalAfter;
     private int totalBefore, totalAfter;
+    private ScrollView scrollView;
+    private BottomNavigationView bottomNavigationView;
+    private Animator animator;
 
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();
+
         totals = new SparseIntArray();
         cartPref = activity.getSharedPreferences(PREFERENCES_CART, Context.MODE_PRIVATE);
         memberPref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
@@ -88,6 +105,7 @@ public class ShoppingCartFragment extends Fragment {
         mem_id = memberPref.getInt("mem_id",0);
         Log.d(TAG, "mem_id :" + mem_id);
         orderDetail = new File(activity.getFilesDir(), "orderDetail");
+
 
         try (BufferedReader in = new BufferedReader(new FileReader(orderDetail))) {
             gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
@@ -105,11 +123,16 @@ public class ShoppingCartFragment extends Fragment {
 
     }
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
         return inflater.inflate(R.layout.fragment_shopping_cart, container, false);
     }
 
@@ -121,6 +144,13 @@ public class ShoppingCartFragment extends Fragment {
         tvTotalAfter = view.findViewById(R.id.tvTotalAfter);
         tvTotalBefore = view.findViewById(R.id.tvTotalBefore);
         navController = Navigation.findNavController(view);
+//        scrollView = view.findViewById(R.id.scrollView);
+//        scrollView.setPadding(0, 0, 0, Common.getNavigationBarHeight(activity));
+        bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
+//        bottomNavigationView.setVisibility(GONE);
+        animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_down);
+        animator.setTarget(bottomNavigationView);
+        animator.start();
 
 
         btLogin = view.findViewById(R.id.btLogin);
@@ -302,7 +332,16 @@ public class ShoppingCartFragment extends Fragment {
             tvTotalBefore.setText(String.format(Locale.getDefault(), "$ %d", totalBefore));
             tvTotalAfter.setText(String.format(Locale.getDefault(), "$ %d", totalAfter));
         }
+
+
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        animator = AnimatorInflater.loadAnimator(activity,R.animator.anim_bottom_navigation_slide_up);
+        animator.setTarget(bottomNavigationView);
+        animator.start();
+    }
 
 }

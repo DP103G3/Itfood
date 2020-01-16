@@ -50,4 +50,11 @@
     <string name="小計">小計</string>
     <string name="ServiceFee">服務費</string>
     <string name="Total">總計</string>
+    <string name="yourAddress">你的地址</string>
+    <string name="tvContactInfoText">聯繫資料</string>
+    <string name="tvDeliveryTimeText">送餐時間</string>
+    <string name="tvDeliveryAddressText">詳細送餐資料</string>
+    <string name="tvDeliveryTime">即時(40分鐘)</string>
+    <string name="tvContactInfo">請輸入聯絡資料</string>
+    <string name="tvPaymentMethodText">付款方式</string>
 </resources>
