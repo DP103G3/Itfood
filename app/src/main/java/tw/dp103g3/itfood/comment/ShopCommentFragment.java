@@ -102,11 +102,11 @@ public class ShopCommentFragment extends Fragment {
 
         int mem_id = preferences.getInt("mem_id", 0);
         member = getMember(mem_id);
+        Bundle sendBundle = new Bundle();
+        Bundle gotBundle = getArguments();
+        shop = (Shop) gotBundle.getSerializable("shop");
 
         btPostComment.setOnClickListener(v -> {
-            Bundle sendBundle = new Bundle();
-            Bundle gotBundle = getArguments();
-            Shop shop = (Shop) gotBundle.getSerializable("shop");
             sendBundle.putString("action", "insert");
             sendBundle.putSerializable("member", member);
             sendBundle.putSerializable("shop", shop);
@@ -142,8 +142,8 @@ public class ShopCommentFragment extends Fragment {
                     }
 
                     System.out.println(TAG + "會員comment:" + jsonIn);
-                    if (comment != null) {
-                        layoutCommentedFalse.setVisibility(View.GONE);
+                    if (comment != null && shop.getId() == comment.getShop_id()) {
+                        layoutCommentedTrue.setVisibility(View.VISIBLE);
 
                         Member member = getMember(mem_id);
                         String rawMemberEmail = member.getMemEmail();
@@ -162,7 +162,7 @@ public class ShopCommentFragment extends Fragment {
                         });
 
                     } else {
-                        layoutCommentedTrue.setVisibility(View.GONE);
+                        layoutCommentedFalse.setVisibility(View.VISIBLE);
                     }
                 } catch (Exception e) {
                     System.out.println(TAG + e.toString());
