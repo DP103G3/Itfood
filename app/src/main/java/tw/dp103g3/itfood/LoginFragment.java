@@ -2,6 +2,8 @@ package tw.dp103g3.itfood;
 
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -21,11 +23,14 @@ import android.widget.TextView;
 public class LoginFragment extends Fragment {
     private Activity activity;
     private TextView tvBack;
+    private SharedPreferences preferences;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();
+        preferences = activity.getSharedPreferences(Common.PREFERENCES_MEMBER, Context.MODE_PRIVATE);
+        preferences.edit().putInt("mem_id", 1).commit();
     }
 
     @Override
@@ -38,7 +43,7 @@ public class LoginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         tvBack = view.findViewById(R.id.tvBack);
         tvBack.setOnClickListener(v -> {
-            Navigation.findNavController(v).popBackStack();
+            Navigation.findNavController(v).popBackStack(R.id.mainFragment, false);
         });
     }
 }

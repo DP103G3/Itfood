@@ -7,20 +7,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
-
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
@@ -28,9 +14,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
@@ -46,18 +40,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import tw.dp103g3.itfood.shop.Dish;
+import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 
 import static android.view.View.GONE;
-import static tw.dp103g3.itfood.Common.PREFERENCES_CART;
 import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 
 
@@ -71,7 +62,8 @@ public class ShoppingCartFragment extends Fragment {
     private Activity activity;
     private Button btLogin;
     private File orderDetail;
-    private int mem_id, shop_id;
+    private int mem_id;
+    private Shop shop;
     private Map<Integer, Integer> orderDetails;
     private Gson gson;
     private RecyclerView rvDish;
@@ -99,19 +91,18 @@ public class ShoppingCartFragment extends Fragment {
         activity = getActivity();
 
         totals = new SparseIntArray();
-        cartPref = activity.getSharedPreferences(PREFERENCES_CART, Context.MODE_PRIVATE);
         memberPref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
-        shopName = cartPref.getString("shop_name", "");
         mem_id = memberPref.getInt("mem_id",0);
         Log.d(TAG, "mem_id :" + mem_id);
         orderDetail = new File(activity.getFilesDir(), "orderDetail");
-
 
         try (BufferedReader in = new BufferedReader(new FileReader(orderDetail))) {
             gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
             String inStr = in.readLine();
             JsonObject jsonObject = gson.fromJson(inStr, JsonObject.class);
-            shop_id = jsonObject.get("shopId").getAsInt();
+            String shopStr = jsonObject.get("shop").getAsString();
+            shop = gson.fromJson(shopStr, Shop.class);
+            shopName = shop.getName();
             String odStr = jsonObject.get("orderDetails").getAsString();
             Type type = new TypeToken<Map<Integer, Integer>>(){}.getType();
             orderDetails = gson.fromJson(odStr, type);
@@ -132,7 +123,6 @@ public class ShoppingCartFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
         return inflater.inflate(R.layout.fragment_shopping_cart, container, false);
     }
 
@@ -157,11 +147,13 @@ public class ShoppingCartFragment extends Fragment {
         if (mem_id != 0){
             btLogin.setVisibility(GONE);
         }
-        btLogin.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.action_shoppingCartFragment_to_loginFragment));
+        btLogin.setOnClickListener(v -> Navigation.findNavController(v)
+                .navigate(R.id.action_shoppingCartFragment_to_loginFragment));
 
         toolbarShoppingCart = view.findViewById(R.id.toolbarShoppingCart);
         toolbarShoppingCart.setTitle(shopName);
-        toolbarShoppingCart.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());
+        toolbarShoppingCart.setNavigationOnClickListener(v ->
+                Navigation.findNavController(v).popBackStack());
         dishes = new ArrayList<>();
         orderDetails.forEach((dish_id, dish_count) -> dishes.add(getDish(dish_id)));
 
@@ -211,7 +203,7 @@ public class ShoppingCartFragment extends Fragment {
         }
     }
 
-    private class DishAdapter extends RecyclerView.Adapter<ShoppingCartFragment.DishAdapter.MyViewHolder> {
+    private class DishAdapter extends RecyclerView.Adapter<DishAdapter.MyViewHolder> {
         private Context context;
         private List<Dish> dishes;
 
@@ -265,7 +257,7 @@ public class ShoppingCartFragment extends Fragment {
                 }
                 try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail));) {
                     JsonObject jsonObject = new JsonObject();
-                    jsonObject.addProperty("shopId", shop_id);
+                    jsonObject.addProperty("shop", gson.toJson(shop));
                     jsonObject.addProperty("orderDetails", gson.toJson(orderDetails));
                     out.write(jsonObject.toString());
                 } catch (IOException e) {
@@ -274,7 +266,15 @@ public class ShoppingCartFragment extends Fragment {
                 tvCount.setText(String.valueOf(count));
                 tvDishPrice.setText(String.format(Locale.getDefault(), "$ %d", dish.getPrice() * count));
                 if(orderDetails.isEmpty()){
-                    navController.popBackStack();
+                    try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail));) {
+                        JsonObject jsonObject = new JsonObject();
+                        jsonObject.addProperty("shop", gson.toJson(new Shop()));
+                        jsonObject.addProperty("orderDetails", gson.toJson(orderDetails));
+                        out.write(jsonObject.toString());
+                    } catch (IOException e) {
+                        Log.e(TAG, e.toString());
+                    }
+                    navController.popBackStack(R.id.mainFragment, false);
                 }
                 totals.append(dishId, dish.getPrice() * count);
                 for (int i = 0; i < totals.size(); i++ ){
@@ -291,14 +291,14 @@ public class ShoppingCartFragment extends Fragment {
 
         @NonNull
         @Override
-        public ShoppingCartFragment.DishAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public DishAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View itemView = LayoutInflater.from(context)
                     .inflate(R.layout.dish_cart_item_view, parent, false);
-            return new ShoppingCartFragment.DishAdapter.MyViewHolder(itemView);
+            return new DishAdapter.MyViewHolder(itemView);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull ShoppingCartFragment.DishAdapter.MyViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull DishAdapter.MyViewHolder holder, int position) {
             final Dish dish = dishes.get(position);
             holder.dishId = dish.getId();
             String dishName = dish.getName();
