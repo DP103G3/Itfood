@@ -65,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:backgroundTint="@color/colorSecondary"
-                android:text="@string/textLogin"
+                android:text="@string/login"
                 android:textColor="@color/colorTextOnS"
                 app:layout_constraintEnd_toEndOf="@+id/textView3"
                 app:layout_constraintStart_toStartOf="@+id/textView3"
