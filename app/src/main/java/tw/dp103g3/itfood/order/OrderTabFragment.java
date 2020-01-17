@@ -4,7 +4,9 @@ package tw.dp103g3.itfood.order;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -116,13 +118,11 @@ OrderTabFragment extends Fragment {
         pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = pref.getInt("mem_id", 0);
 
-//        //TODO delete
-        mem_id = 1;
-
         orders = getOrders(mem_id, counter);
 
         if(orders.isEmpty()){
             layoutEmpty.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(GONE);
         }
 
         rvOrder.setPadding(0, 0, 0, Common.getNavigationBarHeight(activity));
@@ -161,6 +161,7 @@ OrderTabFragment extends Fragment {
     public void onResume() {
         Log.d(TAG, "resume" + String.valueOf(counter));
         rvOrder.setLayoutManager(new LinearLayoutManager(activity));
+        progressBar.setVisibility(View.VISIBLE);
         orders = getOrders(mem_id, counter);
         ShowOrders(orders);
         if (!orders.isEmpty()){
@@ -356,6 +357,46 @@ OrderTabFragment extends Fragment {
                     order_state_text = "已付款，等待接單";
                     order_time_text = "下單時間 : " + simpleDateFormat.format(order_time);
                     holder.btAction.setText("取消訂單");
+                    holder.btAction.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            new AlertDialog.Builder(activity)
+                                    .setTitle(R.string.alertDialogTitleCancelOrder)
+                                    .setPositiveButton("我確定", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            String url = Url.URL + "/OrderServlet";
+                                            JsonObject jsonObject = new JsonObject();
+                                            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+                                            jsonObject.addProperty("action", "orderUpdate");
+                                            order.setOrder_state(CANCEL);
+                                            jsonObject.addProperty("order", gson.toJson(order));
+                                            int count = 0;
+                                            try {
+                                                String result = new CommonTask(url, jsonObject.toString()).execute().get();
+                                                count = Integer.valueOf(result);
+                                            } catch (Exception e){
+                                                Log.e(TAG, e.toString());
+                                            }
+                                            if (count == 0){
+                                                Common.showToast(getActivity(), R.string.cancelOrderFail);
+                                            } else{
+                                                Common.showToast(getActivity(), R.string.cancelOrderSuccess);
+                                                orders.clear();
+                                                orders = getOrders(mem_id, counter);
+                                                setOrders(orders);
+                                                rvOrder.getAdapter().notifyDataSetChanged();
+                                            }
+                                        }
+                                    }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                }
+                            }).setMessage(R.string.alertDialogMessageCancelOrder)
+                                    .show();
+                        }
+                    });
                     break;
                 }
                 case MAKING :{
@@ -387,7 +428,10 @@ OrderTabFragment extends Fragment {
                 }
                 case CANCEL :{
                     order_state_text = "已取消訂單";
+                    simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault() );
+                    order_time_text = "下單時間 : " + simpleDateFormat.format(order_time);
                     holder.btAction.setText("檢舉訂單");
+
                     break;
                 }
             }

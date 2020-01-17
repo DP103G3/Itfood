@@ -57,4 +57,9 @@
     <string name="tvDeliveryTime">即時(40分鐘)</string>
     <string name="tvContactInfo">請輸入聯絡資料</string>
     <string name="tvPaymentMethodText">付款方式</string>
+    <string name="alertDialogTitleCancelOrder">取消訂單</string>
+    <string name="cancelOrderFail">取消訂單失敗，請稍後再試。</string>
+    <string name="cancelOrderSuccess">取消訂單成功。</string>
+    <string name="alertDialogMessageCancelOrder" >你確定要取消此訂單？\n惡意棄單可能會被店家檢舉。</string>
+    <string name="orderType">送餐方式</string>
 </resources>
