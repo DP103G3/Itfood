@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,27 +14,28 @@
     android:orientation="vertical"
     tools:context=".ShoppingCartFragment">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbarShoppingCart"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
-        app:navigationIcon="@drawable/round_close_black_24"
-        app:title="我的餐車"
-        app:titleTextColor="@color/colorTextOnP">
 
-        <Button
-            android:id="@+id/btLogin"
-            android:layout_width="wrap_content"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbarShoppingCart"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:background="@android:color/transparent"
-            android:fontFamily="@font/noto_sans"
-            android:text="@string/login"
-            android:textColor="@color/colorTextOnP" />
-    </androidx.appcompat.widget.Toolbar>
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"
+            app:navigationIcon="@drawable/round_close_black_24"
+            app:title="我的餐車"
+            app:titleTextColor="@color/colorTextOnP">
+
+            <Button
+                android:id="@+id/btLogin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:background="@android:color/transparent"
+                android:fontFamily="@font/noto_sans"
+                android:text="@string/login"
+                android:textColor="@color/colorTextOnP" />
+        </androidx.appcompat.widget.Toolbar>
 
 
     <ScrollView
@@ -199,6 +205,7 @@
                 app:cardCornerRadius="4dp">
 
                 <LinearLayout
+                    android:id="@+id/layoutContactInfo"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@color/colorItemBackground"
@@ -232,9 +239,10 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:fontFamily="@font/noto_sans"
+                            android:paddingRight="24dp"
                             android:text="@string/tvContactInfo"
                             android:textAlignment="viewEnd"
-                            android:textSize="16sp" />
+                            android:textSize="14sp" />
 
                     </LinearLayout>
 
@@ -245,6 +253,7 @@
                         android:background="?android:attr/listDivider" />
 
                     <LinearLayout
+                        android:id="@+id/layoutDeliveryAddress"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:orientation="vertical"
@@ -266,6 +275,7 @@
                                 android:layout_weight="1"
                                 android:fontFamily="@font/noto_sans"
                                 android:text="@string/tvDeliveryAddressText"
+                                android:textAlignment="viewStart"
                                 android:textColor="@android:color/black"
                                 android:textSize="16sp" />
 
@@ -293,6 +303,7 @@
                         android:background="?android:attr/listDivider" />
 
                     <LinearLayout
+                        android:id="@+id/layoutDeliveryTime"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
@@ -330,6 +341,41 @@
                             android:tint="@color/colorTextOnP" />
 
                     </LinearLayout>
+
+                    <View
+                        android:id="@+id/view"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/listDivider" />
+
+                    <LinearLayout
+                        android:id="@+id/layoutOrderType"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:paddingStart="16dp"
+                        android:paddingTop="16dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="16dp">
+
+                        <TextView
+                            android:id="@+id/tvOrderTypeText"
+                            style="@style/ShoppingCartLayoutTextBlack"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/orderType"></TextView>
+
+                        <TextView
+                            android:id="@+id/tvOrdeType"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:paddingRight="24dp"
+                            android:text="@string/TAKEOUT"
+                            android:textAlignment="viewEnd" />
+                    </LinearLayout>
+
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
@@ -345,6 +391,7 @@
                 app:cardCornerRadius="4dp">
 
                 <LinearLayout
+                    android:id="@+id/layoutPayment"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="horizontal"
@@ -389,4 +436,6 @@
     </ScrollView>
 
 
-</LinearLayout>
+    </LinearLayout>
+
+</FrameLayout>
