@@ -331,6 +331,7 @@ OrderTabFragment extends Fragment {
             final Order order = orders.get(position);
             Shop shop = getShop(order.getShop_id());
             List<OrderDetail> orderDetails = getOrderDetails(order.getOrder_id());
+            Log.d(TAG, "orderdetail1");
             Date order_time = order.getOrder_time();
             Date order_ideal = order.getOrder_ideal();
             Date order_delivery = order.getOrder_delivery();
@@ -508,7 +509,8 @@ OrderTabFragment extends Fragment {
             symbols.setDecimalSeparator(',');
             DecimalFormat decimalFormat = new DecimalFormat("$ ###,###,###,###", symbols);
 
-            holder.tvDishCount.setText(String.valueOf(orderDetail.getOd_count()));
+            String tvDishCountText = "x" + orderDetail.getOd_count();
+            holder.tvDishCount.setText(tvDishCountText);
             holder.tvDishPrice.setText(decimalFormat.format(dishPrice));
 
             if (dish.getInfo() == null || dish.getInfo().isEmpty()){
