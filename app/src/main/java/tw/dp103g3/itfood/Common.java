@@ -105,7 +105,6 @@ public class Common {
             }.getType();
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
             JsonObject jsonObject = gson.fromJson(inStr, JsonObject.class);
-//            int shopId = jsonObject.get("shopId").getAsInt();
             String odStr = jsonObject.get("orderDetails").getAsString();
             orderDetails = gson.fromJson(odStr, type);
             orderDetails.forEach((v, u) -> Log.d(TAG, String.format("%d, %d", v, u)));

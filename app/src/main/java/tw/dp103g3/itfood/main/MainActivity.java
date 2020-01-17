@@ -41,6 +41,7 @@ import java.util.HashMap;
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.address.Address;
+import tw.dp103g3.itfood.shop.Shop;
 
 public class MainActivity extends AppCompatActivity {
     private final static String TAG = "TAG_MainActivity";
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         if (!orderDetail.exists()) {
             try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail))) {
                 JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("shopId", 1);
+                jsonObject.addProperty("shop", gson.toJson(new Shop()));
                 jsonObject.addProperty("orderDetails", gson.toJson(new HashMap<Integer, Integer>()));
                 out.write(jsonObject.toString());
             } catch (IOException e) {

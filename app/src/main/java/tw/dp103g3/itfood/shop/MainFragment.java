@@ -2,6 +2,7 @@ package tw.dp103g3.itfood.shop;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -62,19 +63,20 @@ public class MainFragment extends Fragment {
     private SwipeRefreshLayout swipeRefreshLayout;
     private ScrollView scrollView;
     private Spinner spAddress;
-    private Member member;
+    private int memId;
     private Address selectedAddress;
     private Gson gson;
-    private File orderDetail;
-    private Map<Integer, Integer> orderDetails;
     private NavController navController;
     private View view;
+    private SharedPreferences preferences;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = (MainActivity) getActivity();
         activity.checkLocationSettings();
+        preferences = activity.getSharedPreferences(Common.PREFERENCES_MEMBER,
+                Context.MODE_PRIVATE);
     }
 
     @Override
@@ -85,22 +87,21 @@ public class MainFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        memId = preferences.getInt("mem_id", 0);
         this.view = view;
         ivCart = view.findViewById(R.id.ivCart);
         navController = Navigation.findNavController(view);
-        member = new Member();
-        member.setMemId(1);
         Common.checkCart(activity, ivCart);
         ivCart.setOnClickListener(v -> navController.
                 navigate(R.id.action_mainFragment_to_shoppingCartFragment));
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+        Log.d(TAG, "1");
         Address localAddress = null;
-        addresses = getAddresses(member.getMemId()) != null ?
-                getAddresses(member.getMemId()) : new ArrayList<>();
+        addresses = getAddresses(memId) != null ?
+                getAddresses(memId) : new ArrayList<>();
         File file = new File(activity.getFilesDir(), "localAddress");
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             localAddress = (Address) in.readObject();
-            Log.d(TAG, String.valueOf(localAddress.getLatitude()));
         } catch (IOException | ClassNotFoundException e) {
             Log.e(TAG, e.toString());
         }
@@ -125,7 +126,6 @@ public class MainFragment extends Fragment {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
-
         if (shops == null) {
             shops = getShops();
         }
@@ -157,7 +157,6 @@ public class MainFragment extends Fragment {
             showShops();
             swipeRefreshLayout.setRefreshing(false);
         });
-
         showShops();
     }
 
@@ -184,7 +183,7 @@ public class MainFragment extends Fragment {
         return adresses;
     }
 
-    private List<Shop> typeFilter(String type) {
+    private List<Shop> typeFilter(String type, List<Shop> shops) {
         return shops.stream().filter(v -> v.getTypes().contains(type)).collect(Collectors.toList());
     }
 
@@ -227,18 +226,18 @@ public class MainFragment extends Fragment {
             }
             shops = new ArrayList<>();
         }
-        shops = shops.stream().filter(v -> Common.Distance(v.getLatitude(), v.getLongitude(),
+        List<Shop> showShops = shops.stream().filter(v -> Common.Distance(v.getLatitude(), v.getLongitude(),
                 selectedAddress.getLatitude(), selectedAddress.getLongitude()) < 5000)
                 .collect(Collectors.toList());
-        List<Shop> newShop = shops.stream()
+        List<Shop> newShop = showShops.stream()
                 .filter(v -> System.currentTimeMillis() - v.getJointime().getTime() <= 2592000000L)
                 .collect(Collectors.toList());
         setAdapter(rvNewShop, newShop, R.layout.small_shop_item_view);
-        setAdapter(rvChineseShop, typeFilter("中式"), R.layout.small_shop_item_view);
+        setAdapter(rvChineseShop, typeFilter("中式", showShops), R.layout.small_shop_item_view);
         Comparator<Shop> cmp = Comparator.<Shop, Double>comparing(v ->
                 Common.Distance(v.getLatitude(), v.getLongitude(),
                         selectedAddress.getLatitude(), selectedAddress.getLongitude()));
-        List<Shop> sortedShops = shops.stream().sorted(cmp)
+        List<Shop> sortedShops = showShops.stream().sorted(cmp)
                 .collect(Collectors.toList());
         setAdapter(rvAllShop, sortedShops, R.layout.large_shop_item_view);
     }
@@ -332,7 +331,5 @@ public class MainFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Common.checkCart(activity, ivCart);
-        navController = Navigation.findNavController(view);
-        Log.d(TAG, "1");
     }
 }

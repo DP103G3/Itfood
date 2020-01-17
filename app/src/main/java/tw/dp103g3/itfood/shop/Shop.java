@@ -66,6 +66,8 @@ public class Shop implements Serializable {
 		this.ttrate = ttrate;
 	}
 
+	public Shop() {}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

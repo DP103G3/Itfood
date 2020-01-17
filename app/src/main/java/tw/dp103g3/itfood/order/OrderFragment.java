@@ -107,7 +107,7 @@ public class OrderFragment extends Fragment {
             case NO_ITEM: {
                 Button btBackToMain = view.findViewById(R.id.btBackToMain);
                 btBackToMain.setOnClickListener(v -> {
-                    navController.navigate(R.id.action_mainFragment_to_orderFragment);
+                    navController.popBackStack(R.id.mainFragment, false);
                 });
                 break;
             }

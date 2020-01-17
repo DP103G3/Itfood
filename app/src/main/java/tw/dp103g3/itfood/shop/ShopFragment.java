@@ -37,6 +37,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -260,6 +261,23 @@ public class ShopFragment extends Fragment {
                 etCount = itemView.findViewById(R.id.etCount);
             }
             void onEditCountClick(View view) {
+                try (BufferedReader in = new BufferedReader(new FileReader(orderDetail))) {
+                    StringBuilder sb = new StringBuilder();
+                    String line = "";
+                    while ((line = in.readLine()) != null) {
+                        sb.append(line);
+                    }
+                    Log.d(TAG, sb.toString());
+                    JsonObject jsonObject = gson.fromJson(sb.toString(), JsonObject.class);
+                    String shopStr = jsonObject.get("shop").getAsString();
+                    Shop odShop = gson.fromJson(shopStr, Shop.class);
+                    if (odShop.getId() != 0 && !shop.equals(odShop)) {
+                        Common.showToast(activity, "clear cart");
+                        orderDetails = new HashMap<>();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 if (view.getId() == R.id.ibAdd) {
                     count++;
                 } else {
@@ -270,20 +288,14 @@ public class ShopFragment extends Fragment {
                 if (count <= 0){
                     orderDetails.remove(dishId);
                 }
-                try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail));) {
+                try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail))) {
                     JsonObject jsonObject = new JsonObject();
-                    jsonObject.addProperty("shopId", shop.getId());
+                    jsonObject.addProperty("shop", gson.toJson(shop));
                     jsonObject.addProperty("orderDetails", gson.toJson(orderDetails));
                     out.write(jsonObject.toString());
                 } catch (IOException e) {
                     Log.e(TAG, e.toString());
                 }
-//                try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail));) {
-//                    out.write(gson.toJson(orderDetails));
-//                } catch (IOException e) {
-//                    Log.e(TAG, e.toString());
-//                }
-//                orderDetails.remove(33);
                 Common.checkCart(activity, ivCart);
                 etCount.setText(String.valueOf(count));
             }
@@ -312,6 +324,7 @@ public class ShopFragment extends Fragment {
             dishImageTask = new ImageTask(url, dish.getId(), imageSize, holder.ivDish);
             dishImageTask.execute();
             holder.ibAdd.setOnClickListener(holder::onEditCountClick);
+            holder.ibAdd.setOnClickListener(holder::onEditCountClick);
             holder.ibRemove.setOnClickListener(holder::onEditCountClick);
             holder.etCount.setText(String.valueOf(holder.count));
         }
@@ -326,19 +339,6 @@ public class ShopFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("shopId", shop.getId());
-        jsonObject.addProperty("orderDetails", gson.toJson(orderDetails));
-        try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail));) {
-            out.write(gson.toJson(jsonObject));
-        } catch (IOException e) {
-            Log.e(TAG, e.toString());
-        }
-        if (!orderDetails.isEmpty()){
-            pref.edit().putString("shop_name", shop.getName()).apply();
-        } else {
-            pref.edit().remove("shop_name").apply();
-        }
         PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(getResources().getColor(R.color.colorTextOnP, activity.getTheme()), PorterDuff.Mode.SRC_ATOP);
         ivBack.getDrawable().setColorFilter(colorFilter);
         ivCart.getDrawable().setColorFilter(colorFilter);

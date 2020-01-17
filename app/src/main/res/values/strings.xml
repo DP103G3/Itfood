@@ -57,4 +57,8 @@
     <string name="tvDeliveryTime">即時(40分鐘)</string>
     <string name="tvContactInfo">請輸入聯絡資料</string>
     <string name="tvPaymentMethodText">付款方式</string>
+    <string name="textPayment">Payment</string>
+    <string name="textSendLocation">Send Location</string>
+    <string name="textPersonInfo">Personal Information</string>
+    <string name="textLogout">logout</string>
 </resources>
