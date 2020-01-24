@@ -10,8 +10,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -119,26 +122,14 @@ public class OrderFragment extends Fragment {
 
                     switch (position) {
                         case 0: {
-                            tab.setText(R.string.unconfirmed);
+                            tab.setText(R.string.unfinished);
                             break;
                         }
                         case 1: {
-                            tab.setText(R.string.making);
-                            break;
-                        }
-                        case 2: {
-                            tab.setText(R.string.unpickup);
-                            break;
-                        }
-                        case 3: {
-                            tab.setText(R.string.delivering);
-                            break;
-                        }
-                        case 4: {
                             tab.setText(R.string.done);
                             break;
                         }
-                        case 5: {
+                        case 2: {
                             tab.setText(R.string.canceled);
                             break;
                         }
@@ -149,6 +140,8 @@ public class OrderFragment extends Fragment {
             }
         }
     }
+
+
 
     private ViewPagerAdapter createCardAdapter() {
         ViewPagerAdapter adapter = new ViewPagerAdapter(super.getActivity());
@@ -179,7 +172,7 @@ public class OrderFragment extends Fragment {
     }
 
     public class ViewPagerAdapter extends FragmentStateAdapter {
-        public static final int TABS_ITEM_SIZE = 6;
+        public static final int TABS_ITEM_SIZE = 3;
 
         public ViewPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
             super(fragmentActivity);

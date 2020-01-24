@@ -66,4 +66,6 @@
     <string name="textSendLocation">Send Location</string>
     <string name="textPersonInfo">Personal Information</string>
     <string name="textLogout">logout</string>
+    <string name="CheckOut">結帳</string>
+    <string name="unfinished">未完成</string>
 </resources>

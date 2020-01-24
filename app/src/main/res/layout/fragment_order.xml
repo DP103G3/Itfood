@@ -44,8 +44,7 @@
         android:scrollbarAlwaysDrawHorizontalTrack="false"
         android:scrollbarAlwaysDrawVerticalTrack="false"
         app:tabIndicatorColor="@color/colorTextOnP"
-        app:tabMinWidth="96dp"
-        app:tabMode="auto"
+        app:tabMode="fixed"
         app:tabSelectedTextColor="@color/colorTextOnP"
         app:tabTextColor="@color/colorSecondaryDark">
 
@@ -67,23 +66,6 @@
             android:layout_height="wrap_content"
             android:text="@string/unpickup" />
 
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/tabDelivering"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/delivering" />
-
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/tabDone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/done" />
-
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/tabCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/canceled" />
     </com.google.android.material.tabs.TabLayout>
 
     <androidx.viewpager2.widget.ViewPager2

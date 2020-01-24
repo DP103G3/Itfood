@@ -31,6 +31,7 @@ public class Common {
     public static final String PREFERENCES_MEMBER = "member";
     public static final String PREFERENCES_CART = "cart";
     public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final int LOGIN_FALSE = 0;
 
     public static boolean networkConnected(Activity activity) {
         ConnectivityManager connectivityManager =

@@ -41,6 +41,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
@@ -135,14 +137,18 @@ public class ShopCommentFragment extends Fragment {
                     Type listType = new TypeToken<List<Comment>>() {
                     }.getType();
                     comments = gson.fromJson(jsonIn, listType);
-                    if (comments != null && !comments.isEmpty()) {
-                        comment = comments.get(0);
+
+                    List<Comment> filteredComments = comments.stream()
+                            .filter(cmt -> cmt.getShop_id() == shop.getId())
+                            .collect(Collectors.toList());
+                    if (!filteredComments.isEmpty()) {
+                        comment = filteredComments.get(0);
                     } else {
                         comment = null;
                     }
 
                     System.out.println(TAG + "會員comment:" + jsonIn);
-                    if (comment != null && shop.getId() == comment.getShop_id()) {
+                    if (comment != null) {
                         layoutCommentedTrue.setVisibility(View.VISIBLE);
 
                         Member member = getMember(mem_id);
@@ -204,7 +210,7 @@ public class ShopCommentFragment extends Fragment {
         }
         if (index != -1) {
             comments.remove(index);
-            tvCommentsTotal.setText(String.valueOf(comments.size() + 1));
+            tvCommentsTotal.setText(String.valueOf(comments.size() + 1 ));
         } else {
             tvCommentsTotal.setText(String.valueOf(comments.size()));
         }
@@ -323,6 +329,11 @@ public class ShopCommentFragment extends Fragment {
                             jsonObject.addProperty("comment", jsonOut);
 
                             CommonTask commonTask = new CommonTask(Url.URL + "/CommentServlet", jsonObject.toString());
+                            // TODO 刪除評論時 Shop 的 ttrate, ttscore 也要跟著改變,
+                            //  資料庫不能使用Auto-Commit, 在確定ShopServlet, CommentServlet都輸入成功
+                            //  才commit, 要不然就revert。
+
+
 
                             int count = 0;
                             try {

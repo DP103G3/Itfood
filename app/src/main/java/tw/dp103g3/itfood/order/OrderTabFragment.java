@@ -35,9 +35,11 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
@@ -53,8 +55,7 @@ import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class
-OrderTabFragment extends Fragment {
+public class OrderTabFragment extends Fragment {
     private static final String TAG = "TAG_OrderTabFragment";
 
     private static final String ARG_COUNT = "param1";
@@ -76,6 +77,8 @@ OrderTabFragment extends Fragment {
     private ConstraintLayout layoutEmpty;
     private SharedPreferences pref;
     private ProgressBar progressBar;
+    private ArrayList<Integer> order_states;
+    private ArrayList<Order> sortedOrders;
 
 
 
@@ -98,6 +101,21 @@ OrderTabFragment extends Fragment {
             counter = getArguments().getInt(ARG_COUNT);
         }
         activity = getActivity();
+        order_states = new ArrayList<>();
+
+        if(order_states.isEmpty()) {
+            if (counter == 0) {
+                order_states.add(0);
+                order_states.add(1);
+                order_states.add(2);
+                order_states.add(3);
+            } else if (counter == 1) {
+                order_states.add(4);
+
+            } else if (counter == 2) {
+                order_states.add(5);
+            }
+        }
     }
 
     @Override
@@ -118,17 +136,68 @@ OrderTabFragment extends Fragment {
         pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = pref.getInt("mem_id", 0);
 
-        orders = getOrders(mem_id, counter);
+        orders = new ArrayList<>();
+
+        for (Integer state : order_states) {
+            orders.addAll(getOrders(mem_id, state));
+        }
 
         if(orders.isEmpty()){
             layoutEmpty.setVisibility(View.VISIBLE);
             progressBar.setVisibility(GONE);
         }
 
-        rvOrder.setPadding(0, 0, 0, Common.getNavigationBarHeight(activity));
+        sortedOrders = orders.stream().sorted
+                (Comparator.comparing((Order order) -> order.getOrder_time().getTime()).reversed())
+                .collect(Collectors.toCollection(ArrayList::new));
+
         rvOrder.setLayoutManager(new LinearLayoutManager(activity));
+        rvOrder.setPadding(0, 0, 0, Common.getNavigationBarHeight(activity));
 
+    }
 
+    @Override
+    public void onResume() {
+        Log.d(TAG, "resume" + counter);
+        rvOrder.setLayoutManager(new LinearLayoutManager(activity));
+        progressBar.setVisibility(View.VISIBLE);
+        rvOrder.setVisibility(GONE);
+        orders = new ArrayList<>();
+//        ArrayList<Integer> order_states = new ArrayList<>();
+//
+//        if (counter == 0){
+//            order_states.clear();
+//            order_states.add(0);
+//            order_states.add(1);
+//            order_states.add(2);
+//            order_states.add(3);
+//        } else if (counter == 1){
+//            order_states.clear();
+//            order_states.add(4);
+//
+//        } else if (counter == 2){
+//            order_states.clear();
+//            order_states.add(5);
+//        }
+
+        for (Integer state : order_states) {
+            orders.addAll(getOrders(mem_id, state));
+        }
+        sortedOrders = orders.stream().sorted
+                (Comparator.comparing((Order order) -> order.getOrder_time().getTime()).reversed())
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        if(sortedOrders.isEmpty()){
+            layoutEmpty.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(GONE);
+        }
+        ShowOrders(sortedOrders);
+        if (!sortedOrders.isEmpty()){
+            layoutEmpty.setVisibility(GONE);
+        } else {
+            layoutEmpty.setVisibility(View.VISIBLE);
+        }
+        super.onResume();
     }
 
     @Nullable
@@ -144,7 +213,7 @@ OrderTabFragment extends Fragment {
                     // We just need know animation ending when fragment entered and no need to know when exited
                     if (enter) {
                         // here add data to recyclerview adapter
-                        ShowOrders(orders);
+                        ShowOrders(sortedOrders);
                     }
                 }
                 @Override
@@ -155,21 +224,6 @@ OrderTabFragment extends Fragment {
             return animator;
         }
         return null;
-    }
-
-    @Override
-    public void onResume() {
-        Log.d(TAG, "resume" + String.valueOf(counter));
-        rvOrder.setLayoutManager(new LinearLayoutManager(activity));
-        progressBar.setVisibility(View.VISIBLE);
-        orders = getOrders(mem_id, counter);
-        ShowOrders(orders);
-        if (!orders.isEmpty()){
-            layoutEmpty.setVisibility(GONE);
-        } else {
-            layoutEmpty.setVisibility(View.VISIBLE);
-        }
-        super.onResume();
     }
 
     private List<Order> getOrders(int mem_id, int state){
@@ -453,8 +507,6 @@ OrderTabFragment extends Fragment {
             holder.rvOrderDetail.setLayoutManager(new LinearLayoutManager(activity));
             holder.rvOrderDetail.setAdapter(new OrderDetailAdapter(activity, orderDetails));
             progressBar.setVisibility(GONE);
-
-
 
         }
 

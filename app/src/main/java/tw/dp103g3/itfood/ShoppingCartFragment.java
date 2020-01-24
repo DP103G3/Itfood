@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -49,6 +51,7 @@ import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 
 import static android.view.View.GONE;
+import static tw.dp103g3.itfood.Common.LOGIN_FALSE;
 import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 
 
@@ -74,11 +77,13 @@ public class ShoppingCartFragment extends Fragment {
     private NavController navController;
     private static SparseIntArray totals;
     private View fragmentView;
-    private TextView tvTotalBefore, tvTotalAfter;
+    private TextView tvTotalBefore, tvTotalAfter, tvBottomTotal;
     private int totalBefore, totalAfter;
     private ScrollView scrollView;
     private BottomNavigationView bottomNavigationView;
     private Animator animator;
+    private ConstraintLayout layoutBottom;
+    private BottomNavigationView shoppingCartBottomView;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -92,8 +97,7 @@ public class ShoppingCartFragment extends Fragment {
 
         totals = new SparseIntArray();
         memberPref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
-        mem_id = memberPref.getInt("mem_id",0);
-        Log.d(TAG, "mem_id :" + mem_id);
+        mem_id = memberPref.getInt("mem_id",Common.LOGIN_FALSE);
         orderDetail = new File(activity.getFilesDir(), "orderDetail");
 
         try (BufferedReader in = new BufferedReader(new FileReader(orderDetail))) {
@@ -131,12 +135,17 @@ public class ShoppingCartFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         fragmentView = view;
+        shoppingCartBottomView = view.findViewById(R.id.shoppingCartBottomView);
+        layoutBottom = view.findViewById(R.id.layoutBottom);
+        tvBottomTotal = view.findViewById(R.id.tvBottomTotal);
         tvTotalAfter = view.findViewById(R.id.tvTotalAfter);
         tvTotalBefore = view.findViewById(R.id.tvTotalBefore);
         navController = Navigation.findNavController(view);
-//        scrollView = view.findViewById(R.id.scrollView);
-//        scrollView.setPadding(0, 0, 0, Common.getNavigationBarHeight(activity));
+        scrollView = view.findViewById(R.id.scrollView);
         bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
+
+        int height =(int) (shoppingCartBottomView.getHeight() * getResources().getDisplayMetrics().density);
+        scrollView.setPadding(0, 0, 0, height);
 //        bottomNavigationView.setVisibility(GONE);
         animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_down);
         animator.setTarget(bottomNavigationView);
@@ -144,7 +153,7 @@ public class ShoppingCartFragment extends Fragment {
 
 
         btLogin = view.findViewById(R.id.btLogin);
-        if (mem_id != 0){
+        if (mem_id != LOGIN_FALSE){
             btLogin.setVisibility(GONE);
         }
         btLogin.setOnClickListener(v -> Navigation.findNavController(v)
@@ -283,6 +292,7 @@ public class ShoppingCartFragment extends Fragment {
                 totalAfter = totalBefore + 30;
                 tvTotalBefore.setText(String.format(Locale.getDefault(), "$ %d", totalBefore));
                 tvTotalAfter.setText(String.format(Locale.getDefault(), "$ %d", totalAfter));
+                tvBottomTotal.setText(String.format(Locale.getDefault(), "$ %d", totalAfter));
 
 
 
@@ -331,6 +341,7 @@ public class ShoppingCartFragment extends Fragment {
             totalAfter = totalBefore + 30;
             tvTotalBefore.setText(String.format(Locale.getDefault(), "$ %d", totalBefore));
             tvTotalAfter.setText(String.format(Locale.getDefault(), "$ %d", totalAfter));
+            tvBottomTotal.setText(String.format(Locale.getDefault(), "$ %d", totalAfter));
         }
 
 
