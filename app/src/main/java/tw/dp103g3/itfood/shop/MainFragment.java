@@ -1,6 +1,8 @@
 package tw.dp103g3.itfood.shop;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -25,6 +27,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -39,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import tw.dp103g3.itfood.Common;
@@ -47,7 +49,6 @@ import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.address.Address;
 import tw.dp103g3.itfood.main.MainActivity;
-import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
@@ -55,7 +56,7 @@ public class MainFragment extends Fragment {
     private final static String TAG = "TAG_MainFragment";
     private MainActivity activity;
     private ImageView ivCart, ivMap;
-    private RecyclerView rvNewShop, rvAllShop, rvChineseShop;
+    private RecyclerView rvNewShop, rvAllShop, rvChineseShop, rvAmericanShop;
     private List<Shop> shops;
     private List<Address> addresses;
     private CommonTask getAllShopTask, getAllAddressTask;
@@ -69,6 +70,8 @@ public class MainFragment extends Fragment {
     private NavController navController;
     private View view;
     private SharedPreferences preferences;
+    private BottomNavigationView bottomNavigationView;
+    private Animator animator;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -87,6 +90,31 @@ public class MainFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
+        animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_up);
+        animator.setTarget(bottomNavigationView);
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                bottomNavigationView.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        animator.start();
         memId = preferences.getInt("mem_id", 0);
         this.view = view;
         ivCart = view.findViewById(R.id.ivCart);
@@ -141,6 +169,9 @@ public class MainFragment extends Fragment {
                 activity, 1, RecyclerView.HORIZONTAL, false));
         rvChineseShop = view.findViewById(R.id.rvChineseShop);
         rvChineseShop.setLayoutManager(new GridLayoutManager(
+                activity, 1, RecyclerView.HORIZONTAL, false));
+        rvAmericanShop = view.findViewById(R.id.rvAmericanShop);
+        rvAmericanShop.setLayoutManager(new GridLayoutManager(
                 activity, 1, RecyclerView.HORIZONTAL, false));
         rvAllShop = view.findViewById(R.id.rvAllShop);
         rvAllShop.setPadding(0, 0, 0, Common.getNavigationBarHeight(activity));
@@ -234,6 +265,7 @@ public class MainFragment extends Fragment {
                 .collect(Collectors.toList());
         setAdapter(rvNewShop, newShop, R.layout.small_shop_item_view);
         setAdapter(rvChineseShop, typeFilter("中式", showShops), R.layout.small_shop_item_view);
+        setAdapter(rvAmericanShop, typeFilter("美式料理", showShops), R.layout.small_shop_item_view);
         Comparator<Shop> cmp = Comparator.<Shop, Double>comparing(v ->
                 Common.Distance(v.getLatitude(), v.getLongitude(),
                         selectedAddress.getLatitude(), selectedAddress.getLongitude()));
@@ -252,7 +284,7 @@ public class MainFragment extends Fragment {
             this.context = context;
             this.shops = shops;
             this.itemViewResId = itemViewResId;
-            imageSize = getResources().getDisplayMetrics().widthPixels;
+            imageSize = getResources().getDisplayMetrics().widthPixels / 2;
         }
 
         void setShops(List<Shop> shops) {

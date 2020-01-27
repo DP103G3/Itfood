@@ -1,28 +1,27 @@
 package tw.dp103g3.itfood.order;
 
-import java.io.Serializable;
+import tw.dp103g3.itfood.shop.Dish;
 
-public class OrderDetail implements Serializable {
+public class OrderDetail {
 
 	private int od_id;
 	private int order_id;
-	private int dish_id;
+	private Dish dish;
 	private int od_count;
 	private int od_price;
 	private String od_message;
 	
-	public OrderDetail(int od_id, int order_id, int dish_id, int od_count, int od_price, String od_message) {
-		super();
+	public OrderDetail(int od_id, int order_id, Dish dish, int od_count, int od_price, String od_message) {
 		this.od_id = od_id;
 		this.order_id = order_id;
-		this.dish_id = dish_id;
+		this.dish = dish;
 		this.od_count = od_count;
 		this.od_price = od_price;
 		this.od_message = od_message;
 	}
 	
-	public OrderDetail(int dish_id, int od_count) {
-		this.dish_id = dish_id;
+	public OrderDetail(Dish dish, int od_count) {
+		this.dish = dish;
 		this.od_count = od_count;
 	}
 
@@ -42,12 +41,12 @@ public class OrderDetail implements Serializable {
 		this.order_id = order_id;
 	}
 
-	public int getDish_id() {
-		return dish_id;
+	public Dish getDish() {
+		return dish;
 	}
 
-	public void setDish_id(int dish_id) {
-		this.dish_id = dish_id;
+	public void setDish(Dish dish) {
+		this.dish = dish;
 	}
 
 	public int getOd_count() {

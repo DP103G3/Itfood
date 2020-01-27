@@ -232,7 +232,7 @@ public class OrderTabFragment extends Fragment {
             String url = Url.URL + "/OrderServlet";
             Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
             JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("action", "findByCaseWithState");
+            jsonObject.addProperty("action", "findByCase");
             jsonObject.addProperty("type", "member");
             jsonObject.addProperty("id" , mem_id);
             jsonObject.addProperty("state", state);
@@ -251,28 +251,28 @@ public class OrderTabFragment extends Fragment {
         return orders;
     }
 
-    private List<OrderDetail> getOrderDetails(int order_id){
-        List <OrderDetail> orderDetails = new ArrayList<>();
-        if(Common.networkConnected(activity)){
-            String url = Url.URL + "/OrderDetailServlet";
-            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("action", "findByOrderId");
-            jsonObject.addProperty("order_id",order_id );
-            String jsonOut = jsonObject.toString();
-            getOrderDetailTask = new CommonTask(url, jsonOut);
-            try {
-                String jsonIn = getOrderDetailTask.execute().get();
-                Type listType = new TypeToken<List<OrderDetail>>(){}.getType();
-                orderDetails = gson.fromJson(jsonIn, listType);
-            } catch (Exception e){
-                Log.e(TAG, e.toString());
-            }
-        } else{
-            Common.showToast(activity, R.string.textNoNetwork);
-        }
-        return orderDetails;
-    }
+//    private List<OrderDetail> getOrderDetails(int order_id){
+//        List <OrderDetail> orderDetails = new ArrayList<>();
+//        if(Common.networkConnected(activity)){
+//            String url = Url.URL + "/OrderDetailServlet";
+//            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+//            JsonObject jsonObject = new JsonObject();
+//            jsonObject.addProperty("action", "findByOrderId");
+//            jsonObject.addProperty("order_id",order_id );
+//            String jsonOut = jsonObject.toString();
+//            getOrderDetailTask = new CommonTask(url, jsonOut);
+//            try {
+//                String jsonIn = getOrderDetailTask.execute().get();
+//                Type listType = new TypeToken<List<OrderDetail>>(){}.getType();
+//                orderDetails = gson.fromJson(jsonIn, listType);
+//            } catch (Exception e){
+//                Log.e(TAG, e.toString());
+//            }
+//        } else{
+//            Common.showToast(activity, R.string.textNoNetwork);
+//        }
+//        return orderDetails;
+//    }
 
     private Dish getDish (int dish_id){
         Dish dish = null;
@@ -296,27 +296,27 @@ public class OrderTabFragment extends Fragment {
         return dish;
     }
 
-    private Shop getShop (int shop_id){
-        Shop shop = null;
-        if (Common.networkConnected(activity)){
-            String url = Url.URL + "/ShopServlet";
-            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("action", "getShopById");
-            jsonObject.addProperty("id", shop_id);
-            String jsonOut = jsonObject.toString();
-            getShopTask = new CommonTask(url, jsonOut);
-            try {
-                String jsonIn = getShopTask.execute().get();
-                shop = gson.fromJson(jsonIn, Shop.class);
-            } catch (Exception e){
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Common.showToast(activity, R.string.textNoNetwork);
-        }
-        return shop;
-    }
+//    private Shop getShop (int shop_id){
+//        Shop shop = null;
+//        if (Common.networkConnected(activity)){
+//            String url = Url.URL + "/ShopServlet";
+//            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+//            JsonObject jsonObject = new JsonObject();
+//            jsonObject.addProperty("action", "getShopById");
+//            jsonObject.addProperty("id", shop_id);
+//            String jsonOut = jsonObject.toString();
+//            getShopTask = new CommonTask(url, jsonOut);
+//            try {
+//                String jsonIn = getShopTask.execute().get();
+//                shop = gson.fromJson(jsonIn, Shop.class);
+//            } catch (Exception e){
+//                Log.e(TAG, e.toString());
+//            }
+//        } else {
+//            Common.showToast(activity, R.string.textNoNetwork);
+//        }
+//        return shop;
+//    }
 
     private void ShowOrders(List<Order> orders) {
         if (orders == null || orders.isEmpty()) {
@@ -383,8 +383,8 @@ public class OrderTabFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
             final Order order = orders.get(position);
-            Shop shop = getShop(order.getShop_id());
-            List<OrderDetail> orderDetails = getOrderDetails(order.getOrder_id());
+            Shop shop = order.getShop();
+            List<OrderDetail> orderDetails = order.getOrderDetails();
             Log.d(TAG, "orderdetail1");
             Date order_time = order.getOrder_time();
             Date order_ideal = order.getOrder_ideal();
@@ -507,7 +507,6 @@ public class OrderTabFragment extends Fragment {
             holder.rvOrderDetail.setLayoutManager(new LinearLayoutManager(activity));
             holder.rvOrderDetail.setAdapter(new OrderDetailAdapter(activity, orderDetails));
             progressBar.setVisibility(GONE);
-
         }
 
 
@@ -554,7 +553,7 @@ public class OrderTabFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull OrderDetailAdapter.MyViewHolder holder, int position) {
             final OrderDetail orderDetail = orderDetails.get(position);
-            Dish dish = getDish(orderDetail.getDish_id());
+            Dish dish = orderDetail.getDish();
             int dishPrice = orderDetail.getOd_price()*orderDetail.getOd_count();
 
             DecimalFormatSymbols symbols = new DecimalFormatSymbols();
@@ -567,7 +566,7 @@ public class OrderTabFragment extends Fragment {
 
             if (dish.getInfo() == null || dish.getInfo().isEmpty()){
                 holder.tvDishInfo.setText("");
-            } else if (dish.getInfo() != null && !dish.getInfo().isEmpty()){
+            } else {
                 holder.tvDishInfo.setText(dish.getInfo());
             }
 

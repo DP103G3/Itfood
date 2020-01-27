@@ -1,11 +1,15 @@
 package tw.dp103g3.itfood.order;
 
 import java.util.Date;
+import java.util.List;
+
+import tw.dp103g3.itfood.shop.Shop;
+
 
 public class Order {
 	private int order_id;
 	private int del_id;
-	private int shop_id;
+	private Shop shop;
 	private int mem_id;
 	private int pay_id;
 	private int order_state;
@@ -19,12 +23,14 @@ public class Order {
 	private int order_ttprice;
 	private int order_area;
 	private int order_type;
+	private List<OrderDetail> orderDetails;
 	
-	public Order(int shop_id, int mem_id, int del_id, int pay_id, int sp_id, Date order_ideal, Date order_delivery, 
-			int adrs_id, String order_name, String order_phone, int order_ttprice, int order_type) {
+	public Order(Shop shop, int mem_id, int del_id, int pay_id, int sp_id, Date order_ideal, Date order_delivery, 
+			int adrs_id, String order_name, String order_phone, int order_ttprice, int order_type, 
+			List<OrderDetail> orderDetails) {
 		super();
 		this.del_id = del_id;
-		this.shop_id = shop_id;
+		this.shop = shop;
 		this.mem_id = mem_id;
 		this.pay_id = pay_id;
 		this.sp_id = sp_id;
@@ -35,14 +41,16 @@ public class Order {
 		this.order_phone = order_phone;
 		this.order_ttprice = order_ttprice;
 		this.order_type = order_type;
+		this.orderDetails = orderDetails;
 	}
 	
-	public Order(int order_id, int shop_id, int mem_id,int del_id, int pay_id, int sp_id, Date order_ideal,
-			Date order_time, Date order_delivery, int adrs_id, String order_name, String order_phone, int order_ttprice, int order_area, int order_state, int order_type) {
+	public Order(int order_id, Shop shop, int mem_id,int del_id, int pay_id, int sp_id, Date order_ideal,
+			Date order_time, Date order_delivery, int adrs_id, String order_name, String order_phone, int order_ttprice, 
+			int order_area, int order_state, int order_type, List<OrderDetail> orderDetails) {
 		super();
 		this.order_id = order_id;
 		this.del_id = del_id;
-		this.shop_id = shop_id;
+		this.shop = shop;
 		this.mem_id = mem_id;
 		this.pay_id = pay_id;
 		this.sp_id = sp_id;
@@ -56,6 +64,7 @@ public class Order {
 		this.order_area = order_area;
 		this.order_state = order_state;
 		this.order_type = order_type;
+		this.orderDetails = orderDetails;
 	}
 
 	public int getOrder_id() {
@@ -74,12 +83,12 @@ public class Order {
 		this.del_id = del_id;
 	}
 
-	public int getShop_id() {
-		return shop_id;
+	public Shop getShop() {
+		return shop;
 	}
 
-	public void setShop_id(int shop_id) {
-		this.shop_id = shop_id;
+	public void setShop(Shop shop) {
+		this.shop = shop;
 	}
 
 	public int getMem_id() {
@@ -102,8 +111,8 @@ public class Order {
 		return order_state;
 	}
 
-	public void setOrder_state(int order_status) {
-		this.order_state = order_status;
+	public void setOrder_state(int order_statu) {
+		this.order_state = order_statu;
 	}
 
 	public int getSp_id() {
@@ -184,6 +193,14 @@ public class Order {
 
 	public void setOrder_type(int order_type) {
 		this.order_type = order_type;
+	}
+
+	public List<OrderDetail> getOrderDetails() {
+		return orderDetails;
+	}
+
+	public void setOrderDetails(List<OrderDetail> orderDetails) {
+		this.orderDetails = orderDetails;
 	}
 	
 	

@@ -1,6 +1,8 @@
 package tw.dp103g3.itfood.shop;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -29,6 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -77,6 +80,8 @@ public class ShopFragment extends Fragment {
     private File orderDetail;
     private SharedPreferences pref;
     private NavController navController;
+    private BottomNavigationView bottomNavigationView;
+    private Animator animator;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,6 +100,31 @@ public class ShopFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         navController = Navigation.findNavController(view);
+        bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
+        animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_down);
+        animator.setTarget(bottomNavigationView);
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                bottomNavigationView.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        animator.start();
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd EEEE HH:mm");
         tbTitle = view.findViewById(R.id.tbTitle);
         orderDetail = new File(activity.getFilesDir(), "orderDetail");
@@ -178,7 +208,7 @@ public class ShopFragment extends Fragment {
                 "%.1f(%d)", rate, shop.getTtrate()));
 
         rvDish = view.findViewById(R.id.rvDish);
-        rvDish.setPadding(0, rvDish.getPaddingTop(), 0, Common.getNavigationBarHeight(activity) + 20);
+//        rvDish.setPadding(0, rvDish.getPaddingTop(), 0, Common.getNavigationBarHeight(activity) + 20);
         rvDish.setLayoutManager(new LinearLayoutManager(activity));
         dishes = getDishes();
         ShowDishes(dishes);

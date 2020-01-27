@@ -1,5 +1,7 @@
 package tw.dp103g3.itfood.shop;
 
+import java.io.Serializable;
+
 public class Dish {
 	private int id;
 	private String name;

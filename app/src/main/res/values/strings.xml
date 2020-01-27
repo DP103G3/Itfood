@@ -18,9 +18,9 @@
     <string name="Delete">刪除</string>
     <string name="textFavorite">Favorite</string>
     <string name="textNoDishesFound">no dishes found</string>
-    <string name="textHome">Home</string>
-    <string name="textOrder">Order</string>
-    <string name="textPerson">Person</string>
+    <string name="textHome">首頁</string>
+    <string name="textOrder">訂單</string>
+    <string name="textPerson">個人資料</string>
     <string name="textLocationAccessNotGranted">Permission to access location should be granted</string>
     <string name="textLocalPosition">local position</string>
     <string name="btPost">發布</string>
@@ -68,4 +68,5 @@
     <string name="textLogout">logout</string>
     <string name="CheckOut">結帳</string>
     <string name="unfinished">未完成</string>
+    <string name="textAmerican">American Restaurant</string>
 </resources>

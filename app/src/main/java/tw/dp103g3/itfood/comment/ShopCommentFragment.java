@@ -1,6 +1,8 @@
 package tw.dp103g3.itfood.comment;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -30,6 +32,7 @@ import android.widget.PopupMenu;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -69,6 +72,8 @@ public class ShopCommentFragment extends Fragment {
     private Button btPostComment;
     private Member member;
     private int cmt_id;
+    private BottomNavigationView bottomNavigationView;
+    private Animator animator;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -87,7 +92,6 @@ public class ShopCommentFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         layoutShopComment = view.findViewById(R.id.layoutShopComment);
-
         TextView tvUsername, tvCommentTime, tvCommentDetail;
         RatingBar ratingBar;
         ImageButton btCommentOptionMenu;

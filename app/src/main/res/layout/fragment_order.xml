@@ -29,7 +29,7 @@
                 android:fontFamily="@font/noto_sans"
                 android:text="@string/myorder"
                 android:textColor="@color/colorTextOnP"
-                android:textSize="24sp"
+                android:textSize="20sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -39,14 +39,15 @@
         android:id="@+id/tabLayOut"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
+        android:background="@color/colorPrimaryLight"
         android:isScrollContainer="true"
         android:scrollbarAlwaysDrawHorizontalTrack="false"
         android:scrollbarAlwaysDrawVerticalTrack="false"
-        app:tabIndicatorColor="@color/colorTextOnP"
+        app:tabIndicatorColor="@color/colorSecondary"
+        app:tabMinWidth="96dp"
         app:tabMode="fixed"
         app:tabSelectedTextColor="@color/colorTextOnP"
-        app:tabTextColor="@color/colorSecondaryDark">
+        app:tabTextColor="@color/colorTextOnP">
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tabUnconfirmed"
