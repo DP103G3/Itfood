@@ -48,7 +48,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
-
+<!--
     <ProgressBar
         android:id="@+id/progressBar"
         style="@android:style/Widget.Material.Light.ProgressBar.Large"
@@ -59,4 +59,5 @@
         android:indeterminateTint="@color/colorSecondary"
         android:progressDrawable="@android:drawable/progress_horizontal"
         android:visibility="visible" />
+        -->
 </FrameLayout>

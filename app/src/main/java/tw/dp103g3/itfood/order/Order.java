@@ -1,5 +1,8 @@
 package tw.dp103g3.itfood.order;
 
+import androidx.annotation.Nullable;
+
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -65,6 +68,15 @@ public class Order {
 		this.order_state = order_state;
 		this.order_type = order_type;
 		this.orderDetails = orderDetails;
+	}
+
+	@Override
+	public boolean equals(@Nullable Object obj) {
+		if (obj == null || !(obj instanceof Order)) {
+			return false;
+		}
+		Order order = (Order) obj;
+		return getOrder_id() == order.getOrder_id();
 	}
 
 	public int getOrder_id() {

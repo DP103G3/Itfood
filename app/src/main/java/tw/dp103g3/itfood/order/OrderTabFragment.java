@@ -37,8 +37,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import tw.dp103g3.itfood.Common;
@@ -57,7 +59,6 @@ import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
  */
 public class OrderTabFragment extends Fragment {
     private static final String TAG = "TAG_OrderTabFragment";
-
     private static final String ARG_COUNT = "param1";
     private int counter;
     public static final int UNCONFIRMED = 0;
@@ -76,20 +77,15 @@ public class OrderTabFragment extends Fragment {
     private List<Order> orders;
     private ConstraintLayout layoutEmpty;
     private SharedPreferences pref;
-    private ProgressBar progressBar;
-    private ArrayList<Integer> order_states;
-    private ArrayList<Order> sortedOrders;
+//    private ProgressBar progressBar;
+    private Set<Integer> order_states;
+    private List<Order> sortedOrders;
 
-
-
-    public OrderTabFragment() {
-        // Required empty public constructor
-    }
-
-    public static OrderTabFragment newInstance(int counter){
+    public static OrderTabFragment newInstance(int counter, List<Order> orders){
         OrderTabFragment orderTabFragment = new OrderTabFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COUNT, counter);
+        args.putString("orders", Common.GSON.toJson(orders));
         orderTabFragment.setArguments(args);
         return orderTabFragment;
     }
@@ -97,12 +93,22 @@ public class OrderTabFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        activity = getActivity();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_order_tab, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         if (getArguments() != null){
             counter = getArguments().getInt(ARG_COUNT);
         }
-        activity = getActivity();
-        order_states = new ArrayList<>();
-
+        order_states = new HashSet<>();
         if(order_states.isEmpty()) {
             if (counter == 0) {
                 order_states.add(0);
@@ -116,53 +122,43 @@ public class OrderTabFragment extends Fragment {
                 order_states.add(5);
             }
         }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_order_tab, container, false);
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        progressBar = view.findViewById(R.id.progressBar);
+//        progressBar = view.findViewById(R.id.progressBar);
         rvOrder = view.findViewById(R.id.rvOrder);
         counter = getArguments().getInt(ARG_COUNT);
         layoutEmpty = view.findViewById(R.id.layoutEmpty);
 
         pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = pref.getInt("mem_id", 0);
+        String ordersStr = getArguments().getString("orders");
+        Type listType = new TypeToken<List<Order>>(){}.getType();
+        orders = Common.GSON.fromJson(ordersStr, listType);
 
-        orders = new ArrayList<>();
+//        for (Integer state : order_states) {
+//            orders.addAll(getOrders(mem_id, state));
+//        }
 
-        for (Integer state : order_states) {
-            orders.addAll(getOrders(mem_id, state));
+        if(orders == null || !orders.isEmpty()){
+            layoutEmpty.setVisibility(GONE);
+//            progressBar.setVisibility(GONE);
         }
 
-        if(orders.isEmpty()){
-            layoutEmpty.setVisibility(View.VISIBLE);
-            progressBar.setVisibility(GONE);
-        }
-
-        sortedOrders = orders.stream().sorted
-                (Comparator.comparing((Order order) -> order.getOrder_time().getTime()).reversed())
-                .collect(Collectors.toCollection(ArrayList::new));
+        sortedOrders = orders.stream().filter(order -> order_states.stream()
+                .anyMatch(v -> v == order.getOrder_state()))
+                .sorted(Comparator.comparing((Order order) -> order.getOrder_time().getTime()).reversed())
+                .collect(Collectors.toList());
 
         rvOrder.setLayoutManager(new LinearLayoutManager(activity));
         rvOrder.setPadding(0, 0, 0, Common.getNavigationBarHeight(activity));
-
+        ShowOrders(sortedOrders);
     }
 
-    @Override
-    public void onResume() {
-        Log.d(TAG, "resume" + counter);
-        rvOrder.setLayoutManager(new LinearLayoutManager(activity));
-        progressBar.setVisibility(View.VISIBLE);
-        rvOrder.setVisibility(GONE);
-        orders = new ArrayList<>();
+//    @Override
+//    public void onResume() {
+//        Log.d(TAG, "resume" + counter);
+//        rvOrder.setLayoutManager(new LinearLayoutManager(activity));
+//        progressBar.setVisibility(View.VISIBLE);
+//        rvOrder.setVisibility(GONE);
+//        orders = new ArrayList<>();
 //        ArrayList<Integer> order_states = new ArrayList<>();
 //
 //        if (counter == 0){
@@ -180,25 +176,26 @@ public class OrderTabFragment extends Fragment {
 //            order_states.add(5);
 //        }
 
-        for (Integer state : order_states) {
-            orders.addAll(getOrders(mem_id, state));
-        }
-        sortedOrders = orders.stream().sorted
-                (Comparator.comparing((Order order) -> order.getOrder_time().getTime()).reversed())
-                .collect(Collectors.toCollection(ArrayList::new));
-
-        if(sortedOrders.isEmpty()){
-            layoutEmpty.setVisibility(View.VISIBLE);
-            progressBar.setVisibility(GONE);
-        }
-        ShowOrders(sortedOrders);
-        if (!sortedOrders.isEmpty()){
-            layoutEmpty.setVisibility(GONE);
-        } else {
-            layoutEmpty.setVisibility(View.VISIBLE);
-        }
-        super.onResume();
-    }
+//        for (Integer state : order_states) {
+//            orders.addAll(getOrders(mem_id, state));
+//        }
+//        sortedOrders = orders.stream().filter(order -> order_states.stream()
+//                .anyMatch(v -> v == order.getOrder_state()))
+//                .sorted(Comparator.comparing((Order order) -> order.getOrder_time().getTime()).reversed())
+//                .collect(Collectors.toList());
+//
+//        if(sortedOrders.isEmpty()){
+//            layoutEmpty.setVisibility(View.VISIBLE);
+//            progressBar.setVisibility(GONE);
+//        }
+//        ShowOrders(sortedOrders);
+//        if (!sortedOrders.isEmpty()){
+//            layoutEmpty.setVisibility(GONE);
+//        } else {
+//            layoutEmpty.setVisibility(View.VISIBLE);
+//        }
+//        super.onResume();
+//    }
 
     @Nullable
     @Override
@@ -226,30 +223,30 @@ public class OrderTabFragment extends Fragment {
         return null;
     }
 
-    private List<Order> getOrders(int mem_id, int state){
-        List <Order> orders = new ArrayList<>();
-        if(Common.networkConnected(activity)){
-            String url = Url.URL + "/OrderServlet";
-            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("action", "findByCase");
-            jsonObject.addProperty("type", "member");
-            jsonObject.addProperty("id" , mem_id);
-            jsonObject.addProperty("state", state);
-            String jsonOut = jsonObject.toString();
-            getOrderTask = new CommonTask(url, jsonOut);
-            try {
-                String jsonIn = getOrderTask.execute().get();
-                Type listType = new TypeToken<List<Order>>(){}.getType();
-                orders = gson.fromJson(jsonIn, listType);
-            } catch (Exception e){
-                Log.e(TAG, e.toString());
-            }
-        } else{
-            Common.showToast(activity, R.string.textNoNetwork);
-        }
-        return orders;
-    }
+//    private List<Order> getOrders(int mem_id, int state){
+//        List <Order> orders = new ArrayList<>();
+//        if(Common.networkConnected(activity)){
+//            String url = Url.URL + "/OrderServlet";
+//            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+//            JsonObject jsonObject = new JsonObject();
+//            jsonObject.addProperty("action", "findByCase");
+//            jsonObject.addProperty("type", "member");
+//            jsonObject.addProperty("id" , mem_id);
+//            jsonObject.addProperty("state", state);
+//            String jsonOut = jsonObject.toString();
+//            getOrderTask = new CommonTask(url, jsonOut);
+//            try {
+//                String jsonIn = getOrderTask.execute().get();
+//                Type listType = new TypeToken<List<Order>>(){}.getType();
+//                orders = gson.fromJson(jsonIn, listType);
+//            } catch (Exception e){
+//                Log.e(TAG, e.toString());
+//            }
+//        } else{
+//            Common.showToast(activity, R.string.textNoNetwork);
+//        }
+//        return orders;
+//    }
 
 //    private List<OrderDetail> getOrderDetails(int order_id){
 //        List <OrderDetail> orderDetails = new ArrayList<>();
@@ -274,27 +271,27 @@ public class OrderTabFragment extends Fragment {
 //        return orderDetails;
 //    }
 
-    private Dish getDish (int dish_id){
-        Dish dish = null;
-        if (Common.networkConnected(activity)){
-            String url = Url.URL + "/DishServlet";
-            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("action", "getDishById");
-            jsonObject.addProperty("id", dish_id);
-            String jsonOut = jsonObject.toString();
-            getDishTask = new CommonTask(url, jsonOut);
-            try{
-                String jsonIn = getDishTask.execute().get();
-                dish = gson.fromJson(jsonIn, Dish.class);
-            } catch (Exception e){
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Common.showToast(activity, R.string.textNoNetwork);
-        }
-        return dish;
-    }
+//    private Dish getDish (int dish_id){
+//        Dish dish = null;
+//        if (Common.networkConnected(activity)){
+//            String url = Url.URL + "/DishServlet";
+//            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+//            JsonObject jsonObject = new JsonObject();
+//            jsonObject.addProperty("action", "getDishById");
+//            jsonObject.addProperty("id", dish_id);
+//            String jsonOut = jsonObject.toString();
+//            getDishTask = new CommonTask(url, jsonOut);
+//            try{
+//                String jsonIn = getDishTask.execute().get();
+//                dish = gson.fromJson(jsonIn, Dish.class);
+//            } catch (Exception e){
+//                Log.e(TAG, e.toString());
+//            }
+//        } else {
+//            Common.showToast(activity, R.string.textNoNetwork);
+//        }
+//        return dish;
+//    }
 
 //    private Shop getShop (int shop_id){
 //        Shop shop = null;
@@ -417,7 +414,7 @@ public class OrderTabFragment extends Fragment {
                         public void onClick(View v) {
                             new AlertDialog.Builder(activity)
                                     .setTitle(R.string.alertDialogTitleCancelOrder)
-                                    .setPositiveButton("我確定", new DialogInterface.OnClickListener() {
+                                    .setPositiveButton("確定", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             String url = Url.URL + "/OrderServlet";
@@ -437,9 +434,9 @@ public class OrderTabFragment extends Fragment {
                                                 Common.showToast(getActivity(), R.string.cancelOrderFail);
                                             } else{
                                                 Common.showToast(getActivity(), R.string.cancelOrderSuccess);
-                                                orders.clear();
-                                                orders = getOrders(mem_id, counter);
-                                                setOrders(orders);
+//                                                orders.clear();
+                                                OrderTabFragment.this.orders.remove(order);
+                                                setOrders(OrderTabFragment.this.orders);
                                                 rvOrder.getAdapter().notifyDataSetChanged();
                                             }
                                         }
@@ -506,7 +503,7 @@ public class OrderTabFragment extends Fragment {
 
             holder.rvOrderDetail.setLayoutManager(new LinearLayoutManager(activity));
             holder.rvOrderDetail.setAdapter(new OrderDetailAdapter(activity, orderDetails));
-            progressBar.setVisibility(GONE);
+//            progressBar.setVisibility(GONE);
         }
 
 

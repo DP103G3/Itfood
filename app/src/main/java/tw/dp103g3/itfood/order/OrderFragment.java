@@ -53,6 +53,7 @@ public class OrderFragment extends Fragment {
     private final static int NORMAL = 2;
     private int mem_id, status;
     private NavController navController;
+    private List<Order> orders;
 
 
     @Override
@@ -60,12 +61,12 @@ public class OrderFragment extends Fragment {
         activity = getActivity();
         SharedPreferences pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = pref.getInt("mem_id", 0);
-
+        orders = getOrders(mem_id);
         if (mem_id == 0) {
             status = NOT_LOGGED_IN;
         } else {
-            member = getMember(mem_id);
-            if (getOrders(mem_id) == null || getOrders(mem_id).isEmpty()) {
+//            member = getMember(mem_id);
+            if (orders == null || orders.isEmpty()) {
                 status = NO_ITEM;
             } else {
                 status = NORMAL;
@@ -112,7 +113,7 @@ public class OrderFragment extends Fragment {
                 break;
             }
             case NORMAL: {
-                member = getMember(mem_id);
+//                member = getMember(mem_id);
                 TabLayout tabLayout = view.findViewById(R.id.tabLayOut);
                 ViewPager2 viewPager2 = view.findViewById(R.id.viewPager);
 
@@ -149,27 +150,27 @@ public class OrderFragment extends Fragment {
     }
 
 
-    private Member getMember(int mem_id) {
-        Member member = null;
-        if (Common.networkConnected(activity)) {
-            String url = Url.URL + "/MemberServlet";
-            JsonObject jsonObject = new JsonObject();
-            Gson gson = new GsonBuilder().setDateFormat(Common.DATE_FORMAT).create();
-            jsonObject.addProperty("action", "findById");
-            jsonObject.addProperty("mem_id", mem_id);
-            String jsonOut = jsonObject.toString();
-            CommonTask getMemberTask = new CommonTask(url, jsonOut);
-            try {
-                String jsonIn = getMemberTask.execute().get();
-                member = gson.fromJson(jsonIn, Member.class);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            Common.showToast(activity, R.string.textNoNetwork);
-        }
-        return member;
-    }
+//    private Member getMember(int mem_id) {
+//        Member member = null;
+//        if (Common.networkConnected(activity)) {
+//            String url = Url.URL + "/MemberServlet";
+//            JsonObject jsonObject = new JsonObject();
+//            Gson gson = new GsonBuilder().setDateFormat(Common.DATE_FORMAT).create();
+//            jsonObject.addProperty("action", "findById");
+//            jsonObject.addProperty("mem_id", mem_id);
+//            String jsonOut = jsonObject.toString();
+//            CommonTask getMemberTask = new CommonTask(url, jsonOut);
+//            try {
+//                String jsonIn = getMemberTask.execute().get();
+//                member = gson.fromJson(jsonIn, Member.class);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        } else {
+//            Common.showToast(activity, R.string.textNoNetwork);
+//        }
+//        return member;
+//    }
 
     public class ViewPagerAdapter extends FragmentStateAdapter {
         public static final int TABS_ITEM_SIZE = 3;
@@ -181,7 +182,7 @@ public class OrderFragment extends Fragment {
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            return OrderTabFragment.newInstance(position);
+            return OrderTabFragment.newInstance(position, orders);
         }
 
         @Override
