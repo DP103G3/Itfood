@@ -182,7 +182,7 @@ public class OrderFragment extends Fragment {
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            return OrderTabFragment.newInstance(position, orders);
+            return new OrderTabFragment(position, orders);
         }
 
         @Override

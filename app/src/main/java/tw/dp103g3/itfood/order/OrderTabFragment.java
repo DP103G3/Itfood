@@ -6,9 +6,13 @@ import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,24 +21,13 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
@@ -52,14 +45,13 @@ import tw.dp103g3.itfood.task.CommonTask;
 
 import static android.view.View.GONE;
 import static tw.dp103g3.itfood.Common.DATE_FORMAT;
-import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class OrderTabFragment extends Fragment {
     private static final String TAG = "TAG_OrderTabFragment";
-    private static final String ARG_COUNT = "param1";
+//    private static final String ARG_COUNT = "param1";
     private int counter;
     public static final int UNCONFIRMED = 0;
     public static final int MAKING = 1;
@@ -71,23 +63,24 @@ public class OrderTabFragment extends Fragment {
     public static final int DELIVERY = 1;
 
     private RecyclerView rvOrder;
-    private int mem_id;
+//    private int mem_id;
     private Activity activity;
-    private CommonTask getOrderTask, getShopTask, getOrderDetailTask, getDishTask;
+//    private CommonTask getOrderTask, getShopTask, getOrderDetailTask, getDishTask;
     private List<Order> orders;
     private ConstraintLayout layoutEmpty;
-    private SharedPreferences pref;
+//    private SharedPreferences pref;
 //    private ProgressBar progressBar;
     private Set<Integer> order_states;
     private List<Order> sortedOrders;
 
-    public static OrderTabFragment newInstance(int counter, List<Order> orders){
-        OrderTabFragment orderTabFragment = new OrderTabFragment();
-        Bundle args = new Bundle();
-        args.putInt(ARG_COUNT, counter);
-        args.putString("orders", Common.GSON.toJson(orders));
-        orderTabFragment.setArguments(args);
-        return orderTabFragment;
+    OrderTabFragment(int counter, List<Order> orders){
+//        OrderTabFragment orderTabFragment = new OrderTabFragment();
+//        Bundle args = new Bundle();
+//        args.putInt(ARG_COUNT, counter);
+//        args.putString("orders", Common.GSON.toJson(orders));
+//        orderTabFragment.setArguments(args);
+        this.counter = counter;
+        this.orders = orders;
     }
 
     @Override
@@ -105,9 +98,9 @@ public class OrderTabFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        if (getArguments() != null){
-            counter = getArguments().getInt(ARG_COUNT);
-        }
+//        if (getArguments() != null){
+//            counter = getArguments().getInt(ARG_COUNT);
+//        }
         order_states = new HashSet<>();
         if(order_states.isEmpty()) {
             if (counter == 0) {
@@ -124,14 +117,14 @@ public class OrderTabFragment extends Fragment {
         }
 //        progressBar = view.findViewById(R.id.progressBar);
         rvOrder = view.findViewById(R.id.rvOrder);
-        counter = getArguments().getInt(ARG_COUNT);
+//        counter = getArguments().getInt(ARG_COUNT);
         layoutEmpty = view.findViewById(R.id.layoutEmpty);
 
-        pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
-        mem_id = pref.getInt("mem_id", 0);
-        String ordersStr = getArguments().getString("orders");
-        Type listType = new TypeToken<List<Order>>(){}.getType();
-        orders = Common.GSON.fromJson(ordersStr, listType);
+//        pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
+//        mem_id = pref.getInt("mem_id", 0);
+//        String ordersStr = getArguments().getString("orders");
+//        Type listType = new TypeToken<List<Order>>(){}.getType();
+//        orders = Common.GSON.fromJson(ordersStr, listType);
 
 //        for (Integer state : order_states) {
 //            orders.addAll(getOrders(mem_id, state));
@@ -317,8 +310,7 @@ public class OrderTabFragment extends Fragment {
 
     private void ShowOrders(List<Order> orders) {
         if (orders == null || orders.isEmpty()) {
-            if (Common.networkConnected(activity)) {
-            } else {
+            if (!Common.networkConnected(activity)) {
                 Common.showToast(activity, R.string.textNoNetwork);
             }
         }
@@ -382,7 +374,7 @@ public class OrderTabFragment extends Fragment {
             final Order order = orders.get(position);
             Shop shop = order.getShop();
             List<OrderDetail> orderDetails = order.getOrderDetails();
-            Log.d(TAG, "orderdetail1");
+            Log.d(TAG, "orderDetail1");
             Date order_time = order.getOrder_time();
             Date order_ideal = order.getOrder_ideal();
             Date order_delivery = order.getOrder_delivery();
@@ -392,7 +384,7 @@ public class OrderTabFragment extends Fragment {
 
             String order_state_text = "";
             String order_type_text = "";
-            String order_ttprice_text = "";
+            String order_ttprice_text;
             String order_time_text = "";
 
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
@@ -409,46 +401,34 @@ public class OrderTabFragment extends Fragment {
                     order_state_text = "已付款，等待接單";
                     order_time_text = "下單時間 : " + simpleDateFormat.format(order_time);
                     holder.btAction.setText("取消訂單");
-                    holder.btAction.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            new AlertDialog.Builder(activity)
-                                    .setTitle(R.string.alertDialogTitleCancelOrder)
-                                    .setPositiveButton("確定", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            String url = Url.URL + "/OrderServlet";
-                                            JsonObject jsonObject = new JsonObject();
-                                            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-                                            jsonObject.addProperty("action", "orderUpdate");
-                                            order.setOrder_state(CANCEL);
-                                            jsonObject.addProperty("order", gson.toJson(order));
-                                            int count = 0;
-                                            try {
-                                                String result = new CommonTask(url, jsonObject.toString()).execute().get();
-                                                count = Integer.valueOf(result);
-                                            } catch (Exception e){
-                                                Log.e(TAG, e.toString());
-                                            }
-                                            if (count == 0){
-                                                Common.showToast(getActivity(), R.string.cancelOrderFail);
-                                            } else{
-                                                Common.showToast(getActivity(), R.string.cancelOrderSuccess);
-//                                                orders.clear();
-                                                OrderTabFragment.this.orders.remove(order);
-                                                setOrders(OrderTabFragment.this.orders);
-                                                rvOrder.getAdapter().notifyDataSetChanged();
-                                            }
-                                        }
-                                    }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.cancel();
+                    holder.btAction.setOnClickListener(v -> new AlertDialog.Builder(activity)
+                            .setTitle(R.string.alertDialogTitleCancelOrder)
+                            .setPositiveButton("確定", (dialog, which) -> {
+                                String url = Url.URL + "/OrderServlet";
+                                JsonObject jsonObject = new JsonObject();
+                                Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+                                jsonObject.addProperty("action", "orderUpdate");
+                                order.setOrder_state(CANCEL);
+                                jsonObject.addProperty("order", gson.toJson(order));
+                                int count = 0;
+                                try {
+                                    String result = new CommonTask(url, jsonObject.toString()).execute().get();
+                                    count = Integer.valueOf(result);
+                                } catch (Exception e){
+                                    Log.e(TAG, e.toString());
                                 }
-                            }).setMessage(R.string.alertDialogMessageCancelOrder)
-                                    .show();
-                        }
-                    });
+                                if (count == 0){
+                                    Common.showToast(getActivity(), R.string.cancelOrderFail);
+                                } else{
+                                    Common.showToast(getActivity(), R.string.cancelOrderSuccess);
+//                                                orders.clear();
+                                    OrderTabFragment.this.orders.remove(order);
+                                    setOrders(OrderTabFragment.this.orders);
+                                    rvOrder.getAdapter().notifyDataSetChanged();
+                                }
+                            }).setNegativeButton("取消", (dialog, which) ->
+                                    dialog.cancel()).setMessage(R.string.alertDialogMessageCancelOrder)
+                            .show());
                     break;
                 }
                 case MAKING :{
@@ -518,9 +498,9 @@ public class OrderTabFragment extends Fragment {
             this.orderDetails = orderDetails;
         }
 
-        void setOrderDetails(List<OrderDetail> orderDetails){
-            this.orderDetails = orderDetails;
-        }
+//        void setOrderDetails(List<OrderDetail> orderDetails){
+//            this.orderDetails = orderDetails;
+//        }
 
         private class MyViewHolder extends RecyclerView.ViewHolder{
             TextView tvDishName, tvDishInfo, tvDishPrice, tvDishCount;
