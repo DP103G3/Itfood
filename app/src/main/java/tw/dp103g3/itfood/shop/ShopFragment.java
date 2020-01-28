@@ -40,7 +40,6 @@ import com.google.gson.reflect.TypeToken;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -372,5 +371,34 @@ public class ShopFragment extends Fragment {
         PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(getResources().getColor(R.color.colorTextOnP, activity.getTheme()), PorterDuff.Mode.SRC_ATOP);
         ivBack.getDrawable().setColorFilter(colorFilter);
         ivCart.getDrawable().setColorFilter(colorFilter);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_up);
+        animator.setTarget(bottomNavigationView);
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                bottomNavigationView.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        animator.start();
     }
 }

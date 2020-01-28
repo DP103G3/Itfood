@@ -2,12 +2,6 @@ package tw.dp103g3.itfood.comment;
 
 import android.app.Activity;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +11,11 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RatingBar;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -28,6 +27,8 @@ import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
+
+import static tw.dp103g3.itfood.Common.DATE_FORMAT;
 
 
 public class CommentFragment extends Fragment {
@@ -94,7 +95,6 @@ public class CommentFragment extends Fragment {
             int mem_id = member.getMemId();
             int cmt_state = 1;
 
-
             if (Common.networkConnected(activity)) {
                 String URL = Url.URL + "/CommentServlet";
                 int cmt_id = 0;
@@ -104,6 +104,8 @@ public class CommentFragment extends Fragment {
 
                 comment = new Comment(cmt_score, cmt_detail, shop_id, mem_id, cmt_state);
 
+                Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+
                 JsonObject jsonObject = new JsonObject();
                 if (bundle.getString("action").equals("insert")) {
                     jsonObject.addProperty("action", "commentInsert");
@@ -111,27 +113,6 @@ public class CommentFragment extends Fragment {
                     jsonObject.addProperty("action", "commentUpdate");
                     comment.setCmt_id(cmt_id);
                 }
-
-                jsonObject.addProperty("comment", new Gson().toJson(comment));
-
-                int count = 0;
-                try {
-                    String result = new CommonTask(URL, jsonObject.toString()).execute().get();
-                    count = Integer.valueOf(result);
-                } catch (Exception e){
-                    Log.e(TAG, e.toString());
-                }
-                if (count == 0){
-                    Common.showToast(getActivity(), R.string.textPostCommentFail);
-                } else{
-                    Common.showToast(getActivity(), R.string.textPostCommentSuccess);
-                }
-
-            } else {
-                Common.showToast(activity, R.string.textNoNetwork);
-            }
-            if (Common.networkConnected(activity)) {
-                String URL = Url.URL + "/ShopServlet";
                 int ttScore = shop.getTtscore();
                 int ttRate = shop.getTtrate();
                 if (bundle.getString("action").equals("insert")) {
@@ -143,9 +124,9 @@ public class CommentFragment extends Fragment {
 
                 shop.setTtscore(ttScore);
                 shop.setTtrate(ttRate);
-                JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("action", "update");
-                jsonObject.addProperty("shop", new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create().toJson(shop));
+
+                jsonObject.addProperty("comment", gson.toJson(comment));
+                jsonObject.addProperty("shop", gson.toJson(shop));
 
                 int count = 0;
                 try {

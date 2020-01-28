@@ -2,10 +2,18 @@ package tw.dp103g3.itfood.shop;
 
 
 import android.animation.Animator;
-import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,17 +22,6 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -50,7 +47,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import tw.dp103g3.itfood.Common;
@@ -100,30 +96,6 @@ public class MapFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         navController = Navigation.findNavController(view);
         bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
-        animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_up);
-        animator.setTarget(bottomNavigationView);
-        animator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                bottomNavigationView.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-        animator.start();
         member = new Member();
         member.setMemId(1);
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
@@ -272,7 +244,7 @@ public class MapFragment extends Fragment {
             }
             shops = new ArrayList<>();
         }
-        Comparator<Shop> cmp = Comparator.<Shop, Double>comparing(v ->
+        Comparator<Shop> cmp = Comparator.comparing(v ->
                 Common.Distance(v.getLatitude(), v.getLongitude(),
                         selectedAddress.getLatitude(), selectedAddress.getLongitude()));
         List<Shop> sortedShops = shops.stream().sorted(cmp)

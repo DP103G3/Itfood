@@ -141,6 +141,13 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_shoppingCartFragment_to_addressSelectFragment"
+            app:destination="@id/addressSelectFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
     <fragment
         android:id="@+id/personalInfoFragment"
@@ -157,4 +164,49 @@
         android:name="tw.dp103g3.itfood.LocationFragment"
         android:label="fragment_location"
         tools:layout="@layout/fragment_location" />
+    <fragment
+        android:id="@+id/addressSelectFragment"
+        android:name="tw.dp103g3.itfood.address.AddressSelectFragment"
+        android:label="fragment_address_select"
+        tools:layout="@layout/fragment_address_select">
+        <action
+            android:id="@+id/action_addressSelectFragment_to_shoppingCartFragment"
+            app:destination="@id/shoppingCartFragment"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@+id/addressSelectFragment" />
+        <action
+            android:id="@+id/action_addressSelectFragment_to_addAddressFragment"
+            app:destination="@id/addAddressFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/addAddressFragment"
+        android:name="tw.dp103g3.itfood.address.AddAddressFragment"
+        android:label="fragment_add_address"
+        tools:layout="@layout/fragment_add_address">
+        <action
+            android:id="@+id/action_addAddressFragment_to_addressCitiesFragment"
+            app:destination="@id/addressCitiesFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_addAddressFragment_to_addressDistrictsFragment"
+            app:destination="@id/addressDistrictsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addressCitiesFragment"
+        android:name="tw.dp103g3.itfood.address.AddressCitiesFragment"
+        android:label="fragment_address_cities"
+        tools:layout="@layout/fragment_address_cities" />
+    <fragment
+        android:id="@+id/addressDistrictsFragment"
+        android:name="tw.dp103g3.itfood.address.AddressDistrictsFragment"
+        android:label="fragment_address_districts"
+        tools:layout="@layout/fragment_address_districts" />
 </navigation>

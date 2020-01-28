@@ -2,7 +2,6 @@ package tw.dp103g3.itfood.shop;
 
 
 import android.animation.Animator;
-import android.animation.AnimatorInflater;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -91,30 +90,6 @@ public class MainFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
-        animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_up);
-        animator.setTarget(bottomNavigationView);
-        animator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                bottomNavigationView.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-        animator.start();
         memId = preferences.getInt("mem_id", 0);
         this.view = view;
         ivCart = view.findViewById(R.id.ivCart);
@@ -266,7 +241,7 @@ public class MainFragment extends Fragment {
         setAdapter(rvNewShop, newShop, R.layout.small_shop_item_view);
         setAdapter(rvChineseShop, typeFilter("中式", showShops), R.layout.small_shop_item_view);
         setAdapter(rvAmericanShop, typeFilter("美式料理", showShops), R.layout.small_shop_item_view);
-        Comparator<Shop> cmp = Comparator.<Shop, Double>comparing(v ->
+        Comparator<Shop> cmp = Comparator.comparing(v ->
                 Common.Distance(v.getLatitude(), v.getLongitude(),
                         selectedAddress.getLatitude(), selectedAddress.getLongitude()));
         List<Shop> sortedShops = showShops.stream().sorted(cmp)

@@ -9,7 +9,7 @@ public class Address implements Serializable {
 	private int mem_id;
 	private String name;
 	private String info;
-	private byte state;
+    private int state;
 	private double latitude;
 	private double longitude;
 	
@@ -36,7 +36,7 @@ public class Address implements Serializable {
 		return address.getLatitude() == this.getLatitude() && address.getLongitude() == this.getLongitude();
 	}
 
-	public Address(int id, int mem_id, String name, String info, byte state, double latitude, double longitude) {
+    public Address(int id, int mem_id, String name, String info, int state, double latitude, double longitude) {
 		this.id = id;
 		this.mem_id = mem_id;
 		this.name = name;
@@ -46,7 +46,17 @@ public class Address implements Serializable {
 		this.longitude = longitude;
 	}
 
+    public Address(int mem_id, String name, String info, int state, double latitude, double longitude) {
+        this.mem_id = mem_id;
+        this.name = name;
+        this.info = info;
+        this.state = state;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
 	public Address(int id, String name, String info, double latitude, double longitude) {
+        super();
 		this.id = id;
 		this.name = name;
 		this.info = info;
@@ -90,11 +100,11 @@ public class Address implements Serializable {
 		this.info = info;
 	}
 
-	public byte getState() {
+    public int getState() {
 		return state;
 	}
 
-	public void setState(byte state) {
+    public void setState(int state) {
 		this.state = state;
 	}
 

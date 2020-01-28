@@ -1,7 +1,10 @@
 package tw.dp103g3.itfood.main;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -12,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
@@ -40,6 +44,7 @@ import java.util.HashMap;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
+import tw.dp103g3.itfood.SharedViewModel;
 import tw.dp103g3.itfood.address.Address;
 import tw.dp103g3.itfood.shop.Shop;
 
@@ -50,13 +55,18 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
-    private Location lastLocation;
+    private static Location lastLocation;
     private FusedLocationProviderClient fusedLocationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Activity activity = this;
+        SharedPreferences memberPref = activity.getSharedPreferences(Common.PREFERENCES_MEMBER, Context.MODE_PRIVATE);
+
+        SharedViewModel model = new ViewModelProvider(this).get(SharedViewModel.class);
+
         bottomNavigationView = findViewById(R.id.bottomNavigation);
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupWithNavController(bottomNavigationView, navController);
@@ -152,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public Location getLocation() {
+    public static Location getLocation() {
         return lastLocation;
     }
 

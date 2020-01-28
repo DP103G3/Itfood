@@ -2,7 +2,6 @@ package tw.dp103g3.itfood.comment;
 
 
 import android.animation.Animator;
-import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -10,16 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,19 +21,26 @@ import android.widget.PopupMenu;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
-
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import tw.dp103g3.itfood.Common;
@@ -55,7 +51,6 @@ import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
-import static android.provider.Settings.System.DATE_FORMAT;
 import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 
 
@@ -161,6 +156,12 @@ public class ShopCommentFragment extends Fragment {
                         //將會員的電子郵件由“＠”分開為兩部分，取前面顯示
                         String memberEmail = splitEmail[0];
 
+                        Log.d(TAG, "COMMENT SCORE : " + comment.getCmt_score());
+
+                        ratingBar.setIsIndicator(true);
+                        ratingBar.setVisibility(View.VISIBLE);
+                        ratingBar.setNumStars(5);
+                        ratingBar.setStepSize(1);
                         ratingBar.setRating(comment.getCmt_score());
                         tvUsername.setText(memberEmail);
                         tvCommentDetail.setText(comment.getCmt_detail());
@@ -212,6 +213,7 @@ public class ShopCommentFragment extends Fragment {
                 index = comments.indexOf(comment);
             }
         }
+        ShowComments(comments);
         if (index != -1) {
             comments.remove(index);
             tvCommentsTotal.setText(String.valueOf(comments.size() + 1 ));
@@ -219,7 +221,7 @@ public class ShopCommentFragment extends Fragment {
             tvCommentsTotal.setText(String.valueOf(comments.size()));
         }
 
-        ShowComments(comments);
+
 
         ivBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
 
@@ -323,21 +325,20 @@ public class ShopCommentFragment extends Fragment {
                         Comment comment = getComment(cmt_id);
                         if (comment.getCmt_state() != 0) {
                             comment.setCmt_state(0);
+                            int originalTtrate = shop.getTtrate();
+                            int originalTtscroe = shop.getTtscore();
                             shop.setTtrate(shop.getTtrate() - 1);
                             shop.setTtscore(shop.getTtscore() - comment.getCmt_score());
                             JsonObject jsonObject = new JsonObject();
                             Gson gson = new GsonBuilder().setDateFormat(Common.DATE_FORMAT).create();
                             String jsonOut = gson.toJson(comment, Comment.class);
+                            String shopJson = gson.toJson(shop, Shop.class);
 
                             jsonObject.addProperty("action", "commentUpdate");
                             jsonObject.addProperty("comment", jsonOut);
+                            jsonObject.addProperty("shop", shopJson);
 
                             CommonTask commonTask = new CommonTask(Url.URL + "/CommentServlet", jsonObject.toString());
-                            // TODO 刪除評論時 Shop 的 ttrate, ttscore 也要跟著改變,
-                            //  資料庫不能使用Auto-Commit, 在確定ShopServlet, CommentServlet都輸入成功
-                            //  才commit, 要不然就revert。
-
-
 
                             int count = 0;
                             try {
@@ -347,6 +348,8 @@ public class ShopCommentFragment extends Fragment {
                                 System.out.println(TAG + e.toString());
                             }
                             if (count == 0) {
+                                shop.setTtscore(originalTtscroe);
+                                shop.setTtrate(originalTtrate);
                                 Common.showToast(activity, "delete failed");
                             } else {
                                 Common.showToast(activity, "message deleted");
@@ -382,8 +385,6 @@ public class ShopCommentFragment extends Fragment {
         });
         popupMenu.setOnDismissListener(menu -> {
         });
-
-
     }
 
     private void ShowComments(List<Comment> comments) {

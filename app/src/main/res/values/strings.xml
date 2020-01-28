@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">Itfood</string>
     <string name="textLogin">Login</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="textOpen">Open</string>
     <string name="textClose">Close</string>
@@ -60,7 +58,7 @@
     <string name="alertDialogTitleCancelOrder">取消訂單</string>
     <string name="cancelOrderFail">取消訂單失敗，請稍後再試。</string>
     <string name="cancelOrderSuccess">取消訂單成功。</string>
-    <string name="alertDialogMessageCancelOrder" >你確定要取消此訂單？\n惡意棄單可能會被店家檢舉。</string>
+    <string name="alertDialogMessageCancelOrder">你確定要取消此訂單？\n惡意棄單可能會被店家檢舉。</string>
     <string name="orderType">送餐方式</string>
     <string name="textPayment">Payment</string>
     <string name="textSendLocation">Send Location</string>
@@ -68,5 +66,16 @@
     <string name="textLogout">logout</string>
     <string name="CheckOut">結帳</string>
     <string name="unfinished">未完成</string>
+    <string name="Confrim">確定</string>
+    <string name="addAddress">新增送餐地址</string>
     <string name="textAmerican">American Restaurant</string>
+    <string name="addressName">地址代稱 (ex. 我家)</string>
+    <string name="editAddressName">設定 地址代稱</string>
+    <string name="city">城市</string>
+    <string name="adminDistrict">行政區</string>
+    <string name="editCity">設定 城市</string>
+    <string name="editAdminDistrict">設定 行政區</string>
+    <string name="addressDetail">詳細地址</string>
+    <string name="addressDetailCaption">道路或街名，巷弄號</string>
+    <string name="editAddressDetail">設定詳細地址</string>
 </resources>
