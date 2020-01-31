@@ -46,10 +46,22 @@ public class OrderFragment extends Fragment {
     private final static int NOT_LOGGED_IN = 0;
     private final static int NO_ITEM = 1;
     private final static int NORMAL = 2;
-    private int mem_id, status;
+    private static int mem_id;
+    private int status;
     private NavController navController;
-    private List<Order> orders;
+    private static List<Order> orders;
 
+    static void setOrders(List<Order> orders) {
+        OrderFragment.orders = orders;
+    }
+
+    static List<Order> getOrders() {
+        return orders;
+    }
+
+    static int getMem_id() {
+        return mem_id;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -166,7 +178,7 @@ public class OrderFragment extends Fragment {
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            return new OrderTabFragment(position, orders);
+            return new OrderTabFragment(position);
         }
 
         @Override
