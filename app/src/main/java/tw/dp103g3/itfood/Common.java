@@ -5,8 +5,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -32,28 +30,22 @@ public class Common {
     public static final String PREFERENCES_CART = "cart";
     public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final int LOGIN_FALSE = 0;
-    public static final Gson GSON = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+    public static final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
     public static boolean networkConnected(Activity activity) {
         ConnectivityManager connectivityManager =
                 (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (connectivityManager == null) {
-                return false;
-            }
-            Network network = connectivityManager.getActiveNetwork();
-            NetworkCapabilities actNetWork =
-                    connectivityManager.getNetworkCapabilities(network);
-            if (actNetWork != null) {
-                return actNetWork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                        actNetWork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR);
-            } else {
-                return false;
-            }
+        if (connectivityManager == null) {
+            return false;
+        }
+        Network network = connectivityManager.getActiveNetwork();
+        NetworkCapabilities actNetWork =
+                connectivityManager.getNetworkCapabilities(network);
+        if (actNetWork != null) {
+            return actNetWork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                    actNetWork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR);
         } else {
-            NetworkInfo networkInfo =
-                    connectivityManager != null ? connectivityManager.getActiveNetworkInfo() : null;
-            return networkInfo != null && networkInfo.isConnected();
+            return false;
         }
     }
 

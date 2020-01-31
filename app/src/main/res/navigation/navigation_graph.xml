@@ -25,13 +25,6 @@
             android:id="@+id/action_mainFragment_to_mapFragment"
             app:destination="@id/mapFragment" />
         <action
-            android:id="@+id/action_mainFragment_to_orderFragment"
-            app:destination="@id/orderFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-        <action
             android:id="@+id/action_mainFragment_to_shoppingCartFragment"
             app:destination="@id/shoppingCartFragment"
             app:enterAnim="@anim/fragment_open_enter"
@@ -80,6 +73,9 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_orderFragment_to_QRCodeFragment"
+            app:destination="@id/QRCodeFragment" />
     </fragment>
     <fragment
         android:id="@+id/personFragment"
@@ -209,4 +205,9 @@
         android:name="tw.dp103g3.itfood.address.AddressDistrictsFragment"
         android:label="fragment_address_districts"
         tools:layout="@layout/fragment_address_districts" />
+    <fragment
+        android:id="@+id/QRCodeFragment"
+        android:name="tw.dp103g3.itfood.QRCodeFragment"
+        android:label="fragment_qrcode"
+        tools:layout="@layout/fragment_qrcode" />
 </navigation>

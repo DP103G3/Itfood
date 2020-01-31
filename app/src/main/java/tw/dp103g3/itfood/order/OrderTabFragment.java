@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -53,31 +54,31 @@ public class OrderTabFragment extends Fragment {
     private static final String TAG = "TAG_OrderTabFragment";
 //    private static final String ARG_COUNT = "param1";
     private int counter;
-    public static final int UNCONFIRMED = 0;
-    public static final int MAKING = 1;
-    public static final int PICKUP = 2;
-    public static final int DELIVERING = 3;
-    public static final int DONE = 4;
-    public static final int CANCEL = 5;
-    public static final int SELFPICK = 0;
-    public static final int DELIVERY = 1;
+    private static final int UNCONFIRMED = 0;
+    private static final int MAKING = 1;
+    private static final int PICKUP = 2;
+    private static final int DELIVERING = 3;
+    private static final int DONE = 4;
+    private static final int CANCEL = 5;
+    private static final int SELFPICK = 0;
+    private static final int DELIVERY = 1;
 
     private RecyclerView rvOrder;
-//    private int mem_id;
     private Activity activity;
-//    private CommonTask getOrderTask, getShopTask, getOrderDetailTask, getDishTask;
     private List<Order> orders;
     private ConstraintLayout layoutEmpty;
-//    private SharedPreferences pref;
-//    private ProgressBar progressBar;
     private Set<Integer> order_states;
     private List<Order> sortedOrders;
+//    private int mem_id;
+//    private CommonTask getOrderTask, getShopTask, getOrderDetailTask, getDishTask;
+//    private SharedPreferences pref;
+//    private ProgressBar progressBar;
 
     OrderTabFragment(int counter, List<Order> orders){
 //        OrderTabFragment orderTabFragment = new OrderTabFragment();
 //        Bundle args = new Bundle();
 //        args.putInt(ARG_COUNT, counter);
-//        args.putString("orders", Common.GSON.toJson(orders));
+//        args.putString("orders", Common.gson.toJson(orders));
 //        orderTabFragment.setArguments(args);
         this.counter = counter;
         this.orders = orders;
@@ -340,6 +341,7 @@ public class OrderTabFragment extends Fragment {
 
 
         private class MyViewHolder extends RecyclerView.ViewHolder{
+            Order order;
             TextView tvShopName, tvType, tvTotal, tvState, tvTime;
             Button btAction;
             RecyclerView rvOrderDetail;
@@ -353,6 +355,28 @@ public class OrderTabFragment extends Fragment {
                 tvTime = itemView.findViewById(R.id.tvTime);
                 btAction = itemView.findViewById(R.id.btAction);
                 rvOrderDetail = itemView.findViewById(R.id.rvOrderDetail);
+                btAction.setOnClickListener(this::onBtAntionClick);
+            }
+
+            void setOrder(Order order) {
+                this.order = order;
+            }
+
+            void onBtAntionClick(View view) {
+                switch (order.getOrder_state()) {
+                    case UNCONFIRMED:
+                        break;
+                    case PICKUP: case DELIVERING:
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("order", order);
+                        Navigation.findNavController(view)
+                                .navigate(R.id.action_orderFragment_to_QRCodeFragment, bundle);
+                        break;
+                    case DONE:
+                        break;
+                    case CANCEL:
+                        break;
+                }
             }
         }
 
@@ -397,12 +421,13 @@ public class OrderTabFragment extends Fragment {
 
 
             switch (order_state){
-                case UNCONFIRMED :{
+                case UNCONFIRMED :
                     order_state_text = "已付款，等待接單";
                     order_time_text = "下單時間 : " + simpleDateFormat.format(order_time);
                     holder.btAction.setText("取消訂單");
                     holder.btAction.setOnClickListener(v -> new AlertDialog.Builder(activity)
                             .setTitle(R.string.alertDialogTitleCancelOrder)
+                            .setMessage(R.string.alertDialogMessageCancelOrder)
                             .setPositiveButton("確定", (dialog, which) -> {
                                 String url = Url.URL + "/OrderServlet";
                                 JsonObject jsonObject = new JsonObject();
@@ -426,48 +451,39 @@ public class OrderTabFragment extends Fragment {
                                     setOrders(OrderTabFragment.this.orders);
                                     rvOrder.getAdapter().notifyDataSetChanged();
                                 }
-                            }).setNegativeButton("取消", (dialog, which) ->
-                                    dialog.cancel()).setMessage(R.string.alertDialogMessageCancelOrder)
+                            }).setNegativeButton("取消", (dialog, which) -> dialog.cancel())
                             .show());
                     break;
-                }
-                case MAKING :{
+                case MAKING :
                     order_state_text = "製作中";
                     order_time_text = "下單時間 : " + simpleDateFormat.format(order_time);
-                    holder.btAction.setText("取消訂單");
+                    holder.btAction.setText("顯示QR CODE");
                     holder.btAction.setEnabled(false);
                     break;
-                }
-                case PICKUP :{
+                case PICKUP :
                     order_state_text = "製作完成，待取餐";
                     order_time_text = "下單時間 : " + simpleDateFormat.format(order_time);
                     holder.btAction.setText("顯示QR CODE");
                     break;
-                }
-                case DELIVERING :{
+                case DELIVERING :
                     order_state_text = "運送中";
                     if (order.getOrder_ideal() != null){
                         order_time_text = "預計送達時間 : " + simpleDateFormat.format(order_ideal);
                     }
                     holder.btAction.setText("顯示QR CODE");
                     break;
-                }
-                case DONE :{
+                case DONE :
                     order_state_text = "已取餐";
                     order_time_text = "訂單完成時間 : " + simpleDateFormat.format(order_delivery);
                     holder.btAction.setText("重新下單");
                     break;
-                }
-                case CANCEL :{
+                case CANCEL :
                     order_state_text = "已取消訂單";
                     simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault() );
                     order_time_text = "下單時間 : " + simpleDateFormat.format(order_time);
-                    holder.btAction.setText("檢舉訂單");
-
+                    holder.btAction.setText("重新下單");
                     break;
-                }
             }
-
 
             if (order_type == SELFPICK){
                 order_type_text = "自取";
@@ -483,6 +499,7 @@ public class OrderTabFragment extends Fragment {
 
             holder.rvOrderDetail.setLayoutManager(new LinearLayoutManager(activity));
             holder.rvOrderDetail.setAdapter(new OrderDetailAdapter(activity, orderDetails));
+            holder.setOrder(order);
 //            progressBar.setVisibility(GONE);
         }
 
@@ -531,7 +548,7 @@ public class OrderTabFragment extends Fragment {
         public void onBindViewHolder(@NonNull OrderDetailAdapter.MyViewHolder holder, int position) {
             final OrderDetail orderDetail = orderDetails.get(position);
             Dish dish = orderDetail.getDish();
-            int dishPrice = orderDetail.getOd_price()*orderDetail.getOd_count();
+            int dishPrice = orderDetail.getOd_price();
 
             DecimalFormatSymbols symbols = new DecimalFormatSymbols();
             symbols.setDecimalSeparator(',');
@@ -546,13 +563,8 @@ public class OrderTabFragment extends Fragment {
             } else {
                 holder.tvDishInfo.setText(dish.getInfo());
             }
-
             holder.tvDishName.setText(dish.getName());
-
-
         }
-
-
     }
 }
 

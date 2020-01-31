@@ -9,7 +9,7 @@ import java.util.List;
 import tw.dp103g3.itfood.shop.Shop;
 
 
-public class Order {
+public class Order implements Serializable {
 	private int order_id;
 	private int del_id;
 	private Shop shop;

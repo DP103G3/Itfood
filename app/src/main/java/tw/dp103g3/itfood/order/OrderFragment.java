@@ -1,28 +1,23 @@
 package tw.dp103g3.itfood.order;
 
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.Lifecycle;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
-import androidx.viewpager2.widget.ViewPager2;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -46,7 +41,7 @@ import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 
 public class OrderFragment extends Fragment {
     private final static String TAG = "TAG_OrderFragment";
-    private Activity activity;
+    private FragmentActivity activity;
     private Member member;
     private final static int NOT_LOGGED_IN = 0;
     private final static int NO_ITEM = 1;
@@ -80,7 +75,7 @@ public class OrderFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         if (status == NOT_LOGGED_IN) {
             return inflater.inflate(R.layout.fragment_order_not_logged_in, container, false);
@@ -95,21 +90,18 @@ public class OrderFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
         navController = Navigation.findNavController(view);
         switch (status) {
             case NOT_LOGGED_IN: {
                 Button btLogin = view.findViewById(R.id.btLogin);
-                btLogin.setOnClickListener(v -> {
-                    navController.navigate(R.id.action_orderFragment_to_loginFragment);
-                });
+                btLogin.setOnClickListener(v ->
+                        navController.navigate(R.id.action_orderFragment_to_loginFragment));
                 break;
             }
             case NO_ITEM: {
                 Button btBackToMain = view.findViewById(R.id.btBackToMain);
-                btBackToMain.setOnClickListener(v -> {
-                    navController.popBackStack(R.id.mainFragment, false);
-                });
+                btBackToMain.setOnClickListener(v ->
+                        navController.popBackStack(R.id.mainFragment, false));
                 break;
             }
             case NORMAL: {
@@ -117,7 +109,7 @@ public class OrderFragment extends Fragment {
                 TabLayout tabLayout = view.findViewById(R.id.tabLayOut);
                 ViewPager2 viewPager2 = view.findViewById(R.id.viewPager);
 
-                viewPager2.setAdapter(createCardAdapter());
+                viewPager2.setAdapter(new ViewPagerAdapter(activity));
 
                 new TabLayoutMediator(tabLayout, viewPager2, (tab, position) -> {
 
@@ -142,14 +134,6 @@ public class OrderFragment extends Fragment {
         }
     }
 
-
-
-    private ViewPagerAdapter createCardAdapter() {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(super.getActivity());
-        return adapter;
-    }
-
-
 //    private Member getMember(int mem_id) {
 //        Member member = null;
 //        if (Common.networkConnected(activity)) {
@@ -173,9 +157,9 @@ public class OrderFragment extends Fragment {
 //    }
 
     public class ViewPagerAdapter extends FragmentStateAdapter {
-        public static final int TABS_ITEM_SIZE = 3;
+        static final int TABS_ITEM_SIZE = 3;
 
-        public ViewPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
+        ViewPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
             super(fragmentActivity);
         }
 

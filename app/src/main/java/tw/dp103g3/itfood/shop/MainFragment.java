@@ -99,7 +99,8 @@ public class MainFragment extends Fragment {
                 navigate(R.id.action_mainFragment_to_shoppingCartFragment));
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
         Log.d(TAG, "1");
-        Address localAddress = null;
+        Address localAddress = new Address(0, getString(R.string.textLocalPosition),
+                null, -1, -1);
         addresses = getAddresses(memId) != null ?
                 getAddresses(memId) : new ArrayList<>();
         File file = new File(activity.getFilesDir(), "localAddress");
