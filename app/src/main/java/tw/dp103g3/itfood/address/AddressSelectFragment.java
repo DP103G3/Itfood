@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,6 +31,7 @@ import java.util.List;
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.SharedViewModel;
 import tw.dp103g3.itfood.task.CommonTask;
 
 import static tw.dp103g3.itfood.Common.DATE_FORMAT;
@@ -43,12 +45,12 @@ public class AddressSelectFragment extends Fragment {
     private CommonTask getAddressTask;
     private Activity activity;
     private List<Address> addresses;
-    private Address address;
     private SharedPreferences pref;
     private int mem_id;
     private Address selectedAddress;
     private CardView cardViewCheck;
-    private Bundle bundle;
+    private View view;
+    private SharedViewModel model;
 
 
     public AddressSelectFragment() {
@@ -60,6 +62,9 @@ public class AddressSelectFragment extends Fragment {
         activity = getActivity();
         pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = pref.getInt("mem_id", 0);
+
+        model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
     }
 
     @Override
@@ -71,11 +76,11 @@ public class AddressSelectFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        this.view = view;
 
-        bundle = getArguments();
-        if (bundle != null) {
-            selectedAddress = (Address) bundle.getSerializable("address");
-        }
+        model.getSelectedAddress().observe(getViewLifecycleOwner(), address -> {
+            selectedAddress = address;
+        });
 
         toolbar = view.findViewById(R.id.toolbarAddressSelect);
         cardViewCheck = view.findViewById(R.id.cardViewCheck);
@@ -86,7 +91,8 @@ public class AddressSelectFragment extends Fragment {
         cardViewCheck.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Navigation.findNavController(v).navigate(R.id.action_addressSelectFragment_to_shoppingCartFragment, bundle);
+                model.selectAddress(selectedAddress);
+                Navigation.findNavController(v).popBackStack();
             }
         });
 
@@ -124,6 +130,7 @@ public class AddressSelectFragment extends Fragment {
         if (addresses == null || addresses.isEmpty()) {
             if (Common.networkConnected(activity)) {
                 Common.showToast(activity, "no address found");
+                Navigation.findNavController(view).popBackStack();
             }
         }
         AddressAdapter addressAdapter = (AddressAdapter) recyclerView.getAdapter();
@@ -166,7 +173,7 @@ public class AddressSelectFragment extends Fragment {
         @Override
         public AddressAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View itemView = LayoutInflater.from(context)
-                    .inflate(R.layout.address_select_item_view, parent, false);
+                    .inflate(R.layout.select_radio_button_item_view, parent, false);
             return new AddressAdapter.MyViewHolder(itemView);
         }
 
@@ -183,12 +190,10 @@ public class AddressSelectFragment extends Fragment {
                 holder.radioButton.setText(address.getInfo());
                 holder.radioButton.setTag(position);
 
-
                 if (address.getId() == selectedAddress.getId()) {
                     holder.radioButton.setChecked(true);
                     lastChecked = holder.radioButton;
                     selectedAddress = addresses.get(position);
-                    bundle.putSerializable("address", selectedAddress);
                 } else {
                     holder.radioButton.setChecked(false);
                 }
@@ -202,7 +207,6 @@ public class AddressSelectFragment extends Fragment {
                         lastChecked = rb;
                     }
                     selectedAddress = address;
-                    bundle.putSerializable("address", selectedAddress);
                 });
             }
         }

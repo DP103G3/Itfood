@@ -25,7 +25,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.SharedViewModel;
+import tw.dp103g3.itfood.main.SharedViewModel;
 
 public class AddressCitiesFragment extends Fragment {
     private Activity activity;

@@ -52,7 +52,7 @@
     <string name="tvContactInfoText">聯繫資料</string>
     <string name="tvDeliveryTimeText">送餐時間</string>
     <string name="tvDeliveryAddressText">詳細送餐資料</string>
-    <string name="tvDeliveryTime">即時(40分鐘)</string>
+    <string name="tvDeliveryTime">即時(30分鐘)</string>
     <string name="tvContactInfo">請輸入聯絡資料</string>
     <string name="tvPaymentMethodText">付款方式</string>
     <string name="alertDialogTitleCancelOrder">取消訂單</string>
@@ -78,4 +78,9 @@
     <string name="addressDetail">詳細地址</string>
     <string name="addressDetailCaption">道路或街名，巷弄號</string>
     <string name="editAddressDetail">設定詳細地址</string>
+    <string name="selectOrderType">請選擇送餐方式</string>
+    <string name="deliveryDate">送餐日期</string>
+    <string name="deliveryTime">送餐時間</string>
+    <string name="cancel">取消</string>
+    <string name="addPayment">新增信用卡</string>
 </resources>

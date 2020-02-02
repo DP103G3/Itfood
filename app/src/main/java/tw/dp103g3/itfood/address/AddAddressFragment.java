@@ -31,8 +31,8 @@ import java.util.List;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.SharedViewModel;
 import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.SharedViewModel;
 import tw.dp103g3.itfood.task.CommonTask;
 
 import static tw.dp103g3.itfood.Common.DATE_FORMAT;
@@ -62,6 +62,10 @@ public class AddAddressFragment extends Fragment {
         activity = getActivity();
         pref = activity.getSharedPreferences(Common.PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = pref.getInt("mem_id", Common.LOGIN_FALSE);
+
+        model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        model.selectCity(null);
+        model.selectDistrict(null);
     }
 
     @Override
@@ -81,18 +85,17 @@ public class AddAddressFragment extends Fragment {
 
         toolbarAddAddress.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());
 
-        model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-
         Toast toast = Toast.makeText(activity, "請選擇城市", Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
         etAdminDistrict.setOnClickListener(v -> toast.show());
 
         model.getSelectedCity().observe(getViewLifecycleOwner(), city -> {
             this.city = city;
-            etCity.setText(city.getName());
-            etAdminDistrict.setOnClickListener(null);
-            etAdminDistrict.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.action_addAddressFragment_to_addressDistrictsFragment));
-
+            if (city != null) {
+                etCity.setText(city.getName());
+                etAdminDistrict.setOnClickListener(null);
+                etAdminDistrict.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.action_addAddressFragment_to_addressDistrictsFragment));
+            }
         });
 
         model.getSelectedDistrict().observe(getViewLifecycleOwner(), district -> {

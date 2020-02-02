@@ -1,9 +1,10 @@
-package tw.dp103g3.itfood;
+package tw.dp103g3.itfood.shopping_cart;
 
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Geocoder;
@@ -25,6 +26,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -44,12 +46,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.R;
+import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.address.Address;
 import tw.dp103g3.itfood.main.MainActivity;
+import tw.dp103g3.itfood.main.SharedViewModel;
 import tw.dp103g3.itfood.shop.Dish;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
@@ -58,6 +65,7 @@ import static android.view.View.GONE;
 import static tw.dp103g3.itfood.Common.DATE_FORMAT;
 import static tw.dp103g3.itfood.Common.LOGIN_FALSE;
 import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
+import static tw.dp103g3.itfood.Common.getDayOfWeek;
 
 
 public class ShoppingCartFragment extends Fragment {
@@ -67,7 +75,6 @@ public class ShoppingCartFragment extends Fragment {
     private Activity activity;
     private Button btLogin;
     private File orderDetail;
-    private int mem_id;
     private Shop shop;
     private Map<Integer, Integer> orderDetails;
     private Gson gson;
@@ -79,16 +86,20 @@ public class ShoppingCartFragment extends Fragment {
     private NavController navController;
     private static SparseIntArray totals;
     private View fragmentView;
-    private TextView tvTotalBefore, tvTotalAfter, tvBottomTotal, tvAddress;
-    private int totalBefore, totalAfter;
+    private TextView tvTotalBefore, tvTotalAfter, tvBottomTotal, tvAddress, tvOrderType, tvDeliveryTime;
+    private int totalBefore, totalAfter, mem_id, orderType, selectedOrderType;
     private ScrollView scrollView;
     private BottomNavigationView bottomNavigationView;
     private Animator animator;
     private ConstraintLayout layoutBottom;
     private BottomNavigationView shoppingCartBottomView;
-    private LinearLayout layoutDeliveryAddress;
+    private LinearLayout layoutDeliveryAddress, layoutOrderType, layoutDeliveryTime;
     private Address address;
     private Location lastLocation;
+    private final int DELIVERY = 1;
+    private final int SELFPICK = 0;
+    private View divider;
+    private SharedViewModel model;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -99,14 +110,18 @@ public class ShoppingCartFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();
+        address = null;
+        model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        model.selectDeliveryTime(null);
 
+        orderType = DELIVERY;
         totals = new SparseIntArray();
         memberPref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = memberPref.getInt("mem_id", LOGIN_FALSE);
         orderDetail = new File(activity.getFilesDir(), "orderDetail");
 
         if (mem_id != LOGIN_FALSE) {
-            address = getAddresses(mem_id).get(0);
+            address = getAddresses(mem_id).isEmpty() ? null : getAddresses(mem_id).get(0);
         }
 
         try (BufferedReader in = new BufferedReader(new FileReader(orderDetail))) {
@@ -144,6 +159,22 @@ public class ShoppingCartFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        fragmentView = view;
+        shoppingCartBottomView = view.findViewById(R.id.shoppingCartBottomView);
+        layoutBottom = view.findViewById(R.id.layoutBottom);
+        layoutDeliveryAddress = view.findViewById(R.id.layoutDeliveryAddress);
+        tvBottomTotal = view.findViewById(R.id.tvBottomTotal);
+        tvTotalAfter = view.findViewById(R.id.tvTotalAfter);
+        tvAddress = view.findViewById(R.id.tvAddress);
+        tvTotalBefore = view.findViewById(R.id.tvTotalBefore);
+        tvDeliveryTime = view.findViewById(R.id.tvDeliveryTime);
+        tvOrderType = view.findViewById(R.id.tvOrderType);
+        navController = Navigation.findNavController(view);
+        scrollView = view.findViewById(R.id.scrollView);
+        layoutOrderType = view.findViewById(R.id.layoutOrderType);
+        layoutDeliveryTime = view.findViewById(R.id.layoutDeliveryTime);
+        divider = view.findViewById(R.id.divider);
         bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
         animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_down);
         animator.setTarget(bottomNavigationView);
@@ -168,32 +199,71 @@ public class ShoppingCartFragment extends Fragment {
 
             }
         });
-
-        Bundle getBundle = getArguments();
-        if (getBundle != null) {
-            if (getBundle.getSerializable("address") != null) {
-                address = (Address) getBundle.getSerializable("address");
-            }
-        }
-
-        Bundle sendBundle = new Bundle();
-        sendBundle.putSerializable("address", address);
-
         animator.start();
-        fragmentView = view;
-        shoppingCartBottomView = view.findViewById(R.id.shoppingCartBottomView);
-        layoutBottom = view.findViewById(R.id.layoutBottom);
-        layoutDeliveryAddress = view.findViewById(R.id.layoutDeliveryAddress);
-        tvBottomTotal = view.findViewById(R.id.tvBottomTotal);
-        tvTotalAfter = view.findViewById(R.id.tvTotalAfter);
-        tvAddress = view.findViewById(R.id.tvAddress);
-        tvTotalBefore = view.findViewById(R.id.tvTotalBefore);
-        navController = Navigation.findNavController(view);
-        scrollView = view.findViewById(R.id.scrollView);
+
+
+        model.getSelectedAddress().observe(getViewLifecycleOwner(), address -> {
+            this.address = address;
+            tvAddress.setText(address.getInfo());
+        });
+
+        layoutDeliveryTime.setOnClickListener(v -> {
+            DeliveryTimeSelectDialog dtsd = new DeliveryTimeSelectDialog(activity, model);
+            dtsd.show();
+        });
+
+        layoutOrderType.setOnClickListener(v -> {
+            AlertDialog.Builder alt_bld = new AlertDialog.Builder(activity);
+            selectedOrderType = orderType;
+            String[] orderTypes = {"自取", "外送"};
+            alt_bld.setTitle("請選擇送餐方式");
+            alt_bld.setSingleChoiceItems(orderTypes, orderType, (dialog, which) -> selectedOrderType = which);
+
+            alt_bld.setNegativeButton("取消", (dialog, which) -> dialog.cancel());
+
+            alt_bld.setPositiveButton("確認", (dialog, which) -> {
+                orderType = selectedOrderType;
+                updateDisplayOrderType();
+            });
+            AlertDialog alertDialog = alt_bld.create();
+            alertDialog.show();
+        });
+
 
         int height = (int) (shoppingCartBottomView.getHeight() * getResources().getDisplayMetrics().density);
         scrollView.setPadding(0, 0, 0, height);
 
+        tvDeliveryTime.setText(R.string.tvDeliveryTime);
+
+        model.getSelectedDeliveryTime().observe(getViewLifecycleOwner(), date -> {
+            if (date != null) {
+                Calendar calNow = Calendar.getInstance();
+                Calendar cal = Calendar.getInstance();
+                Calendar tomorrow = Calendar.getInstance();
+                tomorrow.add(Calendar.DAY_OF_YEAR, 1);
+                cal.setTime(date);
+                String text;
+                if (cal.get(Calendar.DAY_OF_WEEK) == calNow.get(Calendar.DAY_OF_WEEK)) {
+                    text = "今天, "
+                            + (cal.get(Calendar.HOUR_OF_DAY) < 10 ? "0" + cal.get(Calendar.HOUR_OF_DAY) : cal.get(Calendar.HOUR_OF_DAY))
+                            + ":" +
+                            (cal.get(Calendar.MINUTE) == 0 ? "00" : cal.get(Calendar.MINUTE));
+                } else if (cal.get(Calendar.DAY_OF_WEEK) == tomorrow.get(Calendar.DAY_OF_WEEK)) {
+                    text = "明天, "
+                            + (cal.get(Calendar.HOUR_OF_DAY) < 10 ? "0" + cal.get(Calendar.HOUR_OF_DAY) : cal.get(Calendar.HOUR_OF_DAY))
+                            + ":" +
+                            (cal.get(Calendar.MINUTE) == 0 ? "00" : cal.get(Calendar.MINUTE));
+                } else {
+                    text = getDayOfWeek(cal) + ", " +
+                            (cal.get(Calendar.HOUR_OF_DAY) < 10 ? "0" + cal.get(Calendar.HOUR_OF_DAY) : cal.get(Calendar.HOUR_OF_DAY))
+                            + ":" +
+                            (cal.get(Calendar.MINUTE) == 0 ? "00" : cal.get(Calendar.MINUTE));
+                }
+                tvDeliveryTime.setText(text);
+            }
+        });
+
+        //設定tvAddress的預設文字，如果未登入會顯示最近一次定位的地址，登入則會顯示第一個個人地址
         if (address != null) {
             tvAddress.setText(address.getInfo());
         } else {
@@ -209,6 +279,7 @@ public class ShoppingCartFragment extends Fragment {
             tvAddress.setText(sb);
         }
 
+        //確認登入狀態，以之決定btLogin是否顯示
         btLogin = view.findViewById(R.id.btLogin);
         if (mem_id != LOGIN_FALSE) {
             btLogin.setVisibility(GONE);
@@ -217,15 +288,15 @@ public class ShoppingCartFragment extends Fragment {
                 .navigate(R.id.action_shoppingCartFragment_to_loginFragment));
 
         if (mem_id != LOGIN_FALSE) {
-            layoutDeliveryAddress.setOnClickListener(v ->
-                    Navigation.findNavController(v)
-                            .navigate(R.id.action_shoppingCartFragment_to_addressSelectFragment, sendBundle));
+            layoutDeliveryAddress.setOnClickListener(v -> {
+                model.selectAddress(address);
+                Navigation.findNavController(v).navigate(R.id.action_shoppingCartFragment_to_addressSelectFragment);
+            });
         }
 
         toolbarShoppingCart = view.findViewById(R.id.toolbarShoppingCart);
         toolbarShoppingCart.setTitle(shopName);
-        toolbarShoppingCart.setNavigationOnClickListener(v ->
-                Navigation.findNavController(v).popBackStack());
+        toolbarShoppingCart.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());
 
         dishes = new ArrayList<>();
         orderDetails.forEach((dish_id, dish_count) -> dishes.add(getDish(dish_id)));
@@ -442,6 +513,18 @@ public class ShoppingCartFragment extends Fragment {
             tvTotalBefore.setText(String.format(Locale.getDefault(), "$ %d", totalBefore));
             tvTotalAfter.setText(String.format(Locale.getDefault(), "$ %d", totalAfter));
             tvBottomTotal.setText(String.format(Locale.getDefault(), "$ %d", totalAfter));
+        }
+    }
+
+    private void updateDisplayOrderType() {
+        if (orderType == DELIVERY) {
+            tvOrderType.setText("外送");
+            layoutDeliveryAddress.setVisibility(View.VISIBLE);
+            divider.setVisibility(View.VISIBLE);
+        } else if (orderType == SELFPICK) {
+            tvOrderType.setText("自取");
+            layoutDeliveryAddress.setVisibility(GONE);
+            divider.setVisibility(GONE);
         }
     }
 

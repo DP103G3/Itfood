@@ -21,7 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.SharedViewModel;
+import tw.dp103g3.itfood.main.SharedViewModel;
 
 
 /**

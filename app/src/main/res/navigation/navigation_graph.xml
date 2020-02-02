@@ -127,7 +127,7 @@
     </fragment>
     <fragment
         android:id="@+id/shoppingCartFragment"
-        android:name="tw.dp103g3.itfood.ShoppingCartFragment"
+        android:name="tw.dp103g3.itfood.shopping_cart.ShoppingCartFragment"
         android:label="fragment_shopping_cart"
         tools:layout="@layout/fragment_shopping_cart" >
         <action
@@ -165,12 +165,6 @@
         android:name="tw.dp103g3.itfood.address.AddressSelectFragment"
         android:label="fragment_address_select"
         tools:layout="@layout/fragment_address_select">
-        <action
-            android:id="@+id/action_addressSelectFragment_to_shoppingCartFragment"
-            app:destination="@id/shoppingCartFragment"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:popUpTo="@+id/addressSelectFragment" />
         <action
             android:id="@+id/action_addressSelectFragment_to_addAddressFragment"
             app:destination="@id/addAddressFragment"

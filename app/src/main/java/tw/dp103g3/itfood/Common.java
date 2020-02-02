@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -113,5 +114,33 @@ public class Common {
     }
     public static double rad(double d) {
         return d * Math.PI / 180;
+    }
+
+    public static String getDayOfWeek(Calendar cal) {
+        String day = "";
+        switch (cal.get(Calendar.DAY_OF_WEEK)) {
+            case 1:
+                day = "星期天";
+                break;
+            case 2:
+                day = "星期一";
+                break;
+            case 3:
+                day = "星期二";
+                break;
+            case 4:
+                day = "星期三";
+                break;
+            case 5:
+                day = "星期四";
+                break;
+            case 6:
+                day = "星期五";
+                break;
+            case 7:
+                day = "星期六";
+                break;
+        }
+        return day;
     }
 }

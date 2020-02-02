@@ -44,7 +44,6 @@ import java.util.HashMap;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.SharedViewModel;
 import tw.dp103g3.itfood.address.Address;
 import tw.dp103g3.itfood.shop.Shop;
 
