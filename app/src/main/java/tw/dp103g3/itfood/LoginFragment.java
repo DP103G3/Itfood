@@ -29,8 +29,6 @@ public class LoginFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();
-        preferences = activity.getSharedPreferences(Common.PREFERENCES_MEMBER, Context.MODE_PRIVATE);
-        preferences.edit().putInt("mem_id", 1).commit();
     }
 
     @Override
@@ -41,6 +39,8 @@ public class LoginFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        preferences = activity.getSharedPreferences(Common.PREFERENCES_MEMBER, Context.MODE_PRIVATE);
+        preferences.edit().putInt("mem_id", 1).apply();
         tvBack = view.findViewById(R.id.tvBack);
         tvBack.setOnClickListener(v -> {
             Navigation.findNavController(v).popBackStack(R.id.mainFragment, false);

@@ -2,6 +2,7 @@ package tw.dp103g3.itfood;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -20,9 +21,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+
+import tw.dp103g3.itfood.order.OrderWebSocketClient;
 
 public class Common {
     private static final String TAG = "TAG_Common";
@@ -32,6 +37,32 @@ public class Common {
     public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final int LOGIN_FALSE = 0;
     public static final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+    public static OrderWebSocketClient orderWebSocketClient;
+
+    public static void connectServer(Context context, int memId) {
+        URI uri = null;
+        try {
+            uri = new URI(Url.SOCKET_URI + memId);
+        } catch (URISyntaxException e) {
+            Log.e(TAG, e.toString());
+        }
+        if (orderWebSocketClient == null) {
+            orderWebSocketClient = new OrderWebSocketClient(uri, context);
+            orderWebSocketClient.connect();
+        }
+    }
+
+    public static void disconnectServer() {
+        if (orderWebSocketClient != null) {
+            orderWebSocketClient.close();
+            orderWebSocketClient = null;
+        }
+    }
+
+    public static int getMemId(Context context) {
+        SharedPreferences pref = context.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
+        return pref.getInt("mem_id", 0);
+    }
 
     public static boolean networkConnected(Activity activity) {
         ConnectivityManager connectivityManager =

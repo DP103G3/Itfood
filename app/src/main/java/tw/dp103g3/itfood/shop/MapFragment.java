@@ -69,7 +69,7 @@ public class MapFragment extends Fragment {
     private Gson gson;
     private NavController navController;
     private ImageView ivCart;
-    private Member member;
+    private int memId;
     private List<Address> addresses;
     private CommonTask getAllShopTask, getAllAddressTask;
     private ImageTask shopImageTask;
@@ -96,12 +96,10 @@ public class MapFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         navController = Navigation.findNavController(view);
         bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
-        member = new Member();
-        member.setMemId(1);
+        memId = Common.getMemId(activity);
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
         Address localAddress = null;
-        addresses = getAddresses(member.getMemId()) != null ?
-                getAddresses(member.getMemId()) : new ArrayList<>();
+        addresses = getAddresses(memId);
         File file = new File(activity.getFilesDir(), "localAddress");
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             localAddress = (Address) in.readObject();

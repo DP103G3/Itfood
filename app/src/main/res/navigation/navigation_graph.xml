@@ -201,7 +201,7 @@
         tools:layout="@layout/fragment_address_districts" />
     <fragment
         android:id="@+id/QRCodeFragment"
-        android:name="tw.dp103g3.itfood.QRCodeFragment"
+        android:name="tw.dp103g3.itfood.order.QRCodeFragment"
         android:label="fragment_qrcode"
         tools:layout="@layout/fragment_qrcode" />
 </navigation>

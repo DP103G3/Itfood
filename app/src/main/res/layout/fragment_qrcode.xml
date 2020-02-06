@@ -6,7 +6,7 @@
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/colorBackground"
-    tools:context=".QRCodeFragment">
+    tools:context=".order.QRCodeFragment">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"

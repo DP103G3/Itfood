@@ -1,7 +1,10 @@
 package tw.dp103g3.itfood.order;
 
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,9 +17,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.adapter.FragmentViewHolder;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
@@ -27,13 +32,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
-import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.task.CommonTask;
 
 import static tw.dp103g3.itfood.Common.DATE_FORMAT;
@@ -42,20 +47,22 @@ import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 public class OrderFragment extends Fragment {
     private final static String TAG = "TAG_OrderFragment";
     private FragmentActivity activity;
-    private Member member;
     private final static int NOT_LOGGED_IN = 0;
     private final static int NO_ITEM = 1;
     private final static int NORMAL = 2;
     private static int mem_id;
     private int status;
     private NavController navController;
-    private static List<Order> orders;
+    private static Set<Order> orders;
+    private ViewPager2 viewPager2;
+    private LocalBroadcastManager broadcastManager;
+    private TabLayout tabLayout;
 
-    static void setOrders(List<Order> orders) {
+    static void setOrders(Set<Order> orders) {
         OrderFragment.orders = orders;
     }
 
-    static List<Order> getOrders() {
+    static Set<Order> getOrders() {
         return orders;
     }
 
@@ -65,6 +72,7 @@ public class OrderFragment extends Fragment {
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         activity = getActivity();
         SharedPreferences pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = pref.getInt("mem_id", 0);
@@ -72,18 +80,12 @@ public class OrderFragment extends Fragment {
         if (mem_id == 0) {
             status = NOT_LOGGED_IN;
         } else {
-//            member = getMember(mem_id);
             if (orders == null || orders.isEmpty()) {
                 status = NO_ITEM;
             } else {
                 status = NORMAL;
             }
-
         }
-
-        super.onCreate(savedInstanceState);
-
-
     }
 
     @Override
@@ -102,6 +104,9 @@ public class OrderFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        Common.connectServer(activity, Common.getMemId(activity));
+//        broadcastManager = LocalBroadcastManager.getInstance(activity);
+//        registerOrderReceiver();
         navController = Navigation.findNavController(view);
         switch (status) {
             case NOT_LOGGED_IN: {
@@ -117,56 +122,49 @@ public class OrderFragment extends Fragment {
                 break;
             }
             case NORMAL: {
-//                member = getMember(mem_id);
-                TabLayout tabLayout = view.findViewById(R.id.tabLayOut);
-                ViewPager2 viewPager2 = view.findViewById(R.id.viewPager);
-
-                viewPager2.setAdapter(new ViewPagerAdapter(activity));
-
-                new TabLayoutMediator(tabLayout, viewPager2, (tab, position) -> {
-
-                    switch (position) {
-                        case 0: {
-                            tab.setText(R.string.unfinished);
-                            break;
-                        }
-                        case 1: {
-                            tab.setText(R.string.done);
-                            break;
-                        }
-                        case 2: {
-                            tab.setText(R.string.canceled);
-                            break;
-                        }
-                    }
-                }).attach();
-                viewPager2.setOffscreenPageLimit(1);
-
+                tabLayout = view.findViewById(R.id.tabLayOut);
+                viewPager2 = view.findViewById(R.id.viewPager);
             }
         }
+        viewPager2.setAdapter(new ViewPagerAdapter(activity));
+
+        new TabLayoutMediator(tabLayout, viewPager2, (tab, position) -> {
+
+            switch (position) {
+                case 0: {
+                    tab.setText(R.string.unfinished);
+                    break;
+                }
+                case 1: {
+                    tab.setText(R.string.done);
+                    break;
+                }
+                case 2: {
+                    tab.setText(R.string.canceled);
+                    break;
+                }
+            }
+        }).attach();
+        viewPager2.setOffscreenPageLimit(1);
     }
 
-//    private Member getMember(int mem_id) {
-//        Member member = null;
-//        if (Common.networkConnected(activity)) {
-//            String url = Url.URL + "/MemberServlet";
-//            JsonObject jsonObject = new JsonObject();
-//            Gson gson = new GsonBuilder().setDateFormat(Common.DATE_FORMAT).create();
-//            jsonObject.addProperty("action", "findById");
-//            jsonObject.addProperty("mem_id", mem_id);
-//            String jsonOut = jsonObject.toString();
-//            CommonTask getMemberTask = new CommonTask(url, jsonOut);
-//            try {
-//                String jsonIn = getMemberTask.execute().get();
-//                member = gson.fromJson(jsonIn, Member.class);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        } else {
-//            Common.showToast(activity, R.string.textNoNetwork);
-//        }
-//        return member;
+//    private void registerOrderReceiver() {
+//        IntentFilter orderFilter = new IntentFilter("order");
+//        broadcastManager.registerReceiver(orderReceiver, orderFilter);
 //    }
+//
+//    private BroadcastReceiver orderReceiver = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            String message = intent.getStringExtra("message");
+//            Order order = Common.gson.fromJson(message, Order.class);
+//            orders.remove(order);
+//            orders.add(order);
+//            orders.forEach(v -> Log.d(TAG, v.toString()));
+//            viewPager2.setAdapter(new ViewPagerAdapter(activity));
+//            Log.d(TAG, message);
+//        }
+//    };
 
     public class ViewPagerAdapter extends FragmentStateAdapter {
         static final int TABS_ITEM_SIZE = 3;
@@ -187,8 +185,8 @@ public class OrderFragment extends Fragment {
         }
     }
 
-    private List<Order> getOrders(int mem_id) {
-        List<Order> orders = new ArrayList<>();
+    private Set<Order> getOrders(int mem_id) {
+        Set<Order> orders = new HashSet<>();
         if (Common.networkConnected(activity)) {
             String url = Url.URL + "/OrderServlet";
             Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
@@ -200,7 +198,7 @@ public class OrderFragment extends Fragment {
             CommonTask getOrderTask = new CommonTask(url, jsonOut);
             try {
                 String jsonIn = getOrderTask.execute().get();
-                Type listType = new TypeToken<List<Order>>() {
+                Type listType = new TypeToken<Set<Order>>() {
                 }.getType();
                 orders = gson.fromJson(jsonIn, listType);
             } catch (Exception e) {
@@ -212,6 +210,11 @@ public class OrderFragment extends Fragment {
         return orders;
     }
 
+//    @Override
+//    public void onStop() {
+//        super.onStop();
+//        broadcastManager.unregisterReceiver(orderReceiver);
+//    }
 }
 
 

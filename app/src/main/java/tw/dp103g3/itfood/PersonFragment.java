@@ -39,7 +39,7 @@ public class PersonFragment extends Fragment {
         activity = getActivity();
         preferences =
                 activity.getSharedPreferences(Common.PREFERENCES_MEMBER, Context.MODE_PRIVATE);
-        memId = preferences.getInt("mem_id", 0);
+        memId = Common.getMemId(activity);
     }
 
     @Override
@@ -51,15 +51,15 @@ public class PersonFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        Common.disconnectServer();
         initListMap();
         listView = view.findViewById(R.id.listView);
         if (memId == 0) {
             guestAdapter = new SimpleAdapter(activity, guestList, R.layout.basic_list_item,
                     new String[]{"icon", "title"}, new int[]{R.id.ivIcon, R.id.tvTitle});
             listView.setAdapter(guestAdapter);
-            listView.setOnItemClickListener(((parent, v, position, id) -> {
-                Navigation.findNavController(v).navigate(guestAction[position]);
-            }));
+            listView.setOnItemClickListener(((parent, v, position, id) ->
+                    Navigation.findNavController(v).navigate(guestAction[position])));
         } else {
             memberAdapter = new SimpleAdapter(activity, memberList, R.layout.basic_list_item,
                     new String[]{"icon", "title"}, new int[]{R.id.ivIcon, R.id.tvTitle});
@@ -69,7 +69,7 @@ public class PersonFragment extends Fragment {
                 if (position != 3) {
                     navController.navigate(memberAction[position]);
                 } else {
-                    preferences.edit().putInt("mem_id", 0).commit();
+                    preferences.edit().putInt("mem_id", 0).apply();
                     navController.popBackStack(R.id.mainFragment, false);
                 }
             }));

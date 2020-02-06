@@ -89,8 +89,9 @@ public class MainFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        Common.disconnectServer();
         bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
-        memId = preferences.getInt("mem_id", 0);
+        memId = Common.getMemId(activity);
         this.view = view;
         ivCart = view.findViewById(R.id.ivCart);
         navController = Navigation.findNavController(view);

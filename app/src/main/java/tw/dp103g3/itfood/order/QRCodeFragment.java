@@ -1,13 +1,20 @@
-package tw.dp103g3.itfood;
+package tw.dp103g3.itfood.order;
 
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,8 +26,12 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 
 import java.util.Comparator;
+import java.util.Set;
 
+import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.order.Order;
+import tw.dp103g3.itfood.order.OrderFragment;
 import tw.dp103g3.itfood.qrcode.Contents;
 import tw.dp103g3.itfood.qrcode.QRCodeEncoder;
 
@@ -33,6 +44,8 @@ public class QRCodeFragment extends Fragment {
     private Activity activity;
     private ImageView ivQRCode;
     private Order order;
+    private LocalBroadcastManager broadcastManager;
+    private NavController navController;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,6 +61,9 @@ public class QRCodeFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        broadcastManager = LocalBroadcastManager.getInstance(activity);
+        registerOrderReceiver();
+        navController = Navigation.findNavController(view);
         Bundle bundle = getArguments();
         if (bundle != null) {
             order = (Order) bundle.getSerializable("order");
@@ -63,5 +79,29 @@ public class QRCodeFragment extends Fragment {
         } catch (WriterException e) {
             Log.e(TAG, e.toString());
         }
+    }
+
+    private void registerOrderReceiver() {
+        IntentFilter orderFilter = new IntentFilter("order");
+        broadcastManager.registerReceiver(orderReceiver, orderFilter);
+    }
+
+    private BroadcastReceiver orderReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("message");
+            Order order = Common.gson.fromJson(message, Order.class);
+            Set<Order> orders = OrderFragment.getOrders();
+            orders.remove(order);
+            orders.add(order);
+            navController.popBackStack();
+            Log.d(TAG, message);
+        }
+    };
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        broadcastManager.unregisterReceiver(orderReceiver);
     }
 }

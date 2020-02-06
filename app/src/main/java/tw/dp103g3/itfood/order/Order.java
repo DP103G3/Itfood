@@ -1,13 +1,12 @@
 package tw.dp103g3.itfood.order;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 import tw.dp103g3.itfood.shop.Shop;
-
 
 public class Order implements Serializable {
 	private int order_id;
@@ -71,12 +70,25 @@ public class Order implements Serializable {
 	}
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (obj == null || !(obj instanceof Order)) {
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + order_id;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
 			return false;
-		}
-		Order order = (Order) obj;
-		return getOrder_id() == order.getOrder_id();
+		if (getClass() != obj.getClass())
+			return false;
+		Order other = (Order) obj;
+		if (order_id != other.order_id)
+			return false;
+		return true;
 	}
 
 	public int getOrder_id() {
@@ -214,10 +226,10 @@ public class Order implements Serializable {
 	public void setOrderDetails(List<OrderDetail> orderDetails) {
 		this.orderDetails = orderDetails;
 	}
-	
-	
-	
-	
 
-
+	@NonNull
+	@Override
+	public String toString() {
+		return getOrder_id() + " + " + getOrder_state();
+	}
 }

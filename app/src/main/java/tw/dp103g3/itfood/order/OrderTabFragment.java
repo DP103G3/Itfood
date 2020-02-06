@@ -5,7 +5,10 @@ import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -50,13 +54,13 @@ import tw.dp103g3.itfood.task.CommonTask;
 
 import static android.view.View.GONE;
 import static tw.dp103g3.itfood.Common.DATE_FORMAT;
+import static tw.dp103g3.itfood.Common.orderWebSocketClient;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class OrderTabFragment extends Fragment {
     private static final String TAG = "TAG_OrderTabFragment";
-//    private static final String ARG_COUNT = "param1";
     private int counter;
     private static final int UNCONFIRMED = 0;
     private static final int MAKING = 1;
@@ -73,17 +77,9 @@ public class OrderTabFragment extends Fragment {
     private Set<Integer> order_states;
     private List<Order> sortedOrders;
     private CommonTask editOrderTask;
-//    private int mem_id;
-//    private CommonTask getOrderTask, getShopTask, getOrderDetailTask, getDishTask;
-//    private SharedPreferences pref;
-//    private ProgressBar progressBar;
+    private LocalBroadcastManager broadcastManager;
 
     OrderTabFragment(int counter){
-//        OrderTabFragment orderTabFragment = new OrderTabFragment();
-//        Bundle args = new Bundle();
-//        args.putInt(ARG_COUNT, counter);
-//        args.putString("orders", Common.gson.toJson(orders));
-//        orderTabFragment.setArguments(args);
         this.counter = counter;
     }
 
@@ -96,15 +92,13 @@ public class OrderTabFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_order_tab, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-//        if (getArguments() != null){
-//            counter = getArguments().getInt(ARG_COUNT);
-//        }
+        broadcastManager = LocalBroadcastManager.getInstance(activity);
+        registerOrderReceiver();
         order_states = new HashSet<>();
         if(order_states.isEmpty()) {
             if (counter == 0) {
@@ -119,21 +113,8 @@ public class OrderTabFragment extends Fragment {
                 order_states.add(5);
             }
         }
-//        progressBar = view.findViewById(R.id.progressBar);
         rvOrder = view.findViewById(R.id.rvOrder);
-//        counter = getArguments().getInt(ARG_COUNT);
         layoutEmpty = view.findViewById(R.id.layoutEmpty);
-
-//        pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
-//        mem_id = pref.getInt("mem_id", 0);
-//        String ordersStr = getArguments().getString("orders");
-//        Type listType = new TypeToken<List<Order>>(){}.getType();
-//        orders = Common.GSON.fromJson(ordersStr, listType);
-
-//        for (Integer state : order_states) {
-//            orders.addAll(getOrders(mem_id, state));
-//        }
-
         rvOrder.setLayoutManager(new LinearLayoutManager(activity));
         rvOrder.setPadding(0, 0, 0, Common.getNavigationBarHeight(activity));
     }
@@ -143,7 +124,6 @@ public class OrderTabFragment extends Fragment {
         super.onResume();
         if(OrderFragment.getOrders() == null || !OrderFragment.getOrders().isEmpty()){
             layoutEmpty.setVisibility(GONE);
-//            progressBar.setVisibility(GONE);
         }
         sortedOrders = OrderFragment.getOrders().stream().filter(order -> order_states.stream()
                 .anyMatch(v -> v == order.getOrder_state()))
@@ -151,51 +131,6 @@ public class OrderTabFragment extends Fragment {
                 .collect(Collectors.toList());
         ShowOrders(sortedOrders);
     }
-
-    //    @Override
-//    public void onResume() {
-//        Log.d(TAG, "resume" + counter);
-//        rvOrder.setLayoutManager(new LinearLayoutManager(activity));
-//        progressBar.setVisibility(View.VISIBLE);
-//        rvOrder.setVisibility(GONE);
-//        orders = new ArrayList<>();
-//        ArrayList<Integer> order_states = new ArrayList<>();
-//
-//        if (counter == 0){
-//            order_states.clear();
-//            order_states.add(0);
-//            order_states.add(1);
-//            order_states.add(2);
-//            order_states.add(3);
-//        } else if (counter == 1){
-//            order_states.clear();
-//            order_states.add(4);
-//
-//        } else if (counter == 2){
-//            order_states.clear();
-//            order_states.add(5);
-//        }
-
-//        for (Integer state : order_states) {
-//            orders.addAll(getOrders(mem_id, state));
-//        }
-//        sortedOrders = orders.stream().filter(order -> order_states.stream()
-//                .anyMatch(v -> v == order.getOrder_state()))
-//                .sorted(Comparator.comparing((Order order) -> order.getOrder_time().getTime()).reversed())
-//                .collect(Collectors.toList());
-//
-//        if(sortedOrders.isEmpty()){
-//            layoutEmpty.setVisibility(View.VISIBLE);
-//            progressBar.setVisibility(GONE);
-//        }
-//        ShowOrders(sortedOrders);
-//        if (!sortedOrders.isEmpty()){
-//            layoutEmpty.setVisibility(GONE);
-//        } else {
-//            layoutEmpty.setVisibility(View.VISIBLE);
-//        }
-//        super.onResume();
-//    }
 
     @Nullable
     @Override
@@ -223,98 +158,6 @@ public class OrderTabFragment extends Fragment {
         return null;
     }
 
-//    private List<Order> getOrders(int mem_id, int state){
-//        List <Order> orders = new ArrayList<>();
-//        if(Common.networkConnected(activity)){
-//            String url = Url.URL + "/OrderServlet";
-//            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-//            JsonObject jsonObject = new JsonObject();
-//            jsonObject.addProperty("action", "findByCase");
-//            jsonObject.addProperty("type", "member");
-//            jsonObject.addProperty("id" , mem_id);
-//            jsonObject.addProperty("state", state);
-//            String jsonOut = jsonObject.toString();
-//            getOrderTask = new CommonTask(url, jsonOut);
-//            try {
-//                String jsonIn = getOrderTask.execute().get();
-//                Type listType = new TypeToken<List<Order>>(){}.getType();
-//                orders = gson.fromJson(jsonIn, listType);
-//            } catch (Exception e){
-//                Log.e(TAG, e.toString());
-//            }
-//        } else{
-//            Common.showToast(activity, R.string.textNoNetwork);
-//        }
-//        return orders;
-//    }
-
-//    private List<OrderDetail> getOrderDetails(int order_id){
-//        List <OrderDetail> orderDetails = new ArrayList<>();
-//        if(Common.networkConnected(activity)){
-//            String url = Url.URL + "/OrderDetailServlet";
-//            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-//            JsonObject jsonObject = new JsonObject();
-//            jsonObject.addProperty("action", "findByOrderId");
-//            jsonObject.addProperty("order_id",order_id );
-//            String jsonOut = jsonObject.toString();
-//            getOrderDetailTask = new CommonTask(url, jsonOut);
-//            try {
-//                String jsonIn = getOrderDetailTask.execute().get();
-//                Type listType = new TypeToken<List<OrderDetail>>(){}.getType();
-//                orderDetails = gson.fromJson(jsonIn, listType);
-//            } catch (Exception e){
-//                Log.e(TAG, e.toString());
-//            }
-//        } else{
-//            Common.showToast(activity, R.string.textNoNetwork);
-//        }
-//        return orderDetails;
-//    }
-
-//    private Dish getDish (int dish_id){
-//        Dish dish = null;
-//        if (Common.networkConnected(activity)){
-//            String url = Url.URL + "/DishServlet";
-//            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-//            JsonObject jsonObject = new JsonObject();
-//            jsonObject.addProperty("action", "getDishById");
-//            jsonObject.addProperty("id", dish_id);
-//            String jsonOut = jsonObject.toString();
-//            getDishTask = new CommonTask(url, jsonOut);
-//            try{
-//                String jsonIn = getDishTask.execute().get();
-//                dish = gson.fromJson(jsonIn, Dish.class);
-//            } catch (Exception e){
-//                Log.e(TAG, e.toString());
-//            }
-//        } else {
-//            Common.showToast(activity, R.string.textNoNetwork);
-//        }
-//        return dish;
-//    }
-
-//    private Shop getShop (int shop_id){
-//        Shop shop = null;
-//        if (Common.networkConnected(activity)){
-//            String url = Url.URL + "/ShopServlet";
-//            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-//            JsonObject jsonObject = new JsonObject();
-//            jsonObject.addProperty("action", "getShopById");
-//            jsonObject.addProperty("id", shop_id);
-//            String jsonOut = jsonObject.toString();
-//            getShopTask = new CommonTask(url, jsonOut);
-//            try {
-//                String jsonIn = getShopTask.execute().get();
-//                shop = gson.fromJson(jsonIn, Shop.class);
-//            } catch (Exception e){
-//                Log.e(TAG, e.toString());
-//            }
-//        } else {
-//            Common.showToast(activity, R.string.textNoNetwork);
-//        }
-//        return shop;
-//    }
-
     private void ShowOrders(List<Order> orders) {
         if (orders == null || orders.isEmpty()) {
             if (!Common.networkConnected(activity)) {
@@ -330,7 +173,24 @@ public class OrderTabFragment extends Fragment {
         }
     }
 
+    private void registerOrderReceiver() {
+        IntentFilter orderFilter = new IntentFilter("order");
+        broadcastManager.registerReceiver(orderReceiver, orderFilter);
+    }
 
+    private BroadcastReceiver orderReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("message");
+            Order order = Common.gson.fromJson(message, Order.class);
+            Set<Order> orders = OrderFragment.getOrders();
+            orders.remove(order);
+            orders.add(order);
+            OrderFragment.setOrders(orders);
+            onResume();
+            Log.d(TAG, message);
+        }
+    };
 
     private class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder>{
         private Context context;
@@ -392,14 +252,20 @@ public class OrderTabFragment extends Fragment {
                                         Common.showToast(getActivity(), R.string.cancelOrderFail);
                                     } else{
                                         Common.showToast(getActivity(), R.string.cancelOrderSuccess);
-//                                                orders.clear();
-                                        OrderFragment.setOrders(getOrders(OrderFragment.getMem_id()));
+                                        Set<Order> orders = OrderFragment.getOrders();
+                                        orders.remove(order);
+                                        orders.add(order);
+                                        OrderFragment.setOrders(orders);
+                                        OrderMessage orderMessageShop = new OrderMessage(order, "shop" + order.getShop().getId());
+                                        String shopMessage = Common.gson.toJson(orderMessageShop);
+                                        orderWebSocketClient.send(shopMessage);
                                         onResume();
                                     }
                                 }).setNegativeButton("取消", (dialog, which) -> dialog.cancel())
                                 .show();
                         break;
                     case PICKUP: case DELIVERING:
+
                         Bundle bundle = new Bundle();
                         bundle.putSerializable("order", order);
                         Navigation.findNavController(view)
@@ -456,6 +322,7 @@ public class OrderTabFragment extends Fragment {
                     order_state_text = "已付款，等待接單";
                     order_time_text = "下單時間 : " + simpleDateFormat.format(order_time);
                     holder.btAction.setText("取消訂單");
+                    holder.btAction.setEnabled(true);
                     break;
                 case MAKING :
                     order_state_text = "製作中";
@@ -467,6 +334,11 @@ public class OrderTabFragment extends Fragment {
                     order_state_text = "製作完成，待取餐";
                     order_time_text = "下單時間 : " + simpleDateFormat.format(order_time);
                     holder.btAction.setText("顯示QR CODE");
+                    if (order.getOrder_type() == 0) {
+                        holder.btAction.setEnabled(true);
+                    } else {
+                        holder.btAction.setEnabled(false);
+                    }
                     break;
                 case DELIVERING :
                     order_state_text = "運送中";
@@ -474,6 +346,7 @@ public class OrderTabFragment extends Fragment {
                         order_time_text = "預計送達時間 : " + simpleDateFormat.format(order_ideal);
                     }
                     holder.btAction.setText("顯示QR CODE");
+                    holder.btAction.setEnabled(true);
                     break;
                 case DONE :
                     order_state_text = "已取餐";
@@ -503,32 +376,6 @@ public class OrderTabFragment extends Fragment {
             holder.rvOrderDetail.setLayoutManager(new LinearLayoutManager(activity));
             holder.rvOrderDetail.setAdapter(new OrderDetailAdapter(activity, orderDetails));
             holder.setOrder(order);
-//            progressBar.setVisibility(GONE);
-        }
-
-        private List<Order> getOrders(int mem_id) {
-            List<Order> orders = new ArrayList<>();
-            if (Common.networkConnected(activity)) {
-                String url = Url.URL + "/OrderServlet";
-                Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-                JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("action", "findByCase");
-                jsonObject.addProperty("type", "member");
-                jsonObject.addProperty("id", mem_id);
-                String jsonOut = jsonObject.toString();
-                CommonTask getOrderTask = new CommonTask(url, jsonOut);
-                try {
-                    String jsonIn = getOrderTask.execute().get();
-                    Type listType = new TypeToken<List<Order>>() {
-                    }.getType();
-                    orders = gson.fromJson(jsonIn, listType);
-                } catch (Exception e) {
-                    Log.e(TAG, e.toString());
-                }
-            } else {
-                Common.showToast(activity, R.string.textNoNetwork);
-            }
-            return orders;
         }
     }
 
@@ -540,10 +387,6 @@ public class OrderTabFragment extends Fragment {
             this.context = context;
             this.orderDetails = orderDetails;
         }
-
-//        void setOrderDetails(List<OrderDetail> orderDetails){
-//            this.orderDetails = orderDetails;
-//        }
 
         private class MyViewHolder extends RecyclerView.ViewHolder{
             TextView tvDishName, tvDishInfo, tvDishPrice, tvDishCount;
@@ -593,5 +436,3 @@ public class OrderTabFragment extends Fragment {
         }
     }
 }
-
-//TODO 在OrderItemView 裡頭btAction 應需求加入on click 功能
