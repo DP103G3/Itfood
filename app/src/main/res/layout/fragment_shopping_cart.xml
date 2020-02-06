@@ -223,6 +223,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="vertical"
+                            android:clickable="true"
+                            android:focusable="true"
                             android:paddingStart="16dp"
                             android:paddingTop="16dp"
                             android:paddingEnd="16dp"
@@ -275,6 +277,8 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:orientation="horizontal"
+                            android:clickable="true"
+                            android:focusable="true"
                             android:paddingStart="16dp"
                             android:paddingTop="16dp"
                             android:paddingEnd="16dp"
@@ -322,6 +326,8 @@
                             android:layout_weight="1"
                             android:orientation="horizontal"
                             android:paddingStart="16dp"
+                            android:clickable="true"
+                            android:focusable="true"
                             android:paddingTop="16dp"
                             android:paddingEnd="16dp"
                             android:paddingBottom="16dp">
@@ -361,6 +367,8 @@
                         android:id="@+id/layoutPayment"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
                         android:orientation="horizontal"
                         android:paddingStart="16dp"
                         android:paddingTop="16dp"
@@ -416,6 +424,7 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/layoutCheckOut"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="6dp">

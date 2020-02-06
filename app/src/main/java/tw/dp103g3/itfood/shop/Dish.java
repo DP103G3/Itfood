@@ -1,7 +1,5 @@
 package tw.dp103g3.itfood.shop;
 
-import java.io.Serializable;
-
 public class Dish {
 	private int id;
 	private String name;
@@ -76,4 +74,6 @@ public class Dish {
 	public void setPrice(int price) {
 		this.price = price;
 	}
+
+
 }

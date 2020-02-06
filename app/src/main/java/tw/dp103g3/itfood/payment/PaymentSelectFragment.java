@@ -1,4 +1,4 @@
-package tw.dp103g3.itfood.address;
+package tw.dp103g3.itfood.payment;
 
 import android.app.Activity;
 import android.content.Context;
@@ -38,25 +38,21 @@ import tw.dp103g3.itfood.task.CommonTask;
 
 import static tw.dp103g3.itfood.Common.DATE_FORMAT;
 import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
+import static tw.dp103g3.itfood.Common.formatCardNum;
 
 
-public class AddressSelectFragment extends Fragment {
-    private String TAG = "TAG_AddressSelectFragment";
-    private Toolbar toolbar;
-    private RecyclerView recyclerView;
-    private CommonTask getAddressTask;
+public class PaymentSelectFragment extends Fragment {
+    private Toolbar toolbarPaymentSelect;
+    private RecyclerView rvPaymentRadioButton;
     private Activity activity;
-    private List<Address> addresses;
+    private CommonTask getPaymentTask;
+    private SharedViewModel model;
+    private Payment selectedPayment;
+    private View view;
     private SharedPreferences pref;
     private int mem_id;
-    private Address selectedAddress;
     private CardView cardViewCheck;
-    private View view;
-    private SharedViewModel model;
-
-
-    public AddressSelectFragment() {
-    }
+    private List<Payment> payments;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,97 +60,95 @@ public class AddressSelectFragment extends Fragment {
         activity = getActivity();
         pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = pref.getInt("mem_id", 0);
-
-        model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_address_select, container, false);
+        return inflater.inflate(R.layout.fragment_payment_select, container, false);
     }
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         this.view = view;
 
-        model.getSelectedAddress().observe(getViewLifecycleOwner(), address -> {
-            selectedAddress = address;
+        model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
+        model.getSelectedPayment().observe(getViewLifecycleOwner(), payment -> {
+            selectedPayment = payment;
         });
 
-        toolbar = view.findViewById(R.id.toolbarAddressSelect);
+        toolbarPaymentSelect = view.findViewById(R.id.toolbarPaymentSelect);
+        rvPaymentRadioButton = view.findViewById(R.id.rvPaymentRadioButton);
         cardViewCheck = view.findViewById(R.id.cardViewCheck);
-        recyclerView = view.findViewById(R.id.rvAddressRadioButton);
-        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
 
-        toolbar.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());
-        cardViewCheck.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                model.selectAddress(selectedAddress);
-                Navigation.findNavController(v).popBackStack();
-            }
+        rvPaymentRadioButton.setLayoutManager(new LinearLayoutManager(activity));
+
+        toolbarPaymentSelect.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());
+        cardViewCheck.setOnClickListener(v -> {
+            model.selectPayment(selectedPayment);
+            Navigation.findNavController(v).popBackStack();
         });
 
-        addresses = getAddresses(mem_id);
-
-        ShowAddress(addresses);
+        payments = getPayments(mem_id);
+        ShowPayments(payments);
 
     }
 
-    private List<Address> getAddresses(int mem_id) {
-        List<Address> addresses = new ArrayList<>();
+    private List<Payment> getPayments(int mem_id) {
+        List<Payment> payments = new ArrayList<>();
         if (Common.networkConnected(activity)) {
-            String url = Url.URL + "/AddressServlet";
+            String url = Url.URL + "/PaymentServlet";
             JsonObject jsonObject = new JsonObject();
             Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-            jsonObject.addProperty("action", "getAllShow");
+            jsonObject.addProperty("action", "getByMemberId");
             jsonObject.addProperty("mem_id", mem_id);
+            jsonObject.addProperty("state", 1);
             String jsonOut = jsonObject.toString();
-            getAddressTask = new CommonTask(url, jsonOut);
+            getPaymentTask = new CommonTask(url, jsonOut);
             try {
-                String jsonIn = getAddressTask.execute().get();
-                Type listType = new TypeToken<List<Address>>() {
+                String jsonIn = getPaymentTask.execute().get();
+                Type listType = new TypeToken<List<Payment>>() {
                 }.getType();
-                addresses = gson.fromJson(jsonIn, listType);
+                payments = gson.fromJson(jsonIn, listType);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
             Common.showToast(activity, R.string.textNoNetwork);
         }
-        return addresses;
+        return payments;
     }
 
-    private void ShowAddress(List<Address> addresses) {
-        if (addresses == null || addresses.isEmpty()) {
+    private void ShowPayments(List<Payment> payments) {
+        if (payments == null || payments.isEmpty()) {
             if (Common.networkConnected(activity)) {
-                Common.showToast(activity, "no address found");
+                Common.showToast(activity, "no payment found");
                 Navigation.findNavController(view).popBackStack();
             }
         }
-        AddressAdapter addressAdapter = (AddressAdapter) recyclerView.getAdapter();
-        if (addressAdapter == null) {
-            recyclerView.setAdapter(new AddressAdapter(activity, addresses));
+        PaymentSelectFragment.PaymentAdapter paymentAdapter = (PaymentSelectFragment.PaymentAdapter) rvPaymentRadioButton.getAdapter();
+        if (paymentAdapter == null) {
+            rvPaymentRadioButton.setAdapter(new PaymentSelectFragment.PaymentAdapter(activity, payments));
         } else {
-            addressAdapter.setAddresses(addresses);
-            addressAdapter.notifyDataSetChanged();
+            paymentAdapter.setPayments(payments);
+            paymentAdapter.notifyDataSetChanged();
         }
     }
 
-    private class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.MyViewHolder> {
+    private class PaymentAdapter extends RecyclerView.Adapter<PaymentSelectFragment.PaymentAdapter.MyViewHolder> {
         private Context context;
-        private List<Address> addresses;
+        private List<Payment> payments;
 
-        public AddressAdapter(Context context, List<Address> addresses) {
-            this.addresses = addresses;
+        public PaymentAdapter(Context context, List<Payment> payments) {
+            this.payments = payments;
             this.context = context;
         }
 
-        void setAddresses(List<Address> addresses) {
-            this.addresses = addresses;
+        void setPayments(List<Payment> payments) {
+            this.payments = payments;
         }
 
         private class MyViewHolder extends RecyclerView.ViewHolder {
@@ -168,39 +162,46 @@ public class AddressSelectFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return addresses.size() + 1;
+            return payments.size() + 1;
         }
 
         @NonNull
         @Override
-        public AddressAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public PaymentSelectFragment.PaymentAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View itemView = LayoutInflater.from(context)
                     .inflate(R.layout.select_radio_button_item_view, parent, false);
-            return new AddressAdapter.MyViewHolder(itemView);
+            return new PaymentSelectFragment.PaymentAdapter.MyViewHolder(itemView);
         }
 
         private RadioButton lastChecked = null;
 
         @Override
-        public void onBindViewHolder(@NonNull AddressAdapter.MyViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull PaymentSelectFragment.PaymentAdapter.MyViewHolder holder, int position) {
+            Drawable visa = getResources().getDrawable(R.drawable.visa, activity.getTheme());
+            visa.setBounds(0, 0, 72, 72);
+            Drawable master = getResources().getDrawable(R.drawable.mastercard, activity.getTheme());
+            master.setBounds(0, 0, 72, 72);
             Drawable checkedIcon = getResources().getDrawable(R.drawable.round_check_circle, activity.getTheme());
+            int height = checkedIcon.getIntrinsicHeight();
+            int width = checkedIcon.getIntrinsicWidth();
+            checkedIcon.setBounds(0, 0, width, height);
             ColorStateList tint = getResources().getColorStateList(R.color.radio_button_custom_button, activity.getTheme());
             checkedIcon.setTintList(tint);
-            if (position == addresses.size()) {
-                holder.radioButton.setText(R.string.addAddress);
+            if (position == payments.size()) {
                 Drawable add = getResources().getDrawable(R.drawable.add, activity.getTheme());
                 holder.radioButton.setCompoundDrawablesWithIntrinsicBounds(add, null, null, null);
-                holder.radioButton.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.action_addressSelectFragment_to_addAddressFragment));
+                holder.radioButton.setText(R.string.addPayment);
+                holder.radioButton.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.action_paymentSelectFragment_to_addPaymentFragment));
             } else {
-                final Address address = addresses.get(position);
-                holder.radioButton.setCompoundDrawablesWithIntrinsicBounds(checkedIcon, null, null, null);
-                holder.radioButton.setText(address.getInfo());
+                final Payment payment = payments.get(position);
+                holder.radioButton.setText(formatCardNum(payment.getPay_cardnum()));
                 holder.radioButton.setTag(position);
+                holder.radioButton.setCompoundDrawables(checkedIcon, null, null, null);
 
-                if (address.getId() == selectedAddress.getId()) {
+                if ((selectedPayment != null) && (payment.getPay_id() == selectedPayment.getPay_id())) {
                     holder.radioButton.setChecked(true);
                     lastChecked = holder.radioButton;
-                    selectedAddress = addresses.get(position);
+                    selectedPayment = payments.get(position);
                 } else {
                     holder.radioButton.setChecked(false);
                 }
@@ -213,11 +214,19 @@ public class AddressSelectFragment extends Fragment {
                         }
                         lastChecked = rb;
                     }
-                    selectedAddress = address;
+                    selectedPayment = payment;
                 });
+
+                if (holder.radioButton.getText().toString().startsWith("4")) {
+                    holder.radioButton.setCompoundDrawables(checkedIcon, null, visa, null);
+                } else if (holder.radioButton.getText().toString().startsWith("5")) {
+                    holder.radioButton.setCompoundDrawables(checkedIcon, null, master, null);
+                }
+
+
             }
         }
-
-
     }
+
+
 }

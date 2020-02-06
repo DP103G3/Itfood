@@ -56,10 +56,12 @@ public class MainActivity extends AppCompatActivity {
     private LocationCallback locationCallback;
     private static Location lastLocation;
     private FusedLocationProviderClient fusedLocationClient;
+    private View decorView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        decorView = getWindow().getDecorView();
         setContentView(R.layout.activity_main);
         Activity activity = this;
         SharedPreferences memberPref = activity.getSharedPreferences(Common.PREFERENCES_MEMBER, Context.MODE_PRIVATE);
@@ -106,11 +108,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        View decorView = getWindow().getDecorView();
+
         decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
     }
+
 
     public void checkLocationSettings() {
         LocationSettingsRequest.Builder builder =
@@ -146,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     lastLocation = task.getResult();
                     Address localAddress = new Address(0, getString(R.string.textLocalPosition), null,
-                            lastLocation.getLatitude() ,lastLocation.getLongitude());
+                            lastLocation.getLatitude(), lastLocation.getLongitude());
                     File file = new File(this.getFilesDir(), "localAddress");
                     try (ObjectOutputStream out =
                                  new ObjectOutputStream(new FileOutputStream(file))) {
@@ -198,4 +202,6 @@ public class MainActivity extends AppCompatActivity {
             Common.showToast(this, R.string.textLocationAccessNotGranted);
         }
     }
+
+
 }

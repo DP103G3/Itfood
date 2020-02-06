@@ -24,6 +24,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -47,6 +48,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -57,6 +59,10 @@ import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.address.Address;
 import tw.dp103g3.itfood.main.MainActivity;
 import tw.dp103g3.itfood.main.SharedViewModel;
+import tw.dp103g3.itfood.member.Member;
+import tw.dp103g3.itfood.order.Order;
+import tw.dp103g3.itfood.order.OrderDetail;
+import tw.dp103g3.itfood.payment.Payment;
 import tw.dp103g3.itfood.shop.Dish;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
@@ -65,6 +71,7 @@ import static android.view.View.GONE;
 import static tw.dp103g3.itfood.Common.DATE_FORMAT;
 import static tw.dp103g3.itfood.Common.LOGIN_FALSE;
 import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
+import static tw.dp103g3.itfood.Common.formatCardNum;
 import static tw.dp103g3.itfood.Common.getDayOfWeek;
 
 
@@ -78,6 +85,7 @@ public class ShoppingCartFragment extends Fragment {
     private Shop shop;
     private Map<Integer, Integer> orderDetails;
     private Gson gson;
+    private CardView layoutCheckOut;
     private RecyclerView rvDish;
     private DishAdapter dishAdapter;
     private CommonTask getdishTask, getAddressTask;
@@ -86,20 +94,24 @@ public class ShoppingCartFragment extends Fragment {
     private NavController navController;
     private static SparseIntArray totals;
     private View fragmentView;
-    private TextView tvTotalBefore, tvTotalAfter, tvBottomTotal, tvAddress, tvOrderType, tvDeliveryTime;
+    private TextView tvTotalBefore, tvTotalAfter, tvBottomTotal, tvAddress, tvOrderType, tvDeliveryTime, tvPaymentMethod;
     private int totalBefore, totalAfter, mem_id, orderType, selectedOrderType;
     private ScrollView scrollView;
     private BottomNavigationView bottomNavigationView;
     private Animator animator;
     private ConstraintLayout layoutBottom;
     private BottomNavigationView shoppingCartBottomView;
-    private LinearLayout layoutDeliveryAddress, layoutOrderType, layoutDeliveryTime;
+    private LinearLayout layoutDeliveryAddress, layoutOrderType, layoutPayment, layoutDeliveryTime;
     private Address address;
+    private Payment payment;
     private Location lastLocation;
     private final int DELIVERY = 1;
     private final int SELFPICK = 0;
     private View divider;
     private SharedViewModel model;
+    private Date date;
+    private Member member;
+
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -111,18 +123,27 @@ public class ShoppingCartFragment extends Fragment {
         super.onCreate(savedInstanceState);
         activity = getActivity();
         address = null;
+        payment = null;
+        date = null;
         model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         model.selectDeliveryTime(null);
+        model.selectPayment(null);
+        model.selectAddress(null);
 
         orderType = DELIVERY;
         totals = new SparseIntArray();
         memberPref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = memberPref.getInt("mem_id", LOGIN_FALSE);
+
         orderDetail = new File(activity.getFilesDir(), "orderDetail");
 
         if (mem_id != LOGIN_FALSE) {
             address = getAddresses(mem_id).isEmpty() ? null : getAddresses(mem_id).get(0);
+            payment = getPayments(mem_id).isEmpty() ? null : getPayments(mem_id).get(0);
+            member = getMember(mem_id);
+            Log.d(TAG, "MEM_ID = " + member.getMemId());
         }
+
 
         try (BufferedReader in = new BufferedReader(new FileReader(orderDetail))) {
             gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
@@ -164,16 +185,20 @@ public class ShoppingCartFragment extends Fragment {
         shoppingCartBottomView = view.findViewById(R.id.shoppingCartBottomView);
         layoutBottom = view.findViewById(R.id.layoutBottom);
         layoutDeliveryAddress = view.findViewById(R.id.layoutDeliveryAddress);
+        layoutCheckOut = view.findViewById(R.id.layoutCheckOut);
         tvBottomTotal = view.findViewById(R.id.tvBottomTotal);
         tvTotalAfter = view.findViewById(R.id.tvTotalAfter);
         tvAddress = view.findViewById(R.id.tvAddress);
         tvTotalBefore = view.findViewById(R.id.tvTotalBefore);
         tvDeliveryTime = view.findViewById(R.id.tvDeliveryTime);
+        tvPaymentMethod = view.findViewById(R.id.tvPaymentMethod);
         tvOrderType = view.findViewById(R.id.tvOrderType);
         navController = Navigation.findNavController(view);
         scrollView = view.findViewById(R.id.scrollView);
         layoutOrderType = view.findViewById(R.id.layoutOrderType);
         layoutDeliveryTime = view.findViewById(R.id.layoutDeliveryTime);
+        layoutPayment = view.findViewById(R.id.layoutPayment);
+
         divider = view.findViewById(R.id.divider);
         bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
         animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_down);
@@ -203,8 +228,24 @@ public class ShoppingCartFragment extends Fragment {
 
 
         model.getSelectedAddress().observe(getViewLifecycleOwner(), address -> {
-            this.address = address;
-            tvAddress.setText(address.getInfo());
+            if (address != null) {
+                this.address = address;
+                tvAddress.setText(address.getInfo());
+            }
+        });
+
+        model.getSelectedPayment().observe(getViewLifecycleOwner(), payment -> {
+            if (payment != null) {
+                this.payment = payment;
+                tvPaymentMethod.setText(formatCardNum(payment.getPay_cardnum()));
+            }
+        });
+
+        layoutPayment.setOnClickListener(v -> {
+            if (mem_id != LOGIN_FALSE) {
+                model.selectPayment(payment);
+                navController.navigate(R.id.action_shoppingCartFragment_to_paymentSelectFragment);
+            }
         });
 
         layoutDeliveryTime.setOnClickListener(v -> {
@@ -237,6 +278,7 @@ public class ShoppingCartFragment extends Fragment {
 
         model.getSelectedDeliveryTime().observe(getViewLifecycleOwner(), date -> {
             if (date != null) {
+                this.date = date;
                 Calendar calNow = Calendar.getInstance();
                 Calendar cal = Calendar.getInstance();
                 Calendar tomorrow = Calendar.getInstance();
@@ -263,20 +305,17 @@ public class ShoppingCartFragment extends Fragment {
             }
         });
 
+        if (payment != null) {
+            tvPaymentMethod.setText(formatCardNum(payment.getPay_cardnum()));
+        } else {
+            tvPaymentMethod.setText("");
+        }
+
         //設定tvAddress的預設文字，如果未登入會顯示最近一次定位的地址，登入則會顯示第一個個人地址
         if (address != null) {
             tvAddress.setText(address.getInfo());
         } else {
-            double latitude = lastLocation.getLatitude();
-            double longitude = lastLocation.getLongitude();
-            android.location.Address localAddress = reverseGeocode(latitude, longitude);
-            StringBuilder sb = new StringBuilder();
-            if (localAddress != null) {
-                for (int i = 0; i <= localAddress.getMaxAddressLineIndex(); i++) {
-                    sb.append(localAddress.getAddressLine(i)).append("\n");
-                }
-            }
-            tvAddress.setText(sb);
+            tvAddress.setText("");
         }
 
         //確認登入狀態，以之決定btLogin是否顯示
@@ -284,19 +323,19 @@ public class ShoppingCartFragment extends Fragment {
         if (mem_id != LOGIN_FALSE) {
             btLogin.setVisibility(GONE);
         }
-        btLogin.setOnClickListener(v -> Navigation.findNavController(v)
+        btLogin.setOnClickListener(v -> navController
                 .navigate(R.id.action_shoppingCartFragment_to_loginFragment));
 
         if (mem_id != LOGIN_FALSE) {
             layoutDeliveryAddress.setOnClickListener(v -> {
                 model.selectAddress(address);
-                Navigation.findNavController(v).navigate(R.id.action_shoppingCartFragment_to_addressSelectFragment);
+                navController.navigate(R.id.action_shoppingCartFragment_to_addressSelectFragment);
             });
         }
 
         toolbarShoppingCart = view.findViewById(R.id.toolbarShoppingCart);
         toolbarShoppingCart.setTitle(shopName);
-        toolbarShoppingCart.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());
+        toolbarShoppingCart.setNavigationOnClickListener(v -> navController.popBackStack());
 
         dishes = new ArrayList<>();
         orderDetails.forEach((dish_id, dish_count) -> dishes.add(getDish(dish_id)));
@@ -306,6 +345,82 @@ public class ShoppingCartFragment extends Fragment {
         rvDish.setLayoutManager(new LinearLayoutManager(activity));
         ShowDishes(dishes);
 
+        layoutCheckOut.setOnClickListener(v -> {
+            if (mem_id != LOGIN_FALSE) {
+                Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+                int adrs_id = 0;
+                Date orderIdeal;
+                List<OrderDetail> orderDetails = new ArrayList<>();
+                Calendar now = Calendar.getInstance();
+
+                if (date == null) {
+                    now.add(Calendar.MINUTE, 30);
+                    orderIdeal = now.getTime();
+                    now.add(Calendar.MINUTE, -30);
+                } else {
+                    orderIdeal = date;
+                }
+
+                if (orderType == 0) {
+                    adrs_id = 0;
+                } else {
+                    adrs_id = address.getId();
+                }
+
+
+                Order order = new Order(shop, mem_id, 0, payment.getPay_id(), 0, orderIdeal,
+                        now.getTime(), null, adrs_id, member.getMemName(), member.getMemPhone(),
+                        totalAfter, 0, 1, orderType);
+
+                int orderCount = sendOrder(order);
+                if (orderCount != 0) {
+                    try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail))) {
+                        JsonObject jsonObject = new JsonObject();
+                        jsonObject.addProperty("shop", gson.toJson(new Shop()));
+                        this.orderDetails.clear();
+                        jsonObject.addProperty("orderDetails", gson.toJson(orderDetails));
+                        out.write(jsonObject.toString());
+                        navController.popBackStack();
+                        Common.showToast(activity, "訂單下訂成功");
+                    } catch (IOException e) {
+                        Log.e(TAG, e.toString());
+                        Common.showToast(activity, "訂單下訂失敗");
+                    }
+                } else {
+                    Common.showToast(activity, "訂單下訂失敗");
+                }
+
+
+            }
+        });
+    }
+
+    private int sendOrder(Order order) {
+        Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+        List<JsonObject> jsonObjects = new ArrayList<>();
+        int count = 0;
+        String url = Url.URL + "/OrderServlet";
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("action", "orderInsert");
+        jsonObject.addProperty("order", gson.toJson(order));
+        orderDetails.forEach((dish_id, dish_count) -> {
+            Dish dish = getDish(dish_id);
+            JsonObject object = new JsonObject();
+            object.addProperty("dish_id", dish_id);
+            object.addProperty("od_count", dish_count);
+            object.addProperty("od_price", (dish_count * dish.getPrice()));
+            object.addProperty("od_message", "");
+            jsonObjects.add(object);
+        });
+        jsonObject.addProperty("orderDetailsJson", gson.toJson(jsonObjects));
+        String jsonOut = jsonObject.toString();
+        try {
+            String jsonIn = new CommonTask(url, jsonOut).execute().get();
+            count = Integer.valueOf(jsonIn);
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+        }
+        return count;
     }
 
     private List<Address> getAddresses(int mem_id) {
@@ -332,12 +447,32 @@ public class ShoppingCartFragment extends Fragment {
         return addresses;
     }
 
+    private Member getMember(int mem_id) {
+        Member member = new Member();
+        if (Common.networkConnected(activity)) {
+            String url = Url.URL + "/MemberServlet";
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("action", "findById");
+            jsonObject.addProperty("mem_id", mem_id);
+            String jsonOut = jsonObject.toString();
+            CommonTask getMemberTask = new CommonTask(url, jsonOut);
+            try {
+                String jsonIn = getMemberTask.execute().get();
+                member = gson.fromJson(jsonIn, Member.class);
+            } catch (Exception e) {
+                Log.e(TAG, e.toString());
+            }
+        } else {
+            Common.showToast(activity, R.string.textNoNetwork);
+        }
+        return member;
+    }
+
     private Dish getDish(int dish_id) {
         Dish dish = null;
         if (Common.networkConnected(activity)) {
             String url = Url.URL + "/DishServlet";
             JsonObject jsonObject = new JsonObject();
-            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
             jsonObject.addProperty("action", "getDishById");
             jsonObject.addProperty("id", dish_id);
             String jsonOut = jsonObject.toString();
@@ -352,6 +487,30 @@ public class ShoppingCartFragment extends Fragment {
             Common.showToast(activity, R.string.textNoNetwork);
         }
         return dish;
+    }
+
+    private List<Payment> getPayments(int mem_id) {
+        List<Payment> payments = new ArrayList<>();
+        if (Common.networkConnected(activity)) {
+            String url = Url.URL + "/PaymentServlet";
+            JsonObject jsonObject = new JsonObject();
+            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+            jsonObject.addProperty("action", "getByMemberId");
+            jsonObject.addProperty("mem_id", mem_id);
+            jsonObject.addProperty("state", 1);
+            String jsonOut = jsonObject.toString();
+            try {
+                String jsonIn = new CommonTask(url, jsonOut).execute().get();
+                Type listType = new TypeToken<List<Payment>>() {
+                }.getType();
+                payments = gson.fromJson(jsonIn, listType);
+            } catch (Exception e) {
+                Log.e(TAG, e.toString());
+            }
+        } else {
+            Common.showToast(activity, R.string.textNoNetwork);
+        }
+        return payments;
     }
 
 
@@ -571,3 +730,5 @@ public class ShoppingCartFragment extends Fragment {
         animator.start();
     }
 }
+
+//TODO 增加檢查是否登入以及彈出視窗

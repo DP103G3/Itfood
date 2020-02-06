@@ -1,6 +1,8 @@
 package tw.dp103g3.itfood.payment;
 
-public class Payment {
+import java.io.Serializable;
+
+public class Payment implements Serializable {
 		private int pay_id;
 		private String pay_name;
 		private int member_id;

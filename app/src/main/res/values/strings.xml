@@ -83,4 +83,12 @@
     <string name="deliveryTime">送餐時間</string>
     <string name="cancel">取消</string>
     <string name="addPayment">新增信用卡</string>
+    <string name="payInCash">付現</string>
+    <string name="cardHolderName">持卡人姓名</string>
+    <string name="creditCardNumber">信用卡號碼</string>
+    <string name="expirationDate">到期日</string>
+    <string name="safeCode">安全碼</string>
+    <string name="cardHolderPhoneNumber">持卡人電話</string>
+    <string name="addPaymentFail">新增信用卡失敗，請稍後再試</string>
+    <string name="addPaymentSuccess">新增信用卡成功</string>
 </resources>

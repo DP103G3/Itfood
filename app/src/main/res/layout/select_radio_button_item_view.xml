@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorItemBackground"
+        android:button="@null"
         android:checked="false"
         android:drawablePadding="16dp"
         android:fontFamily="@font/noto_sans"

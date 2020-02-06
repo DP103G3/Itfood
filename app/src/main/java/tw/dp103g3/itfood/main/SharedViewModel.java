@@ -17,6 +17,7 @@ public class SharedViewModel extends ViewModel {
     private final MutableLiveData<Date> deliveryTimeSelected = new MutableLiveData<>();
     private final MutableLiveData<Payment> paymentSelected = new MutableLiveData<>();
     private final MutableLiveData<Address> addressSelected = new MutableLiveData<>();
+    private final MutableLiveData<String> expirationDateSelected = new MutableLiveData<>();
 
     public void selectDistrict(District district) {
         districtSelected.setValue(district);
@@ -38,6 +39,10 @@ public class SharedViewModel extends ViewModel {
         addressSelected.setValue(address);
     }
 
+    public void setExpirationDate(String date) {
+        expirationDateSelected.setValue(date);
+    }
+
 
     public LiveData<City> getSelectedCity() {
         return citySelected;
@@ -57,6 +62,10 @@ public class SharedViewModel extends ViewModel {
 
     public LiveData<Address> getSelectedAddress() {
         return addressSelected;
+    }
+
+    public LiveData<String> getSelectedExpirationDate() {
+        return expirationDateSelected;
     }
 
 

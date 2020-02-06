@@ -13,10 +13,11 @@ public class Member implements Serializable {
 	private Date mem_suspendtime;
 	private int mem_state;
 
-	public Member() {};
-	
+	public Member() {
+	}
+
 	public Member(int mem_id, String mem_name, String mem_password, String mem_email, String mem_phone,
-			Date mem_joindate, Date mem_suspendtime, int mem_state) {
+				  Date mem_joindate, Date mem_suspendtime, int mem_state) {
 		super();
 		this.mem_id = mem_id;
 		this.mem_name = mem_name;
@@ -26,7 +27,24 @@ public class Member implements Serializable {
 		this.mem_joindate = mem_joindate;
 		this.mem_suspendtime = mem_suspendtime;
 		this.mem_state = mem_state;
-		
+	}
+
+	public Member(int mem_id, String mem_name, String mem_password, String mem_email, String mem_phone, Date mem_joindate, int mem_state
+	) {
+		super();
+		this.mem_id = mem_id;
+		this.mem_name = mem_name;
+		this.mem_password = mem_password;
+		this.mem_email = mem_email;
+		this.mem_phone = mem_phone;
+		this.mem_joindate = mem_joindate;
+		this.mem_state = mem_state;
+	}
+
+	public Member(int mem_id, int mem_state) {
+		super();
+		this.mem_id = mem_id;
+		this.mem_state = mem_state;
 	}
 	public int getMemId() {
 		return mem_id;

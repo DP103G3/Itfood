@@ -174,4 +174,24 @@ public class Common {
         }
         return day;
     }
+
+    public static String formatCardNum(String cardNum) {
+        char[] chars = cardNum.toCharArray();
+        if (chars[0] == '4') {
+            return new StringBuilder().append(chars[0]).append(chars[1]).append(chars[2])
+                    .append(chars[3]).append("-").append("****").append("-").append("****").append("-")
+                    .append(chars[12]).append(chars[13]).append(chars[14])
+                    .append(chars[15]).toString();
+        } else if (chars[0] == '5') {
+            return new StringBuilder().append(chars[0]).append(chars[1]).append(chars[2])
+                    .append(chars[3]).append("-").append("****").append("-").append("****").append("-")
+                    .append(chars[12]).append(chars[13]).append(chars[14])
+                    .append(chars[15]).toString();
+        } else {
+            return new StringBuilder().append(chars[0]).append(chars[1]).append(chars[2])
+                    .append(chars[3]).append("-").append("****").append("-").append("****").append("-")
+                    .append(chars[12]).append(chars[13]).append(chars[14])
+                    .append(chars[15]).toString();
+        }
+    }
 }
