@@ -7,8 +7,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.location.Geocoder;
-import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -25,7 +23,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -57,7 +54,6 @@ import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.address.Address;
-import tw.dp103g3.itfood.main.MainActivity;
 import tw.dp103g3.itfood.main.SharedViewModel;
 import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.order.Order;
@@ -77,46 +73,30 @@ import static tw.dp103g3.itfood.Common.getDayOfWeek;
 
 public class ShoppingCartFragment extends Fragment {
     private static final String TAG = "TAG_ShoppingCartFragment";
-    private Toolbar toolbarShoppingCart;
-    private SharedPreferences memberPref;
     private Activity activity;
-    private Button btLogin;
     private File orderDetail;
     private Shop shop;
     private Map<Integer, Integer> orderDetails;
     private Gson gson;
-    private CardView layoutCheckOut;
     private RecyclerView rvDish;
-    private DishAdapter dishAdapter;
-    private CommonTask getdishTask, getAddressTask;
-    private List<Dish> dishes;
     private String shopName;
     private NavController navController;
     private static SparseIntArray totals;
-    private View fragmentView;
     private TextView tvTotalBefore, tvTotalAfter, tvBottomTotal, tvAddress, tvOrderType, tvDeliveryTime, tvPaymentMethod;
     private int totalBefore, totalAfter, mem_id, orderType, selectedOrderType;
-    private ScrollView scrollView;
     private BottomNavigationView bottomNavigationView;
     private Animator animator;
-    private ConstraintLayout layoutBottom;
-    private BottomNavigationView shoppingCartBottomView;
-    private LinearLayout layoutDeliveryAddress, layoutOrderType, layoutPayment, layoutDeliveryTime;
+    private LinearLayout layoutDeliveryAddress;
     private Address address;
     private Payment payment;
-    private Location lastLocation;
     private final int DELIVERY = 1;
-    private final int SELFPICK = 0;
     private View divider;
     private SharedViewModel model;
     private Date date;
     private Member member;
+    private Cart cart;
 
 
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -129,21 +109,12 @@ public class ShoppingCartFragment extends Fragment {
         model.selectDeliveryTime(null);
         model.selectPayment(null);
         model.selectAddress(null);
-
         orderType = DELIVERY;
         totals = new SparseIntArray();
-        memberPref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
+        SharedPreferences memberPref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = memberPref.getInt("mem_id", LOGIN_FALSE);
 
         orderDetail = new File(activity.getFilesDir(), "orderDetail");
-
-        if (mem_id != LOGIN_FALSE) {
-            address = getAddresses(mem_id).isEmpty() ? null : getAddresses(mem_id).get(0);
-            payment = getPayments(mem_id).isEmpty() ? null : getPayments(mem_id).get(0);
-            member = getMember(mem_id);
-            Log.d(TAG, "MEM_ID = " + member.getMemId());
-        }
-
 
         try (BufferedReader in = new BufferedReader(new FileReader(orderDetail))) {
             gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
@@ -161,13 +132,20 @@ public class ShoppingCartFragment extends Fragment {
             e.printStackTrace();
         }
 
-        lastLocation = MainActivity.getLocation();
 
-    }
+        if (mem_id != LOGIN_FALSE) {
+            List<Integer> dishIds = new ArrayList<>();
+            orderDetails.forEach((id, count) -> dishIds.add(id));
+            cart = getCart(dishIds, mem_id);
+            address = cart.getAddresses().isEmpty() ? null : cart.getAddresses().get(0);
+            payment = cart.getPayments().isEmpty() ? null : cart.getPayments().get(0);
+            member = cart.getMember();
+//            address = getAddresses(mem_id).isEmpty() ? null : getAddresses(mem_id).get(0);
+//            payment = getPayments(mem_id).isEmpty() ? null : getPayments(mem_id).get(0);
+//            member = getMember(mem_id);
+        }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+
     }
 
     @Override
@@ -181,11 +159,9 @@ public class ShoppingCartFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        fragmentView = view;
-        shoppingCartBottomView = view.findViewById(R.id.shoppingCartBottomView);
-        layoutBottom = view.findViewById(R.id.layoutBottom);
+        BottomNavigationView shoppingCartBottomView = view.findViewById(R.id.shoppingCartBottomView);
         layoutDeliveryAddress = view.findViewById(R.id.layoutDeliveryAddress);
-        layoutCheckOut = view.findViewById(R.id.layoutCheckOut);
+        CardView layoutCheckOut = view.findViewById(R.id.layoutCheckOut);
         tvBottomTotal = view.findViewById(R.id.tvBottomTotal);
         tvTotalAfter = view.findViewById(R.id.tvTotalAfter);
         tvAddress = view.findViewById(R.id.tvAddress);
@@ -194,10 +170,10 @@ public class ShoppingCartFragment extends Fragment {
         tvPaymentMethod = view.findViewById(R.id.tvPaymentMethod);
         tvOrderType = view.findViewById(R.id.tvOrderType);
         navController = Navigation.findNavController(view);
-        scrollView = view.findViewById(R.id.scrollView);
-        layoutOrderType = view.findViewById(R.id.layoutOrderType);
-        layoutDeliveryTime = view.findViewById(R.id.layoutDeliveryTime);
-        layoutPayment = view.findViewById(R.id.layoutPayment);
+        ScrollView scrollView = view.findViewById(R.id.scrollView);
+        LinearLayout layoutOrderType = view.findViewById(R.id.layoutOrderType);
+        LinearLayout layoutDeliveryTime = view.findViewById(R.id.layoutDeliveryTime);
+        LinearLayout layoutPayment = view.findViewById(R.id.layoutPayment);
 
         divider = view.findViewById(R.id.divider);
         bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
@@ -276,6 +252,7 @@ public class ShoppingCartFragment extends Fragment {
 
         tvDeliveryTime.setText(R.string.tvDeliveryTime);
 
+
         model.getSelectedDeliveryTime().observe(getViewLifecycleOwner(), date -> {
             if (date != null) {
                 this.date = date;
@@ -319,7 +296,7 @@ public class ShoppingCartFragment extends Fragment {
         }
 
         //確認登入狀態，以之決定btLogin是否顯示
-        btLogin = view.findViewById(R.id.btLogin);
+        Button btLogin = view.findViewById(R.id.btLogin);
         if (mem_id != LOGIN_FALSE) {
             btLogin.setVisibility(GONE);
         }
@@ -333,22 +310,25 @@ public class ShoppingCartFragment extends Fragment {
             });
         }
 
-        toolbarShoppingCart = view.findViewById(R.id.toolbarShoppingCart);
+        Toolbar toolbarShoppingCart = view.findViewById(R.id.toolbarShoppingCart);
         toolbarShoppingCart.setTitle(shopName);
         toolbarShoppingCart.setNavigationOnClickListener(v -> navController.popBackStack());
 
-        dishes = new ArrayList<>();
-        orderDetails.forEach((dish_id, dish_count) -> dishes.add(getDish(dish_id)));
+        List<Dish> dishes;
+        dishes = cart.getDishes();
+//        orderDetails.forEach((dish_id, dish_count) -> dishes.add(getDish(dish_id)));
 
         rvDish = view.findViewById(R.id.rvDish);
 
         rvDish.setLayoutManager(new LinearLayoutManager(activity));
         ShowDishes(dishes);
 
+
+        //結帳按鈕
         layoutCheckOut.setOnClickListener(v -> {
             if (mem_id != LOGIN_FALSE) {
                 Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-                int adrs_id = 0;
+                int adrs_id;
                 Date orderIdeal;
                 List<OrderDetail> orderDetails = new ArrayList<>();
                 Calendar now = Calendar.getInstance();
@@ -366,7 +346,6 @@ public class ShoppingCartFragment extends Fragment {
                 } else {
                     adrs_id = address.getId();
                 }
-
 
                 Order order = new Order(shop, mem_id, 0, payment.getPay_id(), 0, orderIdeal,
                         now.getTime(), null, adrs_id, member.getMemName(), member.getMemPhone(),
@@ -389,8 +368,6 @@ public class ShoppingCartFragment extends Fragment {
                 } else {
                     Common.showToast(activity, "訂單下訂失敗");
                 }
-
-
             }
         });
     }
@@ -423,51 +400,6 @@ public class ShoppingCartFragment extends Fragment {
         return count;
     }
 
-    private List<Address> getAddresses(int mem_id) {
-        List<Address> addresses = new ArrayList<>();
-        if (Common.networkConnected(activity)) {
-            String url = Url.URL + "/AddressServlet";
-            JsonObject jsonObject = new JsonObject();
-            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-            jsonObject.addProperty("action", "getAllShow");
-            jsonObject.addProperty("mem_id", mem_id);
-            String jsonOut = jsonObject.toString();
-            getAddressTask = new CommonTask(url, jsonOut);
-            try {
-                String jsonIn = getAddressTask.execute().get();
-                Type listType = new TypeToken<List<Address>>() {
-                }.getType();
-                addresses = gson.fromJson(jsonIn, listType);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            Common.showToast(activity, R.string.textNoNetwork);
-        }
-        return addresses;
-    }
-
-    private Member getMember(int mem_id) {
-        Member member = new Member();
-        if (Common.networkConnected(activity)) {
-            String url = Url.URL + "/MemberServlet";
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("action", "findById");
-            jsonObject.addProperty("mem_id", mem_id);
-            String jsonOut = jsonObject.toString();
-            CommonTask getMemberTask = new CommonTask(url, jsonOut);
-            try {
-                String jsonIn = getMemberTask.execute().get();
-                member = gson.fromJson(jsonIn, Member.class);
-            } catch (Exception e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Common.showToast(activity, R.string.textNoNetwork);
-        }
-        return member;
-    }
-
     private Dish getDish(int dish_id) {
         Dish dish = null;
         if (Common.networkConnected(activity)) {
@@ -476,9 +408,9 @@ public class ShoppingCartFragment extends Fragment {
             jsonObject.addProperty("action", "getDishById");
             jsonObject.addProperty("id", dish_id);
             String jsonOut = jsonObject.toString();
-            getdishTask = new CommonTask(url, jsonOut);
+            CommonTask getDishTask = new CommonTask(url, jsonOut);
             try {
-                String jsonIn = getdishTask.execute().get();
+                String jsonIn = getDishTask.execute().get();
                 dish = gson.fromJson(jsonIn, Dish.class);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -488,31 +420,6 @@ public class ShoppingCartFragment extends Fragment {
         }
         return dish;
     }
-
-    private List<Payment> getPayments(int mem_id) {
-        List<Payment> payments = new ArrayList<>();
-        if (Common.networkConnected(activity)) {
-            String url = Url.URL + "/PaymentServlet";
-            JsonObject jsonObject = new JsonObject();
-            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-            jsonObject.addProperty("action", "getByMemberId");
-            jsonObject.addProperty("mem_id", mem_id);
-            jsonObject.addProperty("state", 1);
-            String jsonOut = jsonObject.toString();
-            try {
-                String jsonIn = new CommonTask(url, jsonOut).execute().get();
-                Type listType = new TypeToken<List<Payment>>() {
-                }.getType();
-                payments = gson.fromJson(jsonIn, listType);
-            } catch (Exception e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Common.showToast(activity, R.string.textNoNetwork);
-        }
-        return payments;
-    }
-
 
     private void ShowDishes(List<Dish> dishes) {
         if (dishes == null || dishes.isEmpty()) {
@@ -529,27 +436,11 @@ public class ShoppingCartFragment extends Fragment {
         }
     }
 
-    private android.location.Address reverseGeocode(double latitude, double longitude) {
-        Geocoder geocoder = new Geocoder(activity);
-        List<android.location.Address> addressList = null;
-        try {
-            addressList = geocoder.getFromLocation(latitude, longitude, 1);
-        } catch (IOException e) {
-            Log.e(TAG, e.toString());
-        }
-
-        if (addressList == null || addressList.isEmpty()) {
-            return null;
-        } else {
-            return addressList.get(0);
-        }
-    }
-
     private class DishAdapter extends RecyclerView.Adapter<DishAdapter.MyViewHolder> {
-        private Context context;
+        private final Context context;
         private List<Dish> dishes;
 
-        public DishAdapter(Context context, List<Dish> dishes) {
+        DishAdapter(Context context, List<Dish> dishes) {
             this.context = context;
             this.dishes = dishes;
         }
@@ -565,10 +456,14 @@ public class ShoppingCartFragment extends Fragment {
 
         private class MyViewHolder extends RecyclerView.ViewHolder {
             int dishId, count;
-            TextView tvDishName, tvDishPrice, tvCount;
-            ImageButton ibAdd, ibRemove;
+            Dish dish;
+            final TextView tvDishName;
+            final TextView tvDishPrice;
+            final TextView tvCount;
+            final ImageButton ibAdd;
+            final ImageButton ibRemove;
 
-            public MyViewHolder(@NonNull View itemView) {
+            MyViewHolder(@NonNull View itemView) {
                 super(itemView);
                 tvDishName = itemView.findViewById(R.id.tvDishName);
                 tvDishPrice = itemView.findViewById(R.id.tvDishPrice);
@@ -578,7 +473,7 @@ public class ShoppingCartFragment extends Fragment {
             }
 
             void onEditCountClick(View view) {
-                Dish dish = getDish(dishId);
+                dishId = dish.getId();
                 totalBefore = 0;
                 totalAfter = 0;
                 if (view.getId() == R.id.btAdd) {
@@ -586,16 +481,19 @@ public class ShoppingCartFragment extends Fragment {
                 } else {
                     count--;
                 }
-                Log.d(TAG, String.valueOf(dishId));
                 orderDetails.put(dishId, count);
                 if (count <= 0) {
                     orderDetails.remove(dishId);
 
                     dishes.clear();
 
-                    orderDetails.forEach((dish_id, dish_count) -> dishes.add(getDish(dish_id)));
+                    List<Integer> dishIds = new ArrayList<>();
+                    orderDetails.forEach((dish_id, dish_count) -> dishIds.add(dish_id));
+                    Cart cart = getCart(dishIds, mem_id);
+                    dishes = cart.getDishes();
 
                     DishAdapter dishAdapter = (DishAdapter) rvDish.getAdapter();
+                    assert dishAdapter != null;
                     dishAdapter.setDishes(dishes);
                     dishAdapter.notifyDataSetChanged();
                 }
@@ -642,10 +540,10 @@ public class ShoppingCartFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull DishAdapter.MyViewHolder holder, int position) {
             final Dish dish = dishes.get(position);
-            holder.dishId = dish.getId();
+            holder.dish = dish;
             String dishName = dish.getName();
 
-            holder.count = orderDetails.get(dish.getId()) != null ? orderDetails.get(dish.getId()) : 0;
+            holder.count = (orderDetails.get(dish.getId()) != null) ? orderDetails.get(dish.getId()) : 0;
 
             int price = dish.getPrice();
             int total = price * holder.count;
@@ -676,6 +574,7 @@ public class ShoppingCartFragment extends Fragment {
     }
 
     private void updateDisplayOrderType() {
+        int SELFPICK = 0;
         if (orderType == DELIVERY) {
             tvOrderType.setText("外送");
             layoutDeliveryAddress.setVisibility(View.VISIBLE);
@@ -687,19 +586,6 @@ public class ShoppingCartFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            address = (Address) bundle.getSerializable("address");
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
 
     @Override
     public void onDestroy() {
@@ -729,6 +615,119 @@ public class ShoppingCartFragment extends Fragment {
         });
         animator.start();
     }
+
+    private Cart getCart(List<Integer> dishIds, int mem_id) {
+        Cart cart = null;
+        if (Common.networkConnected(activity)) {
+            String dishIdsJson = gson.toJson(dishIds);
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("action", "getCart");
+            jsonObject.addProperty("mem_id", mem_id);
+            jsonObject.addProperty("dishIds", dishIdsJson);
+            String url = Url.URL + "/OrderServlet";
+            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+            String jsonOut = jsonObject.toString();
+            CommonTask getCartTask = new CommonTask(url, jsonOut);
+            try {
+                String jsonIn = getCartTask.execute().get();
+                cart = gson.fromJson(jsonIn, Cart.class);
+            } catch (Exception e) {
+                Log.e(TAG, e.toString());
+            }
+        } else {
+            Common.showToast(activity, R.string.textNoNetwork);
+        }
+        return cart;
+    }
+
+    //    private android.location.Address reverseGeocode(double latitude, double longitude) {
+//        Geocoder geocoder = new Geocoder(activity);
+//        List<android.location.Address> addressList = null;
+//        try {
+//            addressList = geocoder.getFromLocation(latitude, longitude, 1);
+//        } catch (IOException e) {
+//            Log.e(TAG, e.toString());
+//        }
+//
+//        if (addressList == null || addressList.isEmpty()) {
+//            return null;
+//        } else {
+//            return addressList.get(0);
+//        }
+//    }
+
+//    private Member getMember(int mem_id) {
+//        Member member = new Member();
+//        if (Common.networkConnected(activity)) {
+//            String url = Url.URL + "/MemberServlet";
+//            JsonObject jsonObject = new JsonObject();
+//            jsonObject.addProperty("action", "findById");
+//            jsonObject.addProperty("mem_id", mem_id);
+//            String jsonOut = jsonObject.toString();
+//            CommonTask getMemberTask = new CommonTask(url, jsonOut);
+//            try {
+//                String jsonIn = getMemberTask.execute().get();
+//                member = gson.fromJson(jsonIn, Member.class);
+//            } catch (Exception e) {
+//                Log.e(TAG, e.toString());
+//            }
+//        } else {
+//            Common.showToast(activity, R.string.textNoNetwork);
+//        }
+//        return member;
+//    }
+
+//    private List<Payment> getPayments(int mem_id) {
+//        List<Payment> payments = new ArrayList<>();
+//        if (Common.networkConnected(activity)) {
+//            String url = Url.URL + "/PaymentServlet";
+//            JsonObject jsonObject = new JsonObject();
+//            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+//            jsonObject.addProperty("action", "getByMemberId");
+//            jsonObject.addProperty("mem_id", mem_id);
+//            jsonObject.addProperty("state", 1);
+//            String jsonOut = jsonObject.toString();
+//            try {
+//                String jsonIn = new CommonTask(url, jsonOut).execute().get();
+//                Type listType = new TypeToken<List<Payment>>() {
+//                }.getType();
+//                payments = gson.fromJson(jsonIn, listType);
+//            } catch (Exception e) {
+//                Log.e(TAG, e.toString());
+//            }
+//        } else {
+//            Common.showToast(activity, R.string.textNoNetwork);
+//        }
+//        return payments;
+//    }
+
+//    private List<Address> getAddresses(int mem_id) {
+//        List<Address> addresses = new ArrayList<>();
+//        if (Common.networkConnected(activity)) {
+//            String url = Url.URL + "/AddressServlet";
+//            JsonObject jsonObject = new JsonObject();
+//            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+//            jsonObject.addProperty("action", "getAllShow");
+//            jsonObject.addProperty("mem_id", mem_id);
+//            String jsonOut = jsonObject.toString();
+//            CommonTask getAddressTask = new CommonTask(url, jsonOut);
+//            try {
+//                String jsonIn = getAddressTask.execute().get();
+//                Type listType = new TypeToken<List<Address>>() {
+//                }.getType();
+//                addresses = gson.fromJson(jsonIn, listType);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        } else {
+//            Common.showToast(activity, R.string.textNoNetwork);
+//        }
+//        return addresses;
+//    }
+
+
 }
+
+
 
 //TODO 增加檢查是否登入以及彈出視窗
