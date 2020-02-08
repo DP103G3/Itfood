@@ -50,6 +50,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
@@ -78,25 +80,56 @@ public class ShoppingCartFragment extends Fragment {
     private Shop shop;
     private Map<Integer, Integer> orderDetails;
     private Gson gson;
-    private RecyclerView rvDish;
     private String shopName;
     private NavController navController;
     private static SparseIntArray totals;
-    private TextView tvTotalBefore, tvTotalAfter, tvBottomTotal, tvAddress, tvOrderType, tvDeliveryTime, tvPaymentMethod;
     private int totalBefore, totalAfter, mem_id, orderType, selectedOrderType;
     private BottomNavigationView bottomNavigationView;
     private Animator animator;
-    private LinearLayout layoutDeliveryAddress;
     private Address address;
     private Payment payment;
     private final int DELIVERY = 1;
-    private View divider;
     private SharedViewModel model;
     private Date date;
     private Member member;
     private Cart cart;
+    @BindView(R.id.shoppingCartBottomView)
+    BottomNavigationView shoppingCartBottomView;
+    @BindView(R.id.layoutCheckOut)
+    CardView layoutCheckOut;
+    @BindView(R.id.layoutOrderType)
+    LinearLayout layoutOrderType;
+    @BindView(R.id.layoutDeliveryTime)
+    LinearLayout layoutDeliveryTime;
+    @BindView(R.id.layoutPayment)
+    LinearLayout layoutPayment;
+    @BindView(R.id.scrollView)
+    ScrollView scrollView;
+    @BindView(R.id.rvDish)
+    RecyclerView rvDish;
+    @BindView(R.id.divider)
+    View divider;
+    @BindView(R.id.layoutDeliveryAddress)
+    LinearLayout layoutDeliveryAddress;
+    @BindView(R.id.tvTotalBefore)
+    TextView tvTotalBefore;
+    @BindView(R.id.tvTotalAfter)
+    TextView tvTotalAfter;
+    @BindView(R.id.tvBottomTotal)
+    TextView tvBottomTotal;
+    @BindView(R.id.tvAddress)
+    TextView tvAddress;
+    @BindView(R.id.tvOrderType)
+    TextView tvOrderType;
+    @BindView(R.id.tvDeliveryTime)
+    TextView tvDeliveryTime;
+    @BindView(R.id.tvPaymentMethod)
+    TextView tvPaymentMethod;
 
-
+    public static ShoppingCartFragment newInstance() {
+        ShoppingCartFragment shoppingCartFragment = new ShoppingCartFragment();
+        return shoppingCartFragment;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -140,9 +173,6 @@ public class ShoppingCartFragment extends Fragment {
             address = cart.getAddresses().isEmpty() ? null : cart.getAddresses().get(0);
             payment = cart.getPayments().isEmpty() ? null : cart.getPayments().get(0);
             member = cart.getMember();
-//            address = getAddresses(mem_id).isEmpty() ? null : getAddresses(mem_id).get(0);
-//            payment = getPayments(mem_id).isEmpty() ? null : getPayments(mem_id).get(0);
-//            member = getMember(mem_id);
         }
 
 
@@ -159,50 +189,9 @@ public class ShoppingCartFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        BottomNavigationView shoppingCartBottomView = view.findViewById(R.id.shoppingCartBottomView);
-        layoutDeliveryAddress = view.findViewById(R.id.layoutDeliveryAddress);
-        CardView layoutCheckOut = view.findViewById(R.id.layoutCheckOut);
-        tvBottomTotal = view.findViewById(R.id.tvBottomTotal);
-        tvTotalAfter = view.findViewById(R.id.tvTotalAfter);
-        tvAddress = view.findViewById(R.id.tvAddress);
-        tvTotalBefore = view.findViewById(R.id.tvTotalBefore);
-        tvDeliveryTime = view.findViewById(R.id.tvDeliveryTime);
-        tvPaymentMethod = view.findViewById(R.id.tvPaymentMethod);
-        tvOrderType = view.findViewById(R.id.tvOrderType);
+        ButterKnife.bind(this, view);
+        handleViews();
         navController = Navigation.findNavController(view);
-        ScrollView scrollView = view.findViewById(R.id.scrollView);
-        LinearLayout layoutOrderType = view.findViewById(R.id.layoutOrderType);
-        LinearLayout layoutDeliveryTime = view.findViewById(R.id.layoutDeliveryTime);
-        LinearLayout layoutPayment = view.findViewById(R.id.layoutPayment);
-
-        divider = view.findViewById(R.id.divider);
-        bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
-        animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_down);
-        animator.setTarget(bottomNavigationView);
-        animator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                bottomNavigationView.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-        animator.start();
-
-
         model.getSelectedAddress().observe(getViewLifecycleOwner(), address -> {
             if (address != null) {
                 this.address = address;
@@ -316,7 +305,6 @@ public class ShoppingCartFragment extends Fragment {
 
         List<Dish> dishes;
         dishes = cart.getDishes();
-//        orderDetails.forEach((dish_id, dish_count) -> dishes.add(getDish(dish_id)));
 
         rvDish = view.findViewById(R.id.rvDish);
 
@@ -638,6 +626,34 @@ public class ShoppingCartFragment extends Fragment {
             Common.showToast(activity, R.string.textNoNetwork);
         }
         return cart;
+    }
+
+    private void handleViews() {
+        bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
+        animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_down);
+        animator.setTarget(bottomNavigationView);
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                bottomNavigationView.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        animator.start();
     }
 
     //    private android.location.Address reverseGeocode(double latitude, double longitude) {

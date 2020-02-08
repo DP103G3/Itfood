@@ -83,14 +83,6 @@ public class DeliveryTimeSelectDialog extends AlertDialog {
         ArrayAdapter<String> datesAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, dates);
         datesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        spDate.setAdapter(datesAdapter);
-        spDate.setSelection(0, true);
-
-        for (int x = timeUnit + 2; x <= 88; x++) {
-            String hour = (x / 4) < 10 ? "0" + (x / 4) : String.valueOf(x / 4);
-            String minute = ((x % 4 * 15 == 0 ? "00" : String.valueOf(x % 4 * 15)));
-            times.add(String.format(Locale.getDefault(), "%s:%s", hour, minute));
-        }
         ArrayAdapter<String> timesAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, times);
         timesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spTime.setAdapter(timesAdapter);
@@ -100,9 +92,12 @@ public class DeliveryTimeSelectDialog extends AlertDialog {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Calendar cal = Calendar.getInstance();
-                if (position == 0) {
+                int openTime = 32;
+                int closeTime = 88;
+                if (position == 0 && !(timeUnit < openTime)) {
                     times.clear();
                     for (int x = timeUnit + 2; x <= 88; x++) {
+
                         String hour = (x / 4) < 10 ? "0" + (x / 4) : String.valueOf(x / 4);
                         String minute = ((x % 4 * 15 == 0 ? "00" : String.valueOf(x % 4 * 15)));
                         times.add(String.format(Locale.getDefault(), "%s:%s", hour, minute));
@@ -115,7 +110,7 @@ public class DeliveryTimeSelectDialog extends AlertDialog {
                     day = cal.get(Calendar.DAY_OF_MONTH);
                 } else {
                     times.clear();
-                    for (int x = 32; x <= 88; x++) {
+                    for (int x = openTime + 2; x <= closeTime; x++) {
                         String hour = (x / 4) < 10 ? "0" + (x / 4) : String.valueOf(x / 4);
                         String minute = ((x % 4 * 15 == 0 ? "00" : String.valueOf(x % 4 * 15)));
                         times.add(String.format(Locale.getDefault(), "%s:%s", hour, minute));
@@ -144,6 +139,8 @@ public class DeliveryTimeSelectDialog extends AlertDialog {
         };
 
         spDate.setOnItemSelectedListener(dateListener);
+        spDate.setAdapter(datesAdapter);
+        spDate.setSelection(0, true);
 
         btnConfirm.setOnClickListener(v -> {
             SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());

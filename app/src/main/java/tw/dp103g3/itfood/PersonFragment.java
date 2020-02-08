@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -32,6 +33,7 @@ public class PersonFragment extends Fragment {
     private ListView listView;
     private int memId;
     private SharedPreferences preferences;
+    private ImageView ivCart;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,8 @@ public class PersonFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Common.disconnectServer();
         initListMap();
+        ivCart = view.findViewById(R.id.ivCart);
+        ivCart.setVisibility(View.GONE);
         listView = view.findViewById(R.id.listView);
         if (memId == 0) {
             guestAdapter = new SimpleAdapter(activity, guestList, R.layout.basic_list_item,

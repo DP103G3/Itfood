@@ -27,10 +27,10 @@
         <action
             android:id="@+id/action_mainFragment_to_shoppingCartFragment"
             app:destination="@id/shoppingCartFragment"
-            app:enterAnim="@anim/fragment_open_enter"
+            app:enterAnim="@anim/fragment_slide_up_anim"
             app:exitAnim="@anim/fragment_open_exit"
-            app:popEnterAnim="@anim/nav_default_pop_exit_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_slide_down_anim" />
     </fragment>
     <fragment
         android:id="@+id/shopFragment"
@@ -140,17 +140,17 @@
         <action
             android:id="@+id/action_shoppingCartFragment_to_addressSelectFragment"
             app:destination="@id/addressSelectFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            app:enterAnim="@anim/fragment_slide_in_right"
+            app:exitAnim="@anim/fragment_slide_out_left"
+            app:popEnterAnim="@anim/fragment_slide_in_left"
+            app:popExitAnim="@anim/fragment_slide_out_right" />
         <action
             android:id="@+id/action_shoppingCartFragment_to_paymentSelectFragment"
             app:destination="@id/paymentSelectFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            app:enterAnim="@anim/fragment_slide_in_right"
+            app:exitAnim="@anim/fragment_slide_out_left"
+            app:popEnterAnim="@anim/fragment_slide_in_left"
+            app:popExitAnim="@anim/fragment_slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/personalInfoFragment"
@@ -175,10 +175,10 @@
         <action
             android:id="@+id/action_addressSelectFragment_to_addAddressFragment"
             app:destination="@id/addAddressFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            app:enterAnim="@anim/fragment_slide_in_right"
+            app:exitAnim="@anim/fragment_slide_out_left"
+            app:popEnterAnim="@anim/fragment_slide_in_left"
+            app:popExitAnim="@anim/fragment_slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/addAddressFragment"
@@ -188,13 +188,17 @@
         <action
             android:id="@+id/action_addAddressFragment_to_addressCitiesFragment"
             app:destination="@id/addressCitiesFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            app:enterAnim="@anim/fragment_slide_in_right"
+            app:exitAnim="@anim/fragment_slide_out_left"
+            app:popEnterAnim="@anim/fragment_slide_in_left"
+            app:popExitAnim="@anim/fragment_slide_out_right" />
         <action
             android:id="@+id/action_addAddressFragment_to_addressDistrictsFragment"
-            app:destination="@id/addressDistrictsFragment" />
+            app:destination="@id/addressDistrictsFragment"
+            app:enterAnim="@anim/fragment_slide_in_right"
+            app:exitAnim="@anim/fragment_slide_out_left"
+            app:popEnterAnim="@anim/fragment_slide_in_left"
+            app:popExitAnim="@anim/fragment_slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/addressCitiesFragment"
@@ -224,9 +228,9 @@
         <action
             android:id="@+id/action_paymentSelectFragment_to_addPaymentFragment"
             app:destination="@id/addPaymentFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            app:enterAnim="@anim/fragment_slide_in_right"
+            app:exitAnim="@anim/fragment_slide_out_left"
+            app:popEnterAnim="@anim/fragment_slide_in_left"
+            app:popExitAnim="@anim/fragment_slide_out_right" />
     </fragment>
 </navigation>

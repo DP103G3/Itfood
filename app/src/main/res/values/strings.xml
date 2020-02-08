@@ -91,4 +91,6 @@
     <string name="cardHolderPhoneNumber">持卡人電話</string>
     <string name="addPaymentFail">新增信用卡失敗，請稍後再試</string>
     <string name="addPaymentSuccess">新增信用卡成功</string>
+    <string name="username">帳號</string>
+    <string name="password">密碼</string>
 </resources>

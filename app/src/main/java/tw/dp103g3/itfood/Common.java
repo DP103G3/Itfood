@@ -181,12 +181,12 @@ public class Common {
             return new StringBuilder().append(chars[0]).append(chars[1]).append(chars[2])
                     .append(chars[3]).append("-").append("****").append("-").append("****").append("-")
                     .append(chars[12]).append(chars[13]).append(chars[14])
-                    .append(chars[15]).toString();
+                    .append(chars[15]).append(" VISA").toString();
         } else if (chars[0] == '5') {
             return new StringBuilder().append(chars[0]).append(chars[1]).append(chars[2])
                     .append(chars[3]).append("-").append("****").append("-").append("****").append("-")
                     .append(chars[12]).append(chars[13]).append(chars[14])
-                    .append(chars[15]).toString();
+                    .append(chars[15]).append(" MASTER").toString();
         } else {
             return new StringBuilder().append(chars[0]).append(chars[1]).append(chars[2])
                     .append(chars[3]).append("-").append("****").append("-").append("****").append("-")
