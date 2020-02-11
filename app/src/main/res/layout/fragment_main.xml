@@ -45,19 +45,19 @@
                 android:id="@+id/ivMap"
                 android:layout_width="?attr/actionBarSize"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_constraintEnd_toStartOf="@id/ivCart"
-                app:layout_constraintTop_toTopOf="parent"
+                android:scaleType="center"
                 android:src="@drawable/map"
-                android:scaleType="center" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/ivCart"
                 android:layout_width="?attr/actionBarSize"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:scaleType="center"
                 android:src="@drawable/shopping_cart"
-                android:scaleType="center" />
+                app:layout_constraintEnd_toStartOf="@+id/ivMap"
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.appcompat.widget.Toolbar>
 

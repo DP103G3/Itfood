@@ -6,11 +6,6 @@
     app:startDestination="@id/mainFragment">
 
     <fragment
-        android:id="@+id/loginFragment"
-        android:name="tw.dp103g3.itfood.LoginFragment"
-        android:label="fragment_login"
-        tools:layout="@layout/fragment_login" />
-    <fragment
         android:id="@+id/mainFragment"
         android:name="tw.dp103g3.itfood.shop.MainFragment"
         android:label="fragment_main"
@@ -67,13 +62,6 @@
         android:label="fragment_order"
         tools:layout="@layout/fragment_order" >
         <action
-            android:id="@+id/action_orderFragment_to_loginFragment"
-            app:destination="@id/loginFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-        <action
             android:id="@+id/action_orderFragment_to_QRCodeFragment"
             app:destination="@id/QRCodeFragment" />
     </fragment>
@@ -88,9 +76,6 @@
         <action
             android:id="@+id/action_personFragment_to_paymentFragment"
             app:destination="@id/paymentFragment" />
-        <action
-            android:id="@+id/action_personFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
         <action
             android:id="@+id/action_personFragment_to_locationFragment"
             app:destination="@id/locationFragment" />
@@ -130,13 +115,6 @@
         android:name="tw.dp103g3.itfood.shopping_cart.ShoppingCartFragment"
         android:label="fragment_shopping_cart"
         tools:layout="@layout/fragment_shopping_cart" >
-        <action
-            android:id="@+id/action_shoppingCartFragment_to_loginFragment"
-            app:destination="@id/loginFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_shoppingCartFragment_to_addressSelectFragment"
             app:destination="@id/addressSelectFragment"

@@ -22,7 +22,9 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyA6FQBJtXIhZ--XsGMwUZ71Tf3-QoXeJNw" />
 
-        <activity android:name="tw.dp103g3.itfood.main.MainActivity">
+        <activity
+            android:name="tw.dp103g3.itfood.main.MainActivity"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />

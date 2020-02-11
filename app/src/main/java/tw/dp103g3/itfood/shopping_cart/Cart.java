@@ -47,7 +47,6 @@ public class Cart implements Serializable {
     }
 
     public Cart() {
-        // TODO Auto-generated constructor stub
     }
 
     public Cart(List<Dish> dishes, Member member, List<Payment> payments, List<Address> addresses) {

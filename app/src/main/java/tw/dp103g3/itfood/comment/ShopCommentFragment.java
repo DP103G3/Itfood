@@ -93,7 +93,7 @@ public class ShopCommentFragment extends Fragment {
         tvUsername = view.findViewById(R.id.tvUsername);
         tvCommentTime = view.findViewById(R.id.tvCommentTime);
         tvCommentDetail = view.findViewById(R.id.tvCommentDetail);
-        ratingBar = view.findViewById(R.id.ratingBar);
+        ratingBar = view.findViewById(R.id.ratingBarComment);
         btCommentOptionMenu = view.findViewById(R.id.btCommentOptionMenu);
 
         handleViews();
@@ -204,7 +204,6 @@ public class ShopCommentFragment extends Fragment {
         rvComments.setPadding(0, 0, 0, Common.getNavigationBarHeight(activity));
         rvComments.setLayoutManager(new LinearLayoutManager(activity));
 
-
         comments = getComments();
 
         int index = -1;
@@ -216,15 +215,12 @@ public class ShopCommentFragment extends Fragment {
         ShowComments(comments);
         if (index != -1) {
             comments.remove(index);
-            tvCommentsTotal.setText(String.valueOf(comments.size() + 1 ));
+            tvCommentsTotal.setText(String.valueOf(comments.size() + 1));
         } else {
             tvCommentsTotal.setText(String.valueOf(comments.size()));
         }
 
-
-
         ivBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
-
 
     }
 
@@ -457,10 +453,6 @@ public class ShopCommentFragment extends Fragment {
             holder.tvCommentDetail.setText(comment.getCmt_detail());
             holder.tvCommentTime.setText(new SimpleDateFormat("MM月 dd, yyyy", Locale.getDefault()).format(comment.getCmt_time()));
 
-
         }
-
-
     }
-
 }

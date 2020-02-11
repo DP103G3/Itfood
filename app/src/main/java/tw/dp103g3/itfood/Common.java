@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.fragment.app.Fragment;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -28,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import tw.dp103g3.itfood.order.OrderWebSocketClient;
+import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
 
 public class Common {
     private static final String TAG = "TAG_Common";
@@ -193,5 +196,11 @@ public class Common {
                     .append(chars[12]).append(chars[13]).append(chars[14])
                     .append(chars[15]).toString();
         }
+    }
+
+    public static void showLoginDialog(Fragment fragment) {
+        LoginDialogFragment loginDialogFragment = new LoginDialogFragment();
+        loginDialogFragment.setTargetFragment(fragment, 0);
+        loginDialogFragment.show(fragment.getParentFragmentManager(), "LoginDialogFragment");
     }
 }

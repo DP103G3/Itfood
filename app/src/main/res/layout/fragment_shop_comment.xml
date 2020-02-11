@@ -198,7 +198,7 @@
                         tools:text="好喝" />
 
                     <RatingBar
-                        android:id="@+id/ratingBar"
+                        android:id="@+id/ratingBarComment"
                         style="@android:style/Widget.Material.RatingBar.Small"
                         android:layout_width="79dp"
                         android:layout_height="16dp"
@@ -219,7 +219,7 @@
                         android:tint="@color/colorTextOnP"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/ratingBar" />
+                        app:layout_constraintTop_toBottomOf="@+id/ratingBarComment" />
 
                     <TextView
                         android:id="@+id/textView"
@@ -229,7 +229,7 @@
                         android:alpha="80"
                         android:text="@string/yourComment"
                         android:textSize="12sp"
-                        app:layout_constraintEnd_toStartOf="@+id/ratingBar"
+                        app:layout_constraintEnd_toStartOf="@+id/ratingBarComment"
                         app:layout_constraintTop_toTopOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>

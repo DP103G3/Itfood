@@ -1,10 +1,7 @@
 package tw.dp103g3.itfood.order;
 
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,7 +18,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
-import androidx.viewpager2.adapter.FragmentViewHolder;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
@@ -33,18 +29,19 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
 import tw.dp103g3.itfood.task.CommonTask;
 
 import static tw.dp103g3.itfood.Common.DATE_FORMAT;
 import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
+import static tw.dp103g3.itfood.Common.showLoginDialog;
 
-public class OrderFragment extends Fragment {
+public class OrderFragment extends Fragment implements LoginDialogFragment.LoginDialogContract {
     private final static String TAG = "TAG_OrderFragment";
     private FragmentActivity activity;
     private final static int NOT_LOGGED_IN = 0;
@@ -57,6 +54,7 @@ public class OrderFragment extends Fragment {
     private ViewPager2 viewPager2;
     private LocalBroadcastManager broadcastManager;
     private TabLayout tabLayout;
+    private SharedPreferences pref;
 
     static void setOrders(Set<Order> orders) {
         OrderFragment.orders = orders;
@@ -70,11 +68,12 @@ public class OrderFragment extends Fragment {
         return mem_id;
     }
 
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();
-        SharedPreferences pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
+        pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = pref.getInt("mem_id", 0);
         orders = getOrders(mem_id);
         if (mem_id == 0) {
@@ -108,11 +107,13 @@ public class OrderFragment extends Fragment {
 //        broadcastManager = LocalBroadcastManager.getInstance(activity);
 //        registerOrderReceiver();
         navController = Navigation.findNavController(view);
+
         switch (status) {
             case NOT_LOGGED_IN: {
                 Button btLogin = view.findViewById(R.id.btLogin);
-                btLogin.setOnClickListener(v ->
-                        navController.navigate(R.id.action_orderFragment_to_loginFragment));
+                btLogin.setOnClickListener(v -> {
+                    showLoginDialog(this);
+                });
                 break;
             }
             case NO_ITEM: {
@@ -124,29 +125,35 @@ public class OrderFragment extends Fragment {
             case NORMAL: {
                 tabLayout = view.findViewById(R.id.tabLayOut);
                 viewPager2 = view.findViewById(R.id.viewPager);
+                viewPager2.setAdapter(new ViewPagerAdapter(activity));
+                viewPager2.setOffscreenPageLimit(1);
+                new TabLayoutMediator(tabLayout, viewPager2, (tab, position) -> {
+                    switch (position) {
+                        case 0: {
+                            tab.setText(R.string.unfinished);
+                            break;
+                        }
+                        case 1: {
+                            tab.setText(R.string.done);
+                            break;
+                        }
+                        case 2: {
+                            tab.setText(R.string.canceled);
+                            break;
+                        }
+                    }
+                }).attach();
             }
         }
-        viewPager2.setAdapter(new ViewPagerAdapter(activity));
-
-        new TabLayoutMediator(tabLayout, viewPager2, (tab, position) -> {
-
-            switch (position) {
-                case 0: {
-                    tab.setText(R.string.unfinished);
-                    break;
-                }
-                case 1: {
-                    tab.setText(R.string.done);
-                    break;
-                }
-                case 2: {
-                    tab.setText(R.string.canceled);
-                    break;
-                }
-            }
-        }).attach();
-        viewPager2.setOffscreenPageLimit(1);
     }
+
+    @Override
+    public void sendLoginResult(boolean isSuccessful) {
+        if (isSuccessful) {
+            navController.popBackStack(R.id.mainFragment, false);
+        }
+    }
+
 
 //    private void registerOrderReceiver() {
 //        IntentFilter orderFilter = new IntentFilter("order");
@@ -209,6 +216,7 @@ public class OrderFragment extends Fragment {
         }
         return orders;
     }
+
 
 //    @Override
 //    public void onStop() {

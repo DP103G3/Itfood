@@ -3,7 +3,6 @@ package tw.dp103g3.itfood.shopping_cart;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -24,6 +23,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -71,11 +71,12 @@ import static tw.dp103g3.itfood.Common.LOGIN_FALSE;
 import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 import static tw.dp103g3.itfood.Common.formatCardNum;
 import static tw.dp103g3.itfood.Common.getDayOfWeek;
+import static tw.dp103g3.itfood.Common.showLoginDialog;
 
 
-public class ShoppingCartFragment extends Fragment {
+public class ShoppingCartFragment extends Fragment implements LoginDialogFragment.LoginDialogContract {
     private static final String TAG = "TAG_ShoppingCartFragment";
-    private Activity activity;
+    private FragmentActivity activity;
     private File orderDetail;
     private Shop shop;
     private Map<Integer, Integer> orderDetails;
@@ -83,7 +84,11 @@ public class ShoppingCartFragment extends Fragment {
     private String shopName;
     private NavController navController;
     private static SparseIntArray totals;
-    private int totalBefore, totalAfter, mem_id, orderType, selectedOrderType;
+    private int totalBefore;
+    private int totalAfter;
+    private int mem_id;
+    private int orderType;
+    private int selectedOrderType;
     private BottomNavigationView bottomNavigationView;
     private Animator animator;
     private Address address;
@@ -93,6 +98,8 @@ public class ShoppingCartFragment extends Fragment {
     private Date date;
     private Member member;
     private Cart cart;
+    private List<Integer> dishIds;
+    private SharedPreferences memberPref;
     @BindView(R.id.shoppingCartBottomView)
     BottomNavigationView shoppingCartBottomView;
     @BindView(R.id.layoutCheckOut)
@@ -125,10 +132,11 @@ public class ShoppingCartFragment extends Fragment {
     TextView tvDeliveryTime;
     @BindView(R.id.tvPaymentMethod)
     TextView tvPaymentMethod;
+    @BindView(R.id.btLogin)
+    Button btLogin;
 
     public static ShoppingCartFragment newInstance() {
-        ShoppingCartFragment shoppingCartFragment = new ShoppingCartFragment();
-        return shoppingCartFragment;
+        return new ShoppingCartFragment();
     }
 
     @Override
@@ -144,7 +152,7 @@ public class ShoppingCartFragment extends Fragment {
         model.selectAddress(null);
         orderType = DELIVERY;
         totals = new SparseIntArray();
-        SharedPreferences memberPref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
+        memberPref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         mem_id = memberPref.getInt("mem_id", LOGIN_FALSE);
 
         orderDetail = new File(activity.getFilesDir(), "orderDetail");
@@ -166,10 +174,11 @@ public class ShoppingCartFragment extends Fragment {
         }
 
 
+        dishIds = new ArrayList<>();
+        orderDetails.forEach((id, count) -> dishIds.add(id));
+        cart = getCart(dishIds, mem_id);
+
         if (mem_id != LOGIN_FALSE) {
-            List<Integer> dishIds = new ArrayList<>();
-            orderDetails.forEach((id, count) -> dishIds.add(id));
-            cart = getCart(dishIds, mem_id);
             address = cart.getAddresses().isEmpty() ? null : cart.getAddresses().get(0);
             payment = cart.getPayments().isEmpty() ? null : cart.getPayments().get(0);
             member = cart.getMember();
@@ -193,25 +202,25 @@ public class ShoppingCartFragment extends Fragment {
         handleViews();
         navController = Navigation.findNavController(view);
         model.getSelectedAddress().observe(getViewLifecycleOwner(), address -> {
+            this.address = address;
             if (address != null) {
-                this.address = address;
                 tvAddress.setText(address.getInfo());
+            } else {
+                tvAddress.setText("");
             }
         });
+
 
         model.getSelectedPayment().observe(getViewLifecycleOwner(), payment -> {
+            this.payment = payment;
             if (payment != null) {
-                this.payment = payment;
                 tvPaymentMethod.setText(formatCardNum(payment.getPay_cardnum()));
+            } else {
+                tvPaymentMethod.setText("");
             }
         });
 
-        layoutPayment.setOnClickListener(v -> {
-            if (mem_id != LOGIN_FALSE) {
-                model.selectPayment(payment);
-                navController.navigate(R.id.action_shoppingCartFragment_to_paymentSelectFragment);
-            }
-        });
+        layoutPayment.setOnClickListener(layoutPaymentListener());
 
         layoutDeliveryTime.setOnClickListener(v -> {
             DeliveryTimeSelectDialog dtsd = new DeliveryTimeSelectDialog(activity, model);
@@ -285,19 +294,13 @@ public class ShoppingCartFragment extends Fragment {
         }
 
         //確認登入狀態，以之決定btLogin是否顯示
-        Button btLogin = view.findViewById(R.id.btLogin);
+        btLogin = view.findViewById(R.id.btLogin);
         if (mem_id != LOGIN_FALSE) {
             btLogin.setVisibility(GONE);
         }
-        btLogin.setOnClickListener(v -> navController
-                .navigate(R.id.action_shoppingCartFragment_to_loginFragment));
+        btLogin.setOnClickListener(v -> showLoginDialog(this));
 
-        if (mem_id != LOGIN_FALSE) {
-            layoutDeliveryAddress.setOnClickListener(v -> {
-                model.selectAddress(address);
-                navController.navigate(R.id.action_shoppingCartFragment_to_addressSelectFragment);
-            });
-        }
+        layoutDeliveryAddress.setOnClickListener(layoutDeliveryAddressListener());
 
         Toolbar toolbarShoppingCart = view.findViewById(R.id.toolbarShoppingCart);
         toolbarShoppingCart.setTitle(shopName);
@@ -311,53 +314,8 @@ public class ShoppingCartFragment extends Fragment {
         rvDish.setLayoutManager(new LinearLayoutManager(activity));
         ShowDishes(dishes);
 
-
         //結帳按鈕
-        layoutCheckOut.setOnClickListener(v -> {
-            if (mem_id != LOGIN_FALSE) {
-                Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-                int adrs_id;
-                Date orderIdeal;
-                List<OrderDetail> orderDetails = new ArrayList<>();
-                Calendar now = Calendar.getInstance();
-
-                if (date == null) {
-                    now.add(Calendar.MINUTE, 30);
-                    orderIdeal = now.getTime();
-                    now.add(Calendar.MINUTE, -30);
-                } else {
-                    orderIdeal = date;
-                }
-
-                if (orderType == 0) {
-                    adrs_id = 0;
-                } else {
-                    adrs_id = address.getId();
-                }
-
-                Order order = new Order(shop, mem_id, 0, payment.getPay_id(), 0, orderIdeal,
-                        now.getTime(), null, adrs_id, member.getMemName(), member.getMemPhone(),
-                        totalAfter, 0, 1, orderType);
-
-                int orderCount = sendOrder(order);
-                if (orderCount != 0) {
-                    try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail))) {
-                        JsonObject jsonObject = new JsonObject();
-                        jsonObject.addProperty("shop", gson.toJson(new Shop()));
-                        this.orderDetails.clear();
-                        jsonObject.addProperty("orderDetails", gson.toJson(orderDetails));
-                        out.write(jsonObject.toString());
-                        navController.popBackStack();
-                        Common.showToast(activity, "訂單下訂成功");
-                    } catch (IOException e) {
-                        Log.e(TAG, e.toString());
-                        Common.showToast(activity, "訂單下訂失敗");
-                    }
-                } else {
-                    Common.showToast(activity, "訂單下訂失敗");
-                }
-            }
-        });
+        layoutCheckOut.setOnClickListener(layoutCheckListener());
     }
 
     private int sendOrder(Order order) {
@@ -421,6 +379,22 @@ public class ShoppingCartFragment extends Fragment {
         } else {
             dishAdapter.setDishes(dishes);
             dishAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void sendLoginResult(boolean isSuccessful) {
+        if (isSuccessful) {
+            mem_id = memberPref.getInt("mem_id", 0);
+            cart = getCart(dishIds, mem_id);
+            address = cart.getAddresses().isEmpty() ? null : cart.getAddresses().get(0);
+            payment = cart.getPayments().isEmpty() ? null : cart.getPayments().get(0);
+            model.selectPayment(payment);
+            model.selectAddress(address);
+            layoutCheckOut.setOnClickListener(layoutCheckListener());
+            layoutDeliveryAddress.setOnClickListener(layoutDeliveryAddressListener());
+            layoutPayment.setOnClickListener(layoutPaymentListener());
+            btLogin.setVisibility(GONE);
         }
     }
 
@@ -604,6 +578,7 @@ public class ShoppingCartFragment extends Fragment {
         animator.start();
     }
 
+
     private Cart getCart(List<Integer> dishIds, int mem_id) {
         Cart cart = null;
         if (Common.networkConnected(activity)) {
@@ -624,6 +599,7 @@ public class ShoppingCartFragment extends Fragment {
             }
         } else {
             Common.showToast(activity, R.string.textNoNetwork);
+            navController.popBackStack();
         }
         return cart;
     }
@@ -656,94 +632,87 @@ public class ShoppingCartFragment extends Fragment {
         animator.start();
     }
 
-    //    private android.location.Address reverseGeocode(double latitude, double longitude) {
-//        Geocoder geocoder = new Geocoder(activity);
-//        List<android.location.Address> addressList = null;
-//        try {
-//            addressList = geocoder.getFromLocation(latitude, longitude, 1);
-//        } catch (IOException e) {
-//            Log.e(TAG, e.toString());
-//        }
-//
-//        if (addressList == null || addressList.isEmpty()) {
-//            return null;
-//        } else {
-//            return addressList.get(0);
-//        }
-//    }
+    private void navigateToAddressSelect() {
+        model.selectAddress(address);
+        navController.navigate(R.id.action_shoppingCartFragment_to_addressSelectFragment);
+    }
 
-//    private Member getMember(int mem_id) {
-//        Member member = new Member();
-//        if (Common.networkConnected(activity)) {
-//            String url = Url.URL + "/MemberServlet";
-//            JsonObject jsonObject = new JsonObject();
-//            jsonObject.addProperty("action", "findById");
-//            jsonObject.addProperty("mem_id", mem_id);
-//            String jsonOut = jsonObject.toString();
-//            CommonTask getMemberTask = new CommonTask(url, jsonOut);
-//            try {
-//                String jsonIn = getMemberTask.execute().get();
-//                member = gson.fromJson(jsonIn, Member.class);
-//            } catch (Exception e) {
-//                Log.e(TAG, e.toString());
-//            }
-//        } else {
-//            Common.showToast(activity, R.string.textNoNetwork);
-//        }
-//        return member;
-//    }
-
-//    private List<Payment> getPayments(int mem_id) {
-//        List<Payment> payments = new ArrayList<>();
-//        if (Common.networkConnected(activity)) {
-//            String url = Url.URL + "/PaymentServlet";
-//            JsonObject jsonObject = new JsonObject();
-//            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-//            jsonObject.addProperty("action", "getByMemberId");
-//            jsonObject.addProperty("mem_id", mem_id);
-//            jsonObject.addProperty("state", 1);
-//            String jsonOut = jsonObject.toString();
-//            try {
-//                String jsonIn = new CommonTask(url, jsonOut).execute().get();
-//                Type listType = new TypeToken<List<Payment>>() {
-//                }.getType();
-//                payments = gson.fromJson(jsonIn, listType);
-//            } catch (Exception e) {
-//                Log.e(TAG, e.toString());
-//            }
-//        } else {
-//            Common.showToast(activity, R.string.textNoNetwork);
-//        }
-//        return payments;
-//    }
-
-//    private List<Address> getAddresses(int mem_id) {
-//        List<Address> addresses = new ArrayList<>();
-//        if (Common.networkConnected(activity)) {
-//            String url = Url.URL + "/AddressServlet";
-//            JsonObject jsonObject = new JsonObject();
-//            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-//            jsonObject.addProperty("action", "getAllShow");
-//            jsonObject.addProperty("mem_id", mem_id);
-//            String jsonOut = jsonObject.toString();
-//            CommonTask getAddressTask = new CommonTask(url, jsonOut);
-//            try {
-//                String jsonIn = getAddressTask.execute().get();
-//                Type listType = new TypeToken<List<Address>>() {
-//                }.getType();
-//                addresses = gson.fromJson(jsonIn, listType);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        } else {
-//            Common.showToast(activity, R.string.textNoNetwork);
-//        }
-//        return addresses;
-//    }
+    private void navigateToPaymentSelect() {
+        model.selectPayment(payment);
+        navController.navigate(R.id.action_shoppingCartFragment_to_paymentSelectFragment);
+    }
 
 
+    private View.OnClickListener layoutDeliveryAddressListener() {
+        return v -> {
+            if (mem_id != LOGIN_FALSE) {
+                navigateToAddressSelect();
+            } else {
+                showLoginDialog(this);
+            }
+        };
+    }
+
+    private View.OnClickListener layoutPaymentListener() {
+        return v -> {
+            if (mem_id != LOGIN_FALSE) {
+                navigateToPaymentSelect();
+            } else {
+                showLoginDialog(this);
+            }
+        };
+    }
+
+    private View.OnClickListener layoutCheckListener() {
+        return v -> {
+            if (mem_id != LOGIN_FALSE) {
+                Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+                int adrs_id;
+                Date orderIdeal;
+                List<OrderDetail> orderDetails = new ArrayList<>();
+                Calendar now = Calendar.getInstance();
+
+                if (date == null) {
+                    now.add(Calendar.MINUTE, 30);
+                    orderIdeal = now.getTime();
+                    now.add(Calendar.MINUTE, -30);
+                } else {
+                    orderIdeal = date;
+                }
+
+                if (orderType == 0) {
+                    adrs_id = 0;
+                } else {
+                    adrs_id = address.getId();
+                }
+
+                Order order = new Order(shop, mem_id, 0, payment.getPay_id(), 0, orderIdeal,
+                        now.getTime(), null, adrs_id, member.getMemName(), member.getMemPhone(),
+                        totalAfter, 0, 1, orderType);
+
+                int orderCount = sendOrder(order);
+                if (orderCount != 0) {
+                    try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail))) {
+                        JsonObject jsonObject = new JsonObject();
+                        jsonObject.addProperty("shop", gson.toJson(new Shop()));
+                        orderDetails.clear();
+                        jsonObject.addProperty("orderDetails", gson.toJson(orderDetails));
+                        out.write(jsonObject.toString());
+                        navController.popBackStack();
+                        Common.showToast(activity, "訂單下訂成功");
+                    } catch (IOException e) {
+                        Log.e(TAG, e.toString());
+                        Common.showToast(activity, "訂單下訂失敗");
+                    }
+                } else {
+                    Common.showToast(activity, "訂單下訂失敗");
+                }
+            } else {
+                showLoginDialog(this);
+            }
+        };
+
+    }
 }
 
-
-
-//TODO 增加檢查是否登入以及彈出視窗
+//TODO 付現功能

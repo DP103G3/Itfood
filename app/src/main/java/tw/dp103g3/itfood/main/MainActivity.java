@@ -44,8 +44,13 @@ import java.util.HashMap;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
+import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.address.Address;
+import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.shop.Shop;
+import tw.dp103g3.itfood.task.CommonTask;
+
+import static tw.dp103g3.itfood.Common.DATE_FORMAT;
 
 public class MainActivity extends AppCompatActivity {
     private final static String TAG = "TAG_MainActivity";
@@ -65,7 +70,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Activity activity = this;
         SharedPreferences memberPref = activity.getSharedPreferences(Common.PREFERENCES_MEMBER, Context.MODE_PRIVATE);
-
+        int mem_id = memberPref.getInt("mem_id", 0);
+        String mem_password = memberPref.getString("mem_password", null);
+        if (mem_id != 0) {
+            Member member = getMember(mem_id);
+            if (mem_password == null || !mem_password.equals(member.getMemPassword())) {
+                memberPref.edit().putInt("mem_id", 0).apply();
+                memberPref.edit().remove("mem_password").apply();
+            }
+        }
         SharedViewModel model = new ViewModelProvider(this).get(SharedViewModel.class);
 
         bottomNavigationView = findViewById(R.id.bottomNavigation);
@@ -203,5 +216,24 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+    private Member getMember(int mem_id) {
+        Member member = new Member();
+        String url = Url.URL + "/MemberServlet";
+        JsonObject jsonObject = new JsonObject();
+        Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+        jsonObject.addProperty("action", "findById");
+        jsonObject.addProperty("mem_id", mem_id);
+        String jsonOut = jsonObject.toString();
+        if (Common.networkConnected(this)) {
+            try {
+                String jsonIn = new CommonTask(url, jsonOut).execute().get();
+                member = gson.fromJson(jsonIn, Member.class);
+            } catch (Exception e) {
+                Log.e(TAG, e.toString());
+            }
+        } else {
+            Common.showToast(this, R.string.textNoNetwork);
+        }
+        return member;
+    }
 }

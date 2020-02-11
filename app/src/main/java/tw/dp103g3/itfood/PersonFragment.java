@@ -23,7 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PersonFragment extends Fragment {
+import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
+
+public class PersonFragment extends Fragment implements LoginDialogFragment.LoginDialogContract {
     private Activity activity;
     private ListAdapter memberAdapter, guestAdapter;
     private int[] memberIcon, guestIcon;
@@ -34,6 +36,7 @@ public class PersonFragment extends Fragment {
     private int memId;
     private SharedPreferences preferences;
     private ImageView ivCart;
+    private View view;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,6 +56,7 @@ public class PersonFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        this.view = view;
         Common.disconnectServer();
         initListMap();
         ivCart = view.findViewById(R.id.ivCart);
@@ -63,7 +67,7 @@ public class PersonFragment extends Fragment {
                     new String[]{"icon", "title"}, new int[]{R.id.ivIcon, R.id.tvTitle});
             listView.setAdapter(guestAdapter);
             listView.setOnItemClickListener(((parent, v, position, id) ->
-                    Navigation.findNavController(v).navigate(guestAction[position])));
+                    Common.showLoginDialog(this)));
         } else {
             memberAdapter = new SimpleAdapter(activity, memberList, R.layout.basic_list_item,
                     new String[]{"icon", "title"}, new int[]{R.id.ivIcon, R.id.tvTitle});
@@ -75,10 +79,12 @@ public class PersonFragment extends Fragment {
                 } else {
                     preferences.edit().putInt("mem_id", 0).apply();
                     navController.popBackStack(R.id.mainFragment, false);
+                    Common.showToast(activity, "已登出。");
                 }
             }));
         }
     }
+
 
     private void initListMap() {
         memberList = new ArrayList<>();
@@ -90,7 +96,6 @@ public class PersonFragment extends Fragment {
         guestList = new ArrayList<>();
         guestIcon = new int[]{R.drawable.login};
         guestTitle = new String[]{getString(R.string.textLogin)};
-        guestAction = new int[]{R.id.action_personFragment_to_loginFragment};
         for (int i = 0; i < memberIcon.length; i++) {
             Map<String, Object> memberItem = new HashMap<>();
             memberItem.put("icon", memberIcon[i]);
@@ -103,5 +108,13 @@ public class PersonFragment extends Fragment {
             guestItem.put("title", guestTitle[i]);
             guestList.add(guestItem);
         }
+    }
+
+    @Override
+    public void sendLoginResult(boolean isSuccessful) {
+        if (isSuccessful) {
+            Navigation.findNavController(view).popBackStack(R.id.mainFragment, false);
+        }
+
     }
 }
