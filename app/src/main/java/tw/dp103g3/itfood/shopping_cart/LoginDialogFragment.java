@@ -79,7 +79,7 @@ public class LoginDialogFragment extends DialogFragment {
         textInputLayoutPassword = view.findViewById(R.id.textInputLayoutPassword);
 
         btLogin.setOnClickListener(v -> {
-            if (!validateUsername() | !validatePassword()) {
+            if (!validateUsername() || !validatePassword()) {
                 isSuccessful = false;
                 mHost.sendLoginResult(isSuccessful);
                 return;
@@ -114,8 +114,9 @@ public class LoginDialogFragment extends DialogFragment {
     }
 
     private boolean validateUsername() {
-        member = null;
         String username = textInputLayoutUsername.getEditText().getText().toString().trim();
+        member = getMember(username);
+        textInputLayoutPassword.setError(null);
 
         if (username.isEmpty()) {
             textInputLayoutUsername.setError("請輸入帳號 (電子信箱)");
@@ -123,11 +124,10 @@ public class LoginDialogFragment extends DialogFragment {
         } else if (!username.contains("@")) {
             textInputLayoutUsername.setError("帳號為電子信箱格式");
             return false;
-        } else if (getMember(username) == null) {
+        } else if (member == null || member.getMemId() == 0) {
             textInputLayoutUsername.setError("此帳戶不存在，請確認輸入是否正確");
             return false;
         } else {
-            member = getMember(username);
             textInputLayoutUsername.setError(null);
             return true;
         }
@@ -139,7 +139,7 @@ public class LoginDialogFragment extends DialogFragment {
         if (password.isEmpty()) {
             textInputLayoutPassword.setError("請輸入密碼");
             return false;
-        } else if (member != null & !password.equals(member.getMemPassword())) {
+        } else if (!password.equals(member.getMemPassword())) {
             textInputLayoutPassword.setError("密碼錯誤，請檢查是否正確");
             return false;
         } else if (member.getMemState() == 0) {
