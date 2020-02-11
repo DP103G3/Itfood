@@ -129,12 +129,6 @@ public class AddressSelectFragment extends Fragment {
     }
 
     private void ShowAddress(List<Address> addresses) {
-        if (addresses == null || addresses.isEmpty()) {
-            if (Common.networkConnected(activity)) {
-                Common.showToast(activity, "no address found");
-                Navigation.findNavController(view).popBackStack();
-            }
-        }
         AddressAdapter addressAdapter = (AddressAdapter) recyclerView.getAdapter();
         if (addressAdapter == null) {
             recyclerView.setAdapter(new AddressAdapter(activity, addresses));
@@ -168,7 +162,11 @@ public class AddressSelectFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return addresses.size() + 1;
+            if (addresses.isEmpty()) {
+                return 1;
+            } else {
+                return addresses.size() + 1;
+            }
         }
 
         @NonNull

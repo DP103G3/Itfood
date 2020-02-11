@@ -23,8 +23,8 @@
             android:id="@+id/action_mainFragment_to_shoppingCartFragment"
             app:destination="@id/shoppingCartFragment"
             app:enterAnim="@anim/fragment_slide_up_anim"
-            app:exitAnim="@anim/fragment_open_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
             app:popExitAnim="@anim/fragment_slide_down_anim" />
     </fragment>
     <fragment
@@ -41,7 +41,11 @@
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_shopFragment_to_shoppingCartFragment"
-            app:destination="@id/shoppingCartFragment" />
+            app:destination="@id/shoppingCartFragment"
+            app:enterAnim="@anim/fragment_slide_up_anim"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_slide_down_anim" />
     </fragment>
     <fragment
         android:id="@+id/favoriteFragment"
@@ -75,7 +79,11 @@
             app:destination="@id/personalInfoFragment" />
         <action
             android:id="@+id/action_personFragment_to_paymentFragment"
-            app:destination="@id/paymentFragment" />
+            app:destination="@id/paymentFragment"
+            app:enterAnim="@anim/fragment_slide_in_right"
+            app:exitAnim="@anim/fragment_slide_out_left"
+            app:popEnterAnim="@anim/fragment_slide_in_left"
+            app:popExitAnim="@anim/fragment_slide_out_right" />
         <action
             android:id="@+id/action_personFragment_to_locationFragment"
             app:destination="@id/locationFragment" />
@@ -108,7 +116,11 @@
             app:destination="@id/shopFragment" />
         <action
             android:id="@+id/action_mapFragment_to_shoppingCartFragment"
-            app:destination="@id/shoppingCartFragment" />
+            app:destination="@id/shoppingCartFragment"
+            app:enterAnim="@anim/fragment_slide_up_anim"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_slide_down_anim" />
     </fragment>
     <fragment
         android:id="@+id/shoppingCartFragment"
@@ -139,7 +151,22 @@
         android:id="@+id/paymentFragment"
         android:name="tw.dp103g3.itfood.PaymentFragment"
         android:label="fragment_payment"
-        tools:layout="@layout/fragment_payment" />
+        tools:layout="@layout/fragment_payment">
+        <action
+            android:id="@+id/action_paymentFragment_to_addPaymentFragment"
+            app:destination="@id/addPaymentFragment"
+            app:enterAnim="@anim/fragment_slide_in_right"
+            app:exitAnim="@anim/fragment_slide_out_left"
+            app:popEnterAnim="@anim/fragment_slide_in_left"
+            app:popExitAnim="@anim/fragment_slide_out_right" />
+        <action
+            android:id="@+id/action_paymentFragment_to_paymentDetailFragment"
+            app:destination="@id/paymentDetailFragment"
+            app:enterAnim="@anim/fragment_slide_in_right"
+            app:exitAnim="@anim/fragment_slide_out_left"
+            app:popEnterAnim="@anim/fragment_slide_in_left"
+            app:popExitAnim="@anim/fragment_slide_out_right" />
+    </fragment>
     <fragment
         android:id="@+id/locationFragment"
         android:name="tw.dp103g3.itfood.LocationFragment"
@@ -211,4 +238,9 @@
             app:popEnterAnim="@anim/fragment_slide_in_left"
             app:popExitAnim="@anim/fragment_slide_out_right" />
     </fragment>
+    <fragment
+        android:id="@+id/paymentDetailFragment"
+        android:name="tw.dp103g3.itfood.PaymentDetailFragment"
+        android:label="fragment_payment_detail"
+        tools:layout="@layout/fragment_payment_detail" />
 </navigation>

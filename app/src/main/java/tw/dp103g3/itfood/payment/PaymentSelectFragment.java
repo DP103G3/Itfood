@@ -9,12 +9,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -30,6 +32,8 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
@@ -42,17 +46,24 @@ import static tw.dp103g3.itfood.Common.formatCardNum;
 
 
 public class PaymentSelectFragment extends Fragment {
-    private Toolbar toolbarPaymentSelect;
-    private RecyclerView rvPaymentRadioButton;
     private Activity activity;
     private CommonTask getPaymentTask;
     private SharedViewModel model;
     private Payment selectedPayment;
-    private View view;
     private SharedPreferences pref;
     private int mem_id;
-    private CardView cardViewCheck;
     private List<Payment> payments;
+    @BindView(R.id.cardViewCheck)
+    CardView cardViewCheck;
+    @BindView(R.id.ivCashCheck)
+    ImageView ivCashCheck;
+    @BindView(R.id.layoutCash)
+    ConstraintLayout layoutCash;
+    @BindView(R.id.rvPaymentRadioButton)
+    RecyclerView rvPaymentRadioButton;
+    @BindView(R.id.toolbarPaymentSelect)
+    Toolbar toolbarPaymentSelect;
+    private RadioButton lastChecked;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,23 +83,34 @@ public class PaymentSelectFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        this.view = view;
+        ButterKnife.bind(this, view);
+
 
         model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
         model.getSelectedPayment().observe(getViewLifecycleOwner(), payment -> {
             selectedPayment = payment;
+            if (payment == null) {
+                ivCashCheck.setVisibility(View.VISIBLE);
+            } else {
+                ivCashCheck.setVisibility(View.INVISIBLE);
+            }
         });
 
-        toolbarPaymentSelect = view.findViewById(R.id.toolbarPaymentSelect);
-        rvPaymentRadioButton = view.findViewById(R.id.rvPaymentRadioButton);
-        cardViewCheck = view.findViewById(R.id.cardViewCheck);
 
         rvPaymentRadioButton.setLayoutManager(new LinearLayoutManager(activity));
 
         toolbarPaymentSelect.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());
         cardViewCheck.setOnClickListener(v -> {
             model.selectPayment(selectedPayment);
+            Navigation.findNavController(v).popBackStack();
+        });
+
+        layoutCash.setOnClickListener(v -> {
+            model.selectPayment(null);
+            if (lastChecked != null) {
+                lastChecked.setChecked(false);
+            }
             Navigation.findNavController(v).popBackStack();
         });
 
@@ -123,12 +145,6 @@ public class PaymentSelectFragment extends Fragment {
     }
 
     private void ShowPayments(List<Payment> payments) {
-        if (payments == null || payments.isEmpty()) {
-            if (Common.networkConnected(activity)) {
-                Common.showToast(activity, "no payment found");
-                Navigation.findNavController(view).popBackStack();
-            }
-        }
         PaymentSelectFragment.PaymentAdapter paymentAdapter = (PaymentSelectFragment.PaymentAdapter) rvPaymentRadioButton.getAdapter();
         if (paymentAdapter == null) {
             rvPaymentRadioButton.setAdapter(new PaymentSelectFragment.PaymentAdapter(activity, payments));
@@ -162,7 +178,11 @@ public class PaymentSelectFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return payments.size() + 1;
+            if (payments.isEmpty()) {
+                return 1;
+            } else {
+                return payments.size() + 1;
+            }
         }
 
         @NonNull
@@ -172,8 +192,6 @@ public class PaymentSelectFragment extends Fragment {
                     .inflate(R.layout.select_radio_button_item_view, parent, false);
             return new PaymentSelectFragment.PaymentAdapter.MyViewHolder(itemView);
         }
-
-        private RadioButton lastChecked = null;
 
         @Override
         public void onBindViewHolder(@NonNull PaymentSelectFragment.PaymentAdapter.MyViewHolder holder, int position) {
@@ -207,6 +225,7 @@ public class PaymentSelectFragment extends Fragment {
                 }
 
                 holder.radioButton.setOnClickListener(v -> {
+                    ivCashCheck.setVisibility(View.INVISIBLE);
                     RadioButton rb = (RadioButton) v;
                     if (rb.isChecked()) {
                         if (lastChecked != null && lastChecked != rb) {
@@ -222,11 +241,7 @@ public class PaymentSelectFragment extends Fragment {
                 } else if (holder.radioButton.getText().toString().startsWith("5")) {
                     holder.radioButton.setCompoundDrawables(checkedIcon, null, master, null);
                 }
-
-
             }
         }
     }
-
-
 }

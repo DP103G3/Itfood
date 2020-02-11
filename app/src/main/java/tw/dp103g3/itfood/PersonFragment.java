@@ -60,6 +60,8 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
         ivCart = view.findViewById(R.id.ivCart);
         ivCart.setVisibility(View.GONE);
         listView = view.findViewById(R.id.listView);
+        int backgroundColor = getResources().getColor(R.color.colorItemBackground, activity.getTheme());
+        listView.setBackgroundColor(backgroundColor);
         if (memId == 0) {
             guestAdapter = new SimpleAdapter(activity, guestList, R.layout.basic_list_item,
                     new String[]{"icon", "title"}, new int[]{R.id.ivIcon, R.id.tvTitle});

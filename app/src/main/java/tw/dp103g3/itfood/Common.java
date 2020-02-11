@@ -1,13 +1,16 @@
 package tw.dp103g3.itfood;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -146,6 +149,7 @@ public class Common {
             ivCart.setVisibility(View.VISIBLE);
         }
     }
+
     public static double rad(double d) {
         return d * Math.PI / 180;
     }
@@ -180,22 +184,10 @@ public class Common {
 
     public static String formatCardNum(String cardNum) {
         char[] chars = cardNum.toCharArray();
-        if (chars[0] == '4') {
-            return new StringBuilder().append(chars[0]).append(chars[1]).append(chars[2])
-                    .append(chars[3]).append("-").append("****").append("-").append("****").append("-")
-                    .append(chars[12]).append(chars[13]).append(chars[14])
-                    .append(chars[15]).append(" VISA").toString();
-        } else if (chars[0] == '5') {
-            return new StringBuilder().append(chars[0]).append(chars[1]).append(chars[2])
-                    .append(chars[3]).append("-").append("****").append("-").append("****").append("-")
-                    .append(chars[12]).append(chars[13]).append(chars[14])
-                    .append(chars[15]).append(" MASTER").toString();
-        } else {
-            return new StringBuilder().append(chars[0]).append(chars[1]).append(chars[2])
-                    .append(chars[3]).append("-").append("****").append("-").append("****").append("-")
-                    .append(chars[12]).append(chars[13]).append(chars[14])
-                    .append(chars[15]).toString();
-        }
+        return new StringBuilder().append(chars[0]).append(chars[1]).append(chars[2])
+                .append(chars[3]).append(" - ").append("****").append(" - ").append("****").append(" - ")
+                .append(chars[12]).append(chars[13]).append(chars[14])
+                .append(chars[15]).toString();
     }
 
     public static void showLoginDialog(Fragment fragment) {
@@ -203,4 +195,18 @@ public class Common {
         loginDialogFragment.setTargetFragment(fragment, 0);
         loginDialogFragment.show(fragment.getParentFragmentManager(), "LoginDialogFragment");
     }
+
+    public static void setDialogUi(Dialog dialog, Activity activity) {
+        dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        dialog.getWindow().getDecorView().setSystemUiVisibility(activity.getWindow().getDecorView().getSystemUiVisibility());
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+                WindowManager wm = (WindowManager) activity.getSystemService(Context.WINDOW_SERVICE);
+                wm.updateViewLayout(dialog.getWindow().getDecorView(), dialog.getWindow().getAttributes());
+            }
+        });
+    }
+
 }

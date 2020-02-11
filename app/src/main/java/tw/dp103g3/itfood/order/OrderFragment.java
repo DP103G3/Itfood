@@ -14,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
@@ -200,7 +199,9 @@ public class OrderFragment extends Fragment implements LoginDialogFragment.Login
     @Override
     public void onStop() {
         super.onStop();
-        viewPager2.setAdapter(null);
+        if (viewPager2 != null) {
+            viewPager2.setAdapter(null);
+        }
     }
 }
 

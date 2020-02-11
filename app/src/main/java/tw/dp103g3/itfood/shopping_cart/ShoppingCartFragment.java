@@ -94,6 +94,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
     private Address address;
     private Payment payment;
     private final int DELIVERY = 1;
+    private final int SELFPICK = 0;
     private SharedViewModel model;
     private Date date;
     private Member member;
@@ -180,11 +181,11 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
 
         if (mem_id != LOGIN_FALSE) {
             address = cart.getAddresses().isEmpty() ? null : cart.getAddresses().get(0);
+            model.selectAddress(address);
             payment = cart.getPayments().isEmpty() ? null : cart.getPayments().get(0);
+            model.selectPayment(payment);
             member = cart.getMember();
         }
-
-
     }
 
     @Override
@@ -216,7 +217,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
             if (payment != null) {
                 tvPaymentMethod.setText(formatCardNum(payment.getPay_cardnum()));
             } else {
-                tvPaymentMethod.setText("");
+                tvPaymentMethod.setText("付現");
             }
         });
 
@@ -224,6 +225,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
 
         layoutDeliveryTime.setOnClickListener(v -> {
             DeliveryTimeSelectDialog dtsd = new DeliveryTimeSelectDialog(activity, model);
+            Common.setDialogUi(dtsd, activity);
             dtsd.show();
         });
 
@@ -241,6 +243,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
                 updateDisplayOrderType();
             });
             AlertDialog alertDialog = alt_bld.create();
+            Common.setDialogUi(alertDialog, activity);
             alertDialog.show();
         });
 
@@ -280,13 +283,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
             }
         });
 
-        if (payment != null) {
-            tvPaymentMethod.setText(formatCardNum(payment.getPay_cardnum()));
-        } else {
-            tvPaymentMethod.setText("");
-        }
-
-        //設定tvAddress的預設文字，如果未登入會顯示最近一次定位的地址，登入則會顯示第一個個人地址
+        //設定tvAddress的預設文字
         if (address != null) {
             tvAddress.setText(address.getInfo());
         } else {
@@ -536,7 +533,6 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
     }
 
     private void updateDisplayOrderType() {
-        int SELFPICK = 0;
         if (orderType == DELIVERY) {
             tvOrderType.setText("外送");
             layoutDeliveryAddress.setVisibility(View.VISIBLE);
@@ -683,12 +679,25 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
                 if (orderType == 0) {
                     adrs_id = 0;
                 } else {
-                    adrs_id = address.getId();
+                    if (address != null) {
+                        adrs_id = address.getId();
+                    } else {
+                        Common.showToast(activity, "送餐資料不可空白，請選取或新增地址");
+                        return;
+                    }
                 }
+                Order order = new Order();
+                int pay_id = payment == null ? 0 : payment.getPay_id();
 
-                Order order = new Order(shop, mem_id, 0, payment.getPay_id(), 0, orderIdeal,
-                        now.getTime(), null, adrs_id, member.getMemName(), member.getMemPhone(),
-                        totalAfter, 0, 1, orderType);
+                if (payment != null) {
+                    order = new Order(shop, mem_id, 0, pay_id, 0, orderIdeal,
+                            now.getTime(), null, adrs_id, member.getMemName(), member.getMemPhone(),
+                            totalAfter, 0, 1, orderType);
+                } else {
+                    order = new Order(shop, mem_id, 0, pay_id, 0, orderIdeal,
+                            now.getTime(), null, adrs_id, member.getMemName(), member.getMemPhone(),
+                            totalAfter, 0, 1, orderType);
+                }
 
                 int orderCount = sendOrder(order);
                 if (orderCount != 0) {
@@ -714,5 +723,3 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
 
     }
 }
-
-//TODO 付現功能

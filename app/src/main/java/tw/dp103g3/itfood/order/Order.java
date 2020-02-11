@@ -26,6 +26,10 @@ public class Order implements Serializable {
 	private int order_area;
 	private int order_type;
 	private List<OrderDetail> orderDetails;
+
+    public Order() {
+    }
+
 	
 	public Order(Shop shop, int mem_id, int del_id, int pay_id, int sp_id, Date order_ideal, Date order_delivery, 
 			int adrs_id, String order_name, String order_phone, int order_ttprice, int order_type, 
