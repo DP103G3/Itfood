@@ -305,6 +305,7 @@ public class MainFragment extends Fragment {
             String type = typeSb.toString().trim().replaceAll(" ", "，");
             int id = shop.getId();
             double rate = (double) shop.getTtscore() / shop.getTtrate();
+            holder.ivShop.setImageResource(R.drawable.no_image);
             shopImageTask = new ImageTask(url, id, imageSize, holder.ivShop);
             shopImageTask.execute();
             holder.tvName.setText(shop.getName());

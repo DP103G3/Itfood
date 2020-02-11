@@ -14,7 +14,8 @@ public class DateTimePickerDialog extends AlertDialog {
 
     public DateTimePickerDialog(Context context, long date) {
         super(context);
-        dateTimePicker = new DateTimePicker(context);
+        this.date.setTimeInMillis(date);
+        dateTimePicker = new DateTimePicker(context, this.date);
         setView(dateTimePicker);
         dateTimePicker.setOnDateTimeChangedListener((view, year, month, day, hour, minute) -> {
             this.date.set(Calendar.YEAR, year);
@@ -27,8 +28,7 @@ public class DateTimePickerDialog extends AlertDialog {
         });
         setButton(BUTTON_POSITIVE, "設置", this::onClick);
         setButton(BUTTON_NEGATIVE, "取消", (OnClickListener) null);
-        this.date.setTimeInMillis(date);
-        updateTitle(this.date.getTimeInMillis());
+        dateTimePicker.onDateTimeChanged();
     }
 
     public interface OnDateTimeSetListener {

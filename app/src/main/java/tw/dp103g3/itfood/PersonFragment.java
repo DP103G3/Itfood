@@ -28,8 +28,6 @@ import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
 public class PersonFragment extends Fragment implements LoginDialogFragment.LoginDialogContract {
     private Activity activity;
     private ListAdapter memberAdapter, guestAdapter;
-    private int[] memberIcon, guestIcon;
-    private String[] memberTitle, guestTitle;
     private int[] memberAction, guestAction;
     private List<Map<String, Object>> memberList, guestList;
     private ListView listView;
@@ -85,17 +83,16 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
         }
     }
 
-
     private void initListMap() {
         memberList = new ArrayList<>();
-        memberIcon = new int[]{R.drawable.person, R.drawable.payment, R.drawable.location, R.drawable.logout};
-        memberTitle = new String[]{getString(R.string.textPersonInfo), getString(R.string.textPayment), getString(R.string.textSendLocation), getString(R.string.textLogout)};
+        int[] memberIcon = new int[]{R.drawable.person, R.drawable.payment, R.drawable.location, R.drawable.logout};
+        String[] memberTitle = new String[]{getString(R.string.textPersonInfo), getString(R.string.textPayment), getString(R.string.textSendLocation), getString(R.string.textLogout)};
         memberAction = new int[]{R.id.action_personFragment_to_personalInfoFragment,
                 R.id.action_personFragment_to_paymentFragment,
                 R.id.action_personFragment_to_locationFragment};
         guestList = new ArrayList<>();
-        guestIcon = new int[]{R.drawable.login};
-        guestTitle = new String[]{getString(R.string.textLogin)};
+        int[] guestIcon = new int[]{R.drawable.login};
+        String[] guestTitle = new String[]{getString(R.string.textLogin)};
         for (int i = 0; i < memberIcon.length; i++) {
             Map<String, Object> memberItem = new HashMap<>();
             memberItem.put("icon", memberIcon[i]);

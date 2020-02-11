@@ -51,11 +51,9 @@ public class ImageTask extends AsyncTask<Object, Integer, Bitmap> {
         if (isCancelled() || imageView == null) {
             return;
         }
-        imageView.setVisibility(View.VISIBLE);
         if (bitmap != null) {
+            imageView.setVisibility(View.VISIBLE);
             imageView.setImageBitmap(bitmap);
-        } else {
-            imageView.setVisibility(View.GONE);
         }
     }
 

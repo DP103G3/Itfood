@@ -52,7 +52,6 @@ public class OrderFragment extends Fragment implements LoginDialogFragment.Login
     private NavController navController;
     private static Set<Order> orders;
     private ViewPager2 viewPager2;
-    private LocalBroadcastManager broadcastManager;
     private TabLayout tabLayout;
     private SharedPreferences pref;
 
@@ -67,7 +66,6 @@ public class OrderFragment extends Fragment implements LoginDialogFragment.Login
     static int getMem_id() {
         return mem_id;
     }
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -107,7 +105,6 @@ public class OrderFragment extends Fragment implements LoginDialogFragment.Login
 //        broadcastManager = LocalBroadcastManager.getInstance(activity);
 //        registerOrderReceiver();
         navController = Navigation.findNavController(view);
-
         switch (status) {
             case NOT_LOGGED_IN: {
                 Button btLogin = view.findViewById(R.id.btLogin);
@@ -125,7 +122,9 @@ public class OrderFragment extends Fragment implements LoginDialogFragment.Login
             case NORMAL: {
                 tabLayout = view.findViewById(R.id.tabLayOut);
                 viewPager2 = view.findViewById(R.id.viewPager);
-                viewPager2.setAdapter(new ViewPagerAdapter(activity));
+                if (viewPager2.getAdapter() == null) {
+                    viewPager2.setAdapter(new ViewPagerAdapter(activity));
+                }
                 viewPager2.setOffscreenPageLimit(1);
                 new TabLayoutMediator(tabLayout, viewPager2, (tab, position) -> {
                     switch (position) {
@@ -153,25 +152,6 @@ public class OrderFragment extends Fragment implements LoginDialogFragment.Login
             navController.popBackStack(R.id.mainFragment, false);
         }
     }
-
-
-//    private void registerOrderReceiver() {
-//        IntentFilter orderFilter = new IntentFilter("order");
-//        broadcastManager.registerReceiver(orderReceiver, orderFilter);
-//    }
-//
-//    private BroadcastReceiver orderReceiver = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            String message = intent.getStringExtra("message");
-//            Order order = Common.gson.fromJson(message, Order.class);
-//            orders.remove(order);
-//            orders.add(order);
-//            orders.forEach(v -> Log.d(TAG, v.toString()));
-//            viewPager2.setAdapter(new ViewPagerAdapter(activity));
-//            Log.d(TAG, message);
-//        }
-//    };
 
     public class ViewPagerAdapter extends FragmentStateAdapter {
         static final int TABS_ITEM_SIZE = 3;
@@ -217,12 +197,11 @@ public class OrderFragment extends Fragment implements LoginDialogFragment.Login
         return orders;
     }
 
-
-//    @Override
-//    public void onStop() {
-//        super.onStop();
-//        broadcastManager.unregisterReceiver(orderReceiver);
-//    }
+    @Override
+    public void onStop() {
+        super.onStop();
+        viewPager2.setAdapter(null);
+    }
 }
 
 

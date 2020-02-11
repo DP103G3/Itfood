@@ -435,4 +435,10 @@ public class OrderTabFragment extends Fragment {
             holder.tvDishName.setText(dish.getName());
         }
     }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        broadcastManager.unregisterReceiver(orderReceiver);
+    }
 }

@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -140,11 +141,16 @@ public class ShopFragment extends Fragment {
             e.printStackTrace();
         }
         btTime = view.findViewById(R.id.btTime);
+        Calendar showTime = Calendar.getInstance();
+        showTime.set(Calendar.MINUTE, showTime.get(Calendar.MINUTE) - showTime.get(Calendar.MINUTE) % 15);
+        showTime.add(Calendar.MINUTE, 45);
+        btTime.setText(simpleDateFormat.format(showTime.getTime()));
         btTime.setOnClickListener(v -> {
-            DateTimePickerDialog dialog = new DateTimePickerDialog(activity, System.currentTimeMillis());
-            dialog.setOnDateTimeSetListener((alertDialog, date) -> {
-                btTime.setText(simpleDateFormat.format(date));
-            });
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.MINUTE, 30);
+            DateTimePickerDialog dialog = new DateTimePickerDialog(activity, cal.getTimeInMillis());
+            dialog.setOnDateTimeSetListener((alertDialog, date) ->
+                    btTime.setText(simpleDateFormat.format(date)));
             dialog.show();
         });
         ivBack = view.findViewById(R.id.ivBack);
@@ -350,6 +356,7 @@ public class ShopFragment extends Fragment {
             holder.tvDishName.setText(dishName);
             holder.tvInfo.setText(info);
             holder.tvPrice.setText(String.format(Locale.getDefault(), "$ %d", price));
+            holder.ivDish.setVisibility(View.GONE);
             dishImageTask = new ImageTask(url, dish.getId(), imageSize, holder.ivDish);
             dishImageTask.execute();
             holder.ibAdd.setOnClickListener(holder::onEditCountClick);

@@ -2,6 +2,7 @@ package tw.dp103g3.itfood.main;
 
 import android.content.Context;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.NumberPicker;
 
@@ -13,14 +14,16 @@ public class DateTimePicker extends FrameLayout {
     private NumberPicker dateSpinner;
     private NumberPicker hourSpinner;
     private NumberPicker minuteSpinner;
-    private Calendar date;
-    private int hour, minute;
-    private String[] dateDisplayValues = new String[7];
+    private Calendar date, oDate;
+    private int hour, minute, oHour, oMinute;
+    private int dateMaxVal = 4;
+    private String[] dateDisplayValues = new String[dateMaxVal + 1];
     private OnDateTimeChangedListener onDateTimeChangedListener;
 
-    public DateTimePicker(Context context) {
+    public DateTimePicker(Context context, Calendar date) {
         super(context);
-        date = Calendar.getInstance();
+        oDate = Calendar.getInstance();
+        this.date = date;
         hour = date.get(Calendar.HOUR_OF_DAY);
         minute = date.get(Calendar.MINUTE);
 
@@ -28,54 +31,75 @@ public class DateTimePicker extends FrameLayout {
 
         dateSpinner = this.findViewById(R.id.npDate);
         dateSpinner.setMinValue(0);
-        dateSpinner.setMaxValue(6);
-        updateDateControl();
+        dateSpinner.setMaxValue(dateMaxVal);
+        initDate(dateMaxVal);
+        dateSpinner.setWrapSelectorWheel(false);
         dateSpinner.setOnValueChangedListener(onDateChangedLintener);
 
         hourSpinner = this.findViewById(R.id.npHour);
-        hourSpinner.setMaxValue(22);
-        hourSpinner.setMinValue(8);
+        initHour();
         hourSpinner.setWrapSelectorWheel(false);
-        hourSpinner.setValue(hour);
         hourSpinner.dispatchSetSelected(false);
         hourSpinner.setOnValueChangedListener(onHourChangedLintener);
 
         minuteSpinner = this.findViewById(R.id.npMinute);
-        minuteSpinner.setMaxValue(3);
-        minuteSpinner.setMinValue(0);
-        minuteSpinner.setFormatter(value -> String.valueOf(value * 15));
-//        minuteSpinner.setValue(minute / 15 + 1);
+        initMin();
+        minuteSpinner.setWrapSelectorWheel(false);
         minuteSpinner.dispatchSetSelected(false);
         minuteSpinner.setOnValueChangedListener(onMinuteChangedLintener);
+        oHour = hourSpinner.getValue();
+        oMinute = minuteSpinner.getValue();
+        onDateTimeChanged();
     }
 
     private NumberPicker.OnValueChangeListener onDateChangedLintener = (picker, oldVal, newVal) -> {
-        date.add(Calendar.DAY_OF_MONTH, newVal - oldVal);
-        updateDateControl();
+        oDate = Calendar.getInstance();
+        oDate.add(Calendar.DAY_OF_MONTH, dateSpinner.getValue());
+        initHour();
+        initMin();
         onDateTimeChanged();
     };
 
     private NumberPicker.OnValueChangeListener onHourChangedLintener = (picker, oldVal, newVal) -> {
-        hour = hourSpinner.getValue();
+        oHour = hourSpinner.getValue();
+        initMin();
         onDateTimeChanged();
     };
 
     private NumberPicker.OnValueChangeListener onMinuteChangedLintener = (picker, oldVal, newVal) -> {
-        minute = minuteSpinner.getValue() * 15;
+        oMinute = minuteSpinner.getValue();
         onDateTimeChanged();
     };
 
-    private void updateDateControl() {
+    private void initHour() {
+        int hourMinVal = dateSpinner.getValue() == 0 ? ((minute / 15 + 1) == 4 ? hour + 1 : hour) : 8;
+        hourSpinner.setMaxValue(22);
+        hourSpinner.setMinValue(hourMinVal);
+        hourSpinner.setValue(hourMinVal);
+        oHour = hourSpinner.getValue();
+    }
+
+    private void initMin() {
+        minuteSpinner.setMaxValue(3);
+        int minuteMinVal = (hourSpinner.getValue() == hour) && (dateSpinner.getValue() == 0) ? (minute / 15 + 1) : 0;
+        minuteSpinner.setMinValue(minuteMinVal);
+        Log.d("TAG", String.valueOf(minuteMinVal));
+        minuteSpinner.setFormatter(value -> String.valueOf(value * 15));
+        minuteSpinner.setValue(minuteMinVal);
+        oMinute = minuteSpinner.getValue();
+    }
+
+    private void initDate(int dateMaxVal) {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(date.getTimeInMillis());
-        cal.add(Calendar.DAY_OF_YEAR, -7 / 2 - 1);
+        cal.add(Calendar.DAY_OF_YEAR, -1);
         dateSpinner.setDisplayedValues(null);
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i <= dateMaxVal; i++) {
             cal.add(Calendar.DAY_OF_YEAR, 1);
             dateDisplayValues[i] = (String) DateFormat.format("MM.dd EEEE", cal);
         }
         dateSpinner.setDisplayedValues(dateDisplayValues);
-        dateSpinner.setValue(7 / 2);
+        dateSpinner.setValue(0);
         dateSpinner.invalidate();
     }
 
@@ -87,10 +111,10 @@ public class DateTimePicker extends FrameLayout {
         onDateTimeChangedListener = callBack;
     }
 
-    private void onDateTimeChanged() {
+    public void onDateTimeChanged() {
         if (onDateTimeChangedListener != null) {
-            onDateTimeChangedListener.onDateTimeChanged(this, date.get(Calendar.YEAR),
-                    date.get(Calendar.MONTH), date.get(Calendar.DAY_OF_MONTH), hour, minute);
+            onDateTimeChangedListener.onDateTimeChanged(this, oDate.get(Calendar.YEAR),
+                    oDate.get(Calendar.MONTH), oDate.get(Calendar.DAY_OF_MONTH), oHour, oMinute * 15);
         }
     }
 
