@@ -72,12 +72,14 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences memberPref = activity.getSharedPreferences(Common.PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         int mem_id = memberPref.getInt("mem_id", 0);
         String mem_password = memberPref.getString("mem_password", null);
-        if (mem_id != 0) {
+        if (mem_id != 0 & Common.networkConnected(activity)) {
             Member member = getMember(mem_id);
             if (mem_password == null || !mem_password.equals(member.getMemPassword())) {
                 memberPref.edit().putInt("mem_id", 0).apply();
                 memberPref.edit().remove("mem_password").apply();
             }
+        } else {
+            Common.showToast(this, R.string.textNoNetwork);
         }
         SharedViewModel model = new ViewModelProvider(this).get(SharedViewModel.class);
 

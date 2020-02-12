@@ -149,7 +149,7 @@
         tools:layout="@layout/fragment_personal_info" />
     <fragment
         android:id="@+id/paymentFragment"
-        android:name="tw.dp103g3.itfood.PaymentFragment"
+        android:name="tw.dp103g3.itfood.payment.PaymentFragment"
         android:label="fragment_payment"
         tools:layout="@layout/fragment_payment">
         <action
@@ -240,7 +240,7 @@
     </fragment>
     <fragment
         android:id="@+id/paymentDetailFragment"
-        android:name="tw.dp103g3.itfood.PaymentDetailFragment"
+        android:name="tw.dp103g3.itfood.payment.PaymentDetailFragment"
         android:label="fragment_payment_detail"
         tools:layout="@layout/fragment_payment_detail" />
 </navigation>

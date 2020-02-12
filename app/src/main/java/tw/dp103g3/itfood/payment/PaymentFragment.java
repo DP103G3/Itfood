@@ -1,4 +1,4 @@
-package tw.dp103g3.itfood;
+package tw.dp103g3.itfood.payment;
 
 
 import android.app.Activity;
@@ -32,7 +32,9 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import tw.dp103g3.itfood.payment.Payment;
+import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.R;
+import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.task.CommonTask;
 
 import static android.view.View.GONE;

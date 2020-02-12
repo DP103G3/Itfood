@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="@color/colorBackground"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".PaymentFragment">
+    tools:context=".payment.PaymentFragment">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbarPayment"

@@ -6,7 +6,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,11 +21,15 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
-import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.task.CommonTask;
 
 import static tw.dp103g3.itfood.Common.DATE_FORMAT;
@@ -41,9 +44,16 @@ public class LoginDialogFragment extends DialogFragment {
     private Button btSignUp;
     private View view;
     private CommonTask getMemberTask;
-    private Member member;
     private Activity activity;
     private SharedPreferences pref;
+    private int mem_id = 0;
+    private int result = 0;
+    public static final int ERROR = 0;
+    private static final int OK = 1;
+    private static final int WRONG_PASSWORD = 2;
+    private static final int SUSPENDED = 3;
+    private static final int NOT_FOUND = 4;
+
     Boolean isSuccessful;
     LoginDialogContract mHost;
 
@@ -80,13 +90,13 @@ public class LoginDialogFragment extends DialogFragment {
         textInputLayoutPassword = view.findViewById(R.id.textInputLayoutPassword);
 
         btLogin.setOnClickListener(v -> {
-            if (!validateUsername() || !validatePassword()) {
+            if (!validateUsername() | !validatePassword()) {
                 isSuccessful = false;
                 mHost.sendLoginResult(isSuccessful);
                 return;
             } else {
-                pref.edit().putInt("mem_id", member.getMemId()).apply();
-                pref.edit().putString("mem_password", member.getMemPassword()).apply();
+                pref.edit().putInt("mem_id", mem_id).apply();
+                pref.edit().putString("mem_password", textInputLayoutPassword.getEditText().getText().toString().trim()).apply();
                 Common.showToast(activity, "登入成功");
                 isSuccessful = true;
                 mHost.sendLoginResult(isSuccessful);
@@ -117,7 +127,9 @@ public class LoginDialogFragment extends DialogFragment {
 
     private boolean validateUsername() {
         String username = textInputLayoutUsername.getEditText().getText().toString().trim();
-        member = getMember(username);
+        String password = textInputLayoutPassword.getEditText().getText().toString().trim();
+        boolean validate = false;
+        result = login(username, password);
         textInputLayoutPassword.setError(null);
 
         if (username.isEmpty()) {
@@ -126,31 +138,47 @@ public class LoginDialogFragment extends DialogFragment {
         } else if (!username.contains("@")) {
             textInputLayoutUsername.setError("帳號為電子信箱格式");
             return false;
-        } else if (member == null || member.getMemId() == 0) {
-            textInputLayoutUsername.setError("此帳戶不存在，請確認輸入是否正確");
-            return false;
-        } else {
-            textInputLayoutUsername.setError(null);
-            return true;
         }
-
+        switch (result) {
+            case NOT_FOUND:
+                textInputLayoutUsername.setError("此帳戶不存在，請確認輸入是否正確");
+                validate = false;
+                break;
+            case OK:
+                textInputLayoutUsername.setError(null);
+                validate = true;
+                break;
+        }
+        return validate;
     }
 
     private boolean validatePassword() {
         String password = textInputLayoutPassword.getEditText().getText().toString().trim();
+        textInputLayoutPassword.setError(null);
+        boolean validate = false;
         if (password.isEmpty()) {
             textInputLayoutPassword.setError("請輸入密碼");
             return false;
-        } else if (!password.equals(member.getMemPassword())) {
-            textInputLayoutPassword.setError("密碼錯誤，請檢查是否正確");
-            return false;
-        } else if (member.getMemState() == 0) {
-            textInputLayoutPassword.setError("此帳號已刪除或是被停權");
-            return false;
-        } else {
-            textInputLayoutPassword.setError(null);
-            return true;
         }
+        switch (result) {
+            case WRONG_PASSWORD:
+                textInputLayoutPassword.setError("密碼錯誤，請檢查是否正確");
+                validate = false;
+                break;
+            case SUSPENDED:
+                textInputLayoutPassword.setError("此帳號已刪除或是被停權");
+                validate = false;
+                break;
+            case OK:
+                textInputLayoutPassword.setError(null);
+                validate = true;
+                break;
+            case ERROR:
+                textInputLayoutPassword.setError("伺服器錯誤，請稍後再試");
+                validate = false;
+                break;
+        }
+        return validate;
     }
 
     @Override
@@ -158,40 +186,35 @@ public class LoginDialogFragment extends DialogFragment {
         super.onCancel(dialog);
     }
 
-    private Member getMember(String email) {
+    private int login(String email, String password) {
+        int result = 0;
+
         String url = Url.URL + "/MemberServlet";
         JsonObject jsonObject = new JsonObject();
         Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-        jsonObject.addProperty("action", "findByEmail");
+        jsonObject.addProperty("action", "login");
         jsonObject.addProperty("mem_email", email);
+        jsonObject.addProperty("mem_password", password);
         String jsonOut = jsonObject.toString();
-
         if (Common.networkConnected(activity)) {
             try {
                 getMemberTask = new CommonTask(url, jsonOut);
                 String jsonIn = getMemberTask.execute().get();
-                member = gson.fromJson(jsonIn, Member.class);
+                Map<String, Integer> outcome = new HashMap<>();
+                Type mapType = new TypeToken<Map<String, Integer>>() {
+                }.getType();
+                outcome = gson.fromJson(jsonIn, mapType);
+                result = outcome.get("result");
+                mem_id = outcome.get("id");
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
             }
         } else {
             Common.showToast(activity, R.string.textNoNetwork);
+            return ERROR;
         }
 
-        return member;
+        return result;
     }
-
-    private void fullScreenImmersive(View view) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN;
-            view.setSystemUiVisibility(uiOptions);
-        }
-    }
-
 
 }
