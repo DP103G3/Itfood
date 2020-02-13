@@ -208,7 +208,7 @@ public class PaymentSelectFragment extends Fragment {
             if (position == payments.size()) {
                 Drawable add = getResources().getDrawable(R.drawable.add, activity.getTheme());
                 holder.radioButton.setCompoundDrawablesWithIntrinsicBounds(add, null, null, null);
-                holder.radioButton.setText(R.string.addPayment);
+                holder.radioButton.setText(R.string.textAddPayment);
                 holder.radioButton.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.action_paymentSelectFragment_to_addPaymentFragment));
             } else {
                 final Payment payment = payments.get(position);

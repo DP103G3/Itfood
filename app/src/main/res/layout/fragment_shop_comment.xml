@@ -227,7 +227,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="4dp"
                         android:alpha="80"
-                        android:text="@string/yourComment"
+                        android:text="@string/textYourComment"
                         android:textSize="12sp"
                         app:layout_constraintEnd_toStartOf="@+id/ratingBarComment"
                         app:layout_constraintTop_toTopOf="parent" />

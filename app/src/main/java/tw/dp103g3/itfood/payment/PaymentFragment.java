@@ -165,7 +165,7 @@ public class PaymentFragment extends Fragment {
             if (position == payments.size()) {
                 Drawable add = getResources().getDrawable(R.drawable.add, activity.getTheme());
                 holder.ivCardType.setImageDrawable(add);
-                holder.tvCardNum.setText(R.string.addPayment);
+                holder.tvCardNum.setText(R.string.textAddPayment);
                 holder.itemView.setOnClickListener(v -> {
                     navController.navigate(R.id.action_paymentFragment_to_addPaymentFragment);
                 });

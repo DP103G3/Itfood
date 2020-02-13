@@ -27,7 +27,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:fontFamily="@font/noto_sans"
-                android:text="@string/myorder"
+                android:text="@string/textMyOrder"
                 android:textColor="@color/colorTextOnP"
                 android:textSize="20sp"
                 app:layout_constraintStart_toStartOf="parent"
@@ -53,19 +53,19 @@
             android:id="@+id/tabUnconfirmed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/unconfirmed" />
+            android:text="@string/textUnconfirmed" />
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tabMaking"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/making" />
+            android:text="@string/textMaking" />
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tabPickUp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/unpickup" />
+            android:text="@string/textUnpickup" />
 
     </com.google.android.material.tabs.TabLayout>
 

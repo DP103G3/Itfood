@@ -137,7 +137,7 @@
 
                                 android:layout_weight="1"
                                 android:fontFamily="@font/noto_sans"
-                                android:text="@string/ServiceFee"
+                                android:text="@string/textServiceFee"
                                 android:textSize="16sp" />
 
                             <TextView
@@ -175,7 +175,7 @@
                                 android:layout_height="wrap_content"
 
                                 android:fontFamily="@font/noto_sans"
-                                android:text="@string/Total"
+                                android:text="@string/textTotal"
                                 android:textColor="@android:color/black"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />
@@ -337,7 +337,7 @@
                                 style="@style/ShoppingCartLayoutTextBlack"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/orderType"></TextView>
+                                android:text="@string/textOrderType"></TextView>
 
                             <TextView
                                 android:id="@+id/tvOrderType"
@@ -345,7 +345,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:paddingRight="24dp"
-                                android:text="@string/TAKEOUT"
+                                android:text="@string/textTakeout"
                                 android:textAlignment="viewEnd" />
                         </LinearLayout>
 
@@ -466,7 +466,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/noto_sans"
-                            android:text="@string/CheckOut"
+                            android:text="@string/textCheckOut"
                             android:textAlignment="center"
                             android:textColor="@color/colorTextOnS"
                             android:textSize="16sp"

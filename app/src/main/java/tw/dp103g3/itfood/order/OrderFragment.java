@@ -128,15 +128,15 @@ public class OrderFragment extends Fragment implements LoginDialogFragment.Login
                 new TabLayoutMediator(tabLayout, viewPager2, (tab, position) -> {
                     switch (position) {
                         case 0: {
-                            tab.setText(R.string.unfinished);
+                            tab.setText(R.string.textUnfinished);
                             break;
                         }
                         case 1: {
-                            tab.setText(R.string.done);
+                            tab.setText(R.string.textDone);
                             break;
                         }
                         case 2: {
-                            tab.setText(R.string.canceled);
+                            tab.setText(R.string.textCanceled);
                             break;
                         }
                     }

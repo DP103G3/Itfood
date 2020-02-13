@@ -139,7 +139,7 @@ public class Common {
             JsonObject jsonObject = gson.fromJson(inStr, JsonObject.class);
             String odStr = jsonObject.get("orderDetails").getAsString();
             orderDetails = gson.fromJson(odStr, type);
-            orderDetails.forEach((v, u) -> Log.d(TAG, String.format("%d, %d", v, u)));
+//            orderDetails.forEach((v, u) -> Log.d(TAG, String.format("%d, %d", v, u)));
         } catch (IOException e) {
             e.printStackTrace();
         }

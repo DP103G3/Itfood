@@ -74,7 +74,7 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
             listView.setAdapter(memberAdapter);
             listView.setOnItemClickListener(((parent, v, position, id) -> {
                 NavController navController = Navigation.findNavController(v);
-                if (position != 3) {
+                if (position != 4) {
                     navController.navigate(memberAction[position]);
                 } else {
                     preferences.edit().putInt("mem_id", 0).apply();
@@ -87,11 +87,12 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
 
     private void initListMap() {
         memberList = new ArrayList<>();
-        int[] memberIcon = new int[]{R.drawable.person, R.drawable.payment, R.drawable.location, R.drawable.logout};
-        String[] memberTitle = new String[]{getString(R.string.textPersonInfo), getString(R.string.textPayment), getString(R.string.textSendLocation), getString(R.string.textLogout)};
+        int[] memberIcon = new int[]{R.drawable.person, R.drawable.payment, R.drawable.location, R.drawable.ic_local_dining_black_24dp, R.drawable.logout};
+        String[] memberTitle = new String[]{getString(R.string.textPersonInfo), getString(R.string.textPayment), getString(R.string.textSendLocation), getString(R.string.textFavoriteShops), getString(R.string.textLogout)};
         memberAction = new int[]{R.id.action_personFragment_to_personalInfoFragment,
                 R.id.action_personFragment_to_paymentFragment,
-                R.id.action_personFragment_to_locationFragment};
+                R.id.action_personFragment_to_locationFragment,
+                R.id.action_personFragment_to_favoriteFragment,};
         guestList = new ArrayList<>();
         int[] guestIcon = new int[]{R.drawable.login};
         String[] guestTitle = new String[]{getString(R.string.textLogin)};

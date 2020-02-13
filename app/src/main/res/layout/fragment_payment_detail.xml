@@ -40,7 +40,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginTop="16dp"
                 android:layout_marginStart="16dp"
-                android:text="@string/creditCardType"
+                android:text="@string/textCreditCardType"
                 android:textSize="16sp"
                 android:textColor="@color/colorTextOnP"
                 android:fontFamily="@font/noto_sans" />
@@ -82,7 +82,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 android:textColor="@color/colorTextOnP"
                 android:fontFamily="@font/noto_sans"
-                android:text="@string/creditCardNumber" />
+                android:text="@string/textCreditCardNumber" />
 
             <TextView
                 android:id="@+id/tvCardNum"

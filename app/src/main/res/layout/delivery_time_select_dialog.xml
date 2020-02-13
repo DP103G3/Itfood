@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:fontFamily="@font/noto_sans"
-            android:text="@string/deliveryTime"
+            android:text="@string/textDeliveryTime"
             android:textColor="@android:color/black"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -42,7 +42,7 @@
                 android:id="@+id/textView14"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/deliveryDate" />
+                android:text="@string/textDeliveryDate" />
 
             <Spinner
                 android:id="@+id/spDate"
@@ -55,7 +55,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/deliveryTime" />
+                android:text="@string/textDeliveryTime" />
 
             <Spinner
                 android:id="@+id/spTime"
@@ -71,7 +71,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/Confrim"
+            android:text="@string/textConfirm"
             android:textColor="@color/colorSecondary"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -83,7 +83,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="24dp"
-            android:text="@string/cancel"
+            android:text="@string/textCancel"
             app:layout_constraintEnd_toStartOf="@+id/btnConfirm"
             app:layout_constraintTop_toTopOf="@+id/btnConfirm" />
     </androidx.constraintlayout.widget.ConstraintLayout>

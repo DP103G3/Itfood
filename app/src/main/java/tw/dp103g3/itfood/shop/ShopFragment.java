@@ -136,7 +136,7 @@ public class ShopFragment extends Fragment {
             Type type = new TypeToken<Map<Integer, Integer>>(){}.getType();
             orderDetails = gson.fromJson(orderDetailsStr, type) != null ?
                     gson.fromJson(orderDetailsStr, type) : new HashMap<Integer, Integer>();
-            orderDetails.forEach((v,u) -> Log.d(TAG, String.format("%d, %d", v, u)));
+//            orderDetails.forEach((v,u) -> Log.d(TAG, String.format("%d, %d", v, u)));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -302,7 +302,6 @@ public class ShopFragment extends Fragment {
                     while ((line = in.readLine()) != null) {
                         sb.append(line);
                     }
-                    Log.d(TAG, sb.toString());
                     JsonObject jsonObject = gson.fromJson(sb.toString(), JsonObject.class);
                     String shopStr = jsonObject.get("shop").getAsString();
                     Shop odShop = gson.fromJson(shopStr, Shop.class);
@@ -318,7 +317,7 @@ public class ShopFragment extends Fragment {
                 } else {
                     count = count <= 0 ? 0 : count - 1;
                 }
-                Log.d(TAG, String.valueOf(dishId));
+//                Log.d(TAG, String.valueOf(dishId));
                 orderDetails.put(dishId, count);
                 if (count <= 0){
                     orderDetails.remove(dishId);

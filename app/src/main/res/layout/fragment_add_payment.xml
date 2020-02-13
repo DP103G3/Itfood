@@ -49,7 +49,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:fontFamily="@font/noto_sans"
-                    android:text="@string/cardHolderName"
+                    android:text="@string/textCardHolderName"
                     android:textColor="@android:color/black" />
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -95,9 +95,9 @@
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:fontFamily="@font/noto_sans"
-                    android:text="@string/creditCardNumber"
+                    android:text="@string/textCreditCardNumber"
                     android:textColor="@android:color/black"
-                    tools:text="@string/creditCardNumber" />
+                    tools:text="@string/textCreditCardNumber" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/etCardNum"
@@ -145,7 +145,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:fontFamily="@font/noto_sans"
-                    android:text="@string/expirationDate"
+                    android:text="@string/textExpirationDate"
                     android:textColor="@android:color/black" />
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -194,7 +194,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:fontFamily="@font/noto_sans"
-                    android:text="@string/safeCode"
+                    android:text="@string/textSafeCode"
                     android:textColor="@android:color/black" />
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -243,7 +243,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:fontFamily="@font/noto_sans"
-                    android:text="@string/cardHolderPhoneNumber"
+                    android:text="@string/textCardHolderPhoneNumber"
                     android:textColor="@android:color/black" />
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -309,7 +309,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/noto_sans"
-                        android:text="@string/Confrim"
+                        android:text="@string/textConfirm"
                         android:textAlignment="center"
                         android:textColor="@color/colorTextOnS"
                         android:textSize="16sp"

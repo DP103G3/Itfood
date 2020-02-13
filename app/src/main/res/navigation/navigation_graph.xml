@@ -14,9 +14,6 @@
             android:id="@+id/action_mainFragment_to_shopFragment"
             app:destination="@id/shopFragment" />
         <action
-            android:id="@+id/action_mainFragment_to_favoriteFragment"
-            app:destination="@id/favoriteFragment" />
-        <action
             android:id="@+id/action_mainFragment_to_mapFragment"
             app:destination="@id/mapFragment" />
         <action
@@ -68,6 +65,14 @@
         <action
             android:id="@+id/action_orderFragment_to_QRCodeFragment"
             app:destination="@id/QRCodeFragment" />
+        <action
+            android:id="@+id/action_orderFragment_to_shoppingCartFragment"
+            app:destination="@id/shoppingCartFragment"
+            app:enterAnim="@anim/fragment_slide_up_anim"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_slide_down_anim"
+            app:popUpTo="@id/shoppingCartFragment" />
     </fragment>
     <fragment
         android:id="@+id/personFragment"
@@ -87,6 +92,13 @@
         <action
             android:id="@+id/action_personFragment_to_locationFragment"
             app:destination="@id/locationFragment" />
+        <action
+            android:id="@+id/action_personFragment_to_favoriteFragment"
+            app:destination="@id/favoriteFragment"
+            app:enterAnim="@anim/fragment_slide_in_right"
+            app:exitAnim="@anim/fragment_slide_out_left"
+            app:popEnterAnim="@anim/fragment_slide_in_left"
+            app:popExitAnim="@anim/fragment_slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/commentFragment"

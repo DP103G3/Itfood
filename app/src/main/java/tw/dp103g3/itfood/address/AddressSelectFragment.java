@@ -185,7 +185,7 @@ public class AddressSelectFragment extends Fragment {
             ColorStateList tint = getResources().getColorStateList(R.color.radio_button_custom_button, activity.getTheme());
             checkedIcon.setTintList(tint);
             if (position == addresses.size()) {
-                holder.radioButton.setText(R.string.addAddress);
+                holder.radioButton.setText(R.string.textAddAddress);
                 Drawable add = getResources().getDrawable(R.drawable.add, activity.getTheme());
                 holder.radioButton.setCompoundDrawablesWithIntrinsicBounds(add, null, null, null);
                 holder.radioButton.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.action_addressSelectFragment_to_addAddressFragment));

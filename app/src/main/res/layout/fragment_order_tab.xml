@@ -3,22 +3,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="@color/colorBackground"
     android:layout_height="match_parent">
 
     <LinearLayout
-
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
-        android:background="@color/colorBackground"
         android:orientation="vertical"
         tools:context=".order.OrderTabFragment">
 
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvOrder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+        </ScrollView>
+
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layoutEmpty"
@@ -41,11 +44,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="@string/emtpyorder"
+                android:text="@string/textEmptyOrder"
                 app:layout_constraintEnd_toEndOf="@+id/imageView8"
                 app:layout_constraintStart_toStartOf="@+id/imageView8"
                 app:layout_constraintTop_toBottomOf="@+id/imageView8" />
         </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     </LinearLayout>
 <!--

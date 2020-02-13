@@ -1,7 +1,6 @@
 package tw.dp103g3.itfood.comment;
 
 
-import android.animation.Animator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -24,6 +23,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.Navigation;
@@ -47,10 +47,12 @@ import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.member.Member;
+import tw.dp103g3.itfood.order.OrderAnimations;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
+import static android.view.View.GONE;
 import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 
 
@@ -68,7 +70,6 @@ public class ShopCommentFragment extends Fragment {
     private Member member;
     private int cmt_id;
     private BottomNavigationView bottomNavigationView;
-    private Animator animator;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -117,7 +118,7 @@ public class ShopCommentFragment extends Fragment {
         //如果preferences中的mem_id為0即代表為未登入
         List<Comment> comments;
         if (mem_id == 0) {
-            layoutCommentLoggedIn.setVisibility(View.GONE);
+            layoutCommentLoggedIn.setVisibility(GONE);
         } else {
             if (Common.networkConnected(activity)) {
                 String url = Url.URL + "/CommentServlet";
@@ -418,16 +419,33 @@ public class ShopCommentFragment extends Fragment {
             return comments.size();
         }
 
-        private class MyViewHolder extends RecyclerView.ViewHolder {
-            TextView tvUsername, tvCommentTime, tvCommentDetail;
-            RatingBar ratingBar;
-
-            MyViewHolder(@NonNull View itemView) {
-                super(itemView);
-                tvUsername = itemView.findViewById(R.id.tvUsername);
-                tvCommentTime = itemView.findViewById(R.id.tvCommentTime);
-                tvCommentDetail = itemView.findViewById(R.id.tvCommentDetail);
-                ratingBar = itemView.findViewById(R.id.ratingBar);
+        @Override
+        public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+            final Comment comment = comments.get(position);
+            holder.layoutReply.setVisibility(GONE);
+            Member member = getMember(comment.getMem_id());
+            String rawMemberEmail = member.getMemEmail();
+            String[] splitEmail = rawMemberEmail.split("@");
+            //將會員的電子郵件由“＠”分開為兩部分，取前面顯示
+            String memberEmail = splitEmail[0];
+            holder.tvUsername.setText(memberEmail);
+            holder.ratingBar.setRating(comment.getCmt_score());
+            holder.tvCommentDetail.setText(comment.getCmt_detail());
+            holder.tvCommentTime.setText(new SimpleDateFormat("MM月 dd, yyyy", Locale.getDefault()).format(comment.getCmt_time()));
+            if (comment.getCmt_feedback() == null || comment.getCmt_feedback().isEmpty() || comment.getCmt_feedback_state() == 0) {
+                holder.layoutExpandable.setVisibility(GONE);
+            } else {
+                holder.tvShopName.setText("店主");
+                holder.tvReplayContent.setText(comment.getCmt_feedback());
+                holder.tvReplyDate.setText(new SimpleDateFormat("MM月 dd, yyyy", Locale.getDefault()).format(comment.getCmt_feedback_time()));
+                View.OnClickListener onClickListener = v -> {
+                    boolean show = toggleLayout(!comment.isExpanded(), holder.ibExpandable, holder.layoutReply);
+                    swapView(holder.layoutExpandable, show);
+                    comment.setExpanded(show);
+                };
+                holder.layoutExpandable.setOnClickListener(onClickListener);
+                holder.ibExpandable.setOnClickListener(onClickListener);
+                holder.tvExpandReply.setOnClickListener(onClickListener);
 
             }
         }
@@ -439,20 +457,50 @@ public class ShopCommentFragment extends Fragment {
             return new MyViewHolder(itemView);
         }
 
-        @Override
-        public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-            final Comment comment = comments.get(position);
-
-            Member member = getMember(comment.getMem_id());
-            String rawMemberEmail = member.getMemEmail();
-            String[] splitEmail = rawMemberEmail.split("@");
-            //將會員的電子郵件由“＠”分開為兩部分，取前面顯示
-            String memberEmail = splitEmail[0];
-            holder.tvUsername.setText(memberEmail);
-            holder.ratingBar.setRating(comment.getCmt_score());
-            holder.tvCommentDetail.setText(comment.getCmt_detail());
-            holder.tvCommentTime.setText(new SimpleDateFormat("MM月 dd, yyyy", Locale.getDefault()).format(comment.getCmt_time()));
+        private boolean toggleLayout(boolean isExpanded, View v, ConstraintLayout cl) {
+            OrderAnimations.toggleArrow(v, isExpanded);
+            if (isExpanded) {
+                OrderAnimations.expand(cl);
+            } else {
+                OrderAnimations.collapse(cl);
+            }
+            return isExpanded;
 
         }
+
+        private void swapView(ConstraintLayout v, boolean show) {
+            ConstraintSet csOld = new ConstraintSet();
+            ConstraintSet csNew = new ConstraintSet();
+            csOld.clone(activity, R.layout.comment_reply_not_expanded_view);
+            csNew.clone(activity, R.layout.comment_reply_expanded_view);
+            if (show) {
+                csNew.applyTo(v);
+            } else {
+                csOld.applyTo(v);
+            }
+        }
+
+        private class MyViewHolder extends RecyclerView.ViewHolder {
+            TextView tvUsername, tvCommentTime, tvCommentDetail, tvShopName, tvReplyDate, tvReplayContent, tvExpandReply;
+            ImageButton ibExpandable;
+            RatingBar ratingBar;
+            ConstraintLayout layoutReply, layoutExpandable;
+
+            MyViewHolder(@NonNull View itemView) {
+                super(itemView);
+                tvUsername = itemView.findViewById(R.id.tvUsername);
+                tvCommentTime = itemView.findViewById(R.id.tvCommentTime);
+                tvCommentDetail = itemView.findViewById(R.id.tvCommentDetail);
+                ratingBar = itemView.findViewById(R.id.ratingBar);
+                layoutReply = itemView.findViewById(R.id.layoutReply);
+                layoutExpandable = itemView.findViewById(R.id.layoutExpandable);
+                tvReplyDate = itemView.findViewById(R.id.tvReplyDate);
+                tvShopName = itemView.findViewById(R.id.tvShopName);
+                tvReplayContent = itemView.findViewById(R.id.tvReplyContent);
+                tvExpandReply = itemView.findViewById(R.id.tvExpandReply);
+                ibExpandable = itemView.findViewById(R.id.ibExpandable);
+            }
+        }
+
     }
 }

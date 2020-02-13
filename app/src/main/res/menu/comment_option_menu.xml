@@ -3,8 +3,8 @@
 
     <item
         android:id="@+id/edit"
-        android:title="@string/edit" />
+        android:title="@string/textEdit" />
     <item
         android:id="@+id/delete"
-        android:title="@string/deleteComment" />
+        android:title="@string/textDeleteComment" />
 </menu>

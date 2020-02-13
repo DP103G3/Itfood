@@ -65,7 +65,7 @@ public class CommentFragment extends Fragment {
         btClose.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
 
         Bundle bundle = getArguments();
-        if (bundle.getString("action").equals("edit")){
+        if (bundle.getString("action").equals("edit")) {
             int cmt_id = bundle.getInt("cmt_id");
             comment = getComment(cmt_id);
             etComment.setText(comment.getCmt_detail());
@@ -98,8 +98,8 @@ public class CommentFragment extends Fragment {
             if (Common.networkConnected(activity)) {
                 String URL = Url.URL + "/CommentServlet";
                 int cmt_id = 0;
-                if(comment != null){
-                cmt_id = comment.getCmt_id();
+                if (comment != null) {
+                    cmt_id = comment.getCmt_id();
                 }
 
                 comment = new Comment(cmt_score, cmt_detail, shop_id, mem_id, cmt_state);
@@ -109,7 +109,7 @@ public class CommentFragment extends Fragment {
                 JsonObject jsonObject = new JsonObject();
                 if (bundle.getString("action").equals("insert")) {
                     jsonObject.addProperty("action", "commentInsert");
-                } else if(bundle.getString("action").equals("edit")){
+                } else if (bundle.getString("action").equals("edit")) {
                     jsonObject.addProperty("action", "commentUpdate");
                     comment.setCmt_id(cmt_id);
                 }
@@ -118,7 +118,7 @@ public class CommentFragment extends Fragment {
                 if (bundle.getString("action").equals("insert")) {
                     ttScore += cmt_score;
                     ttRate += 1;
-                }  else if(bundle.getString("action").equals("update")){
+                } else if (bundle.getString("action").equals("edit")) {
                     ttScore = ttScore - comment.getCmt_score() + cmt_score;
                 }
 
@@ -132,12 +132,12 @@ public class CommentFragment extends Fragment {
                 try {
                     String result = new CommonTask(URL, jsonObject.toString()).execute().get();
                     count = Integer.valueOf(result);
-                } catch (Exception e){
+                } catch (Exception e) {
                     Log.e(TAG, e.toString());
                 }
-                if (count == 0){
+                if (count == 0) {
                     Common.showToast(getActivity(), R.string.textPostCommentFail);
-                } else{
+                } else {
                     Common.showToast(getActivity(), R.string.textPostCommentSuccess);
                 }
 
@@ -152,7 +152,7 @@ public class CommentFragment extends Fragment {
 
     }
 
-    private Comment getComment(int cmt_id){
+    private Comment getComment(int cmt_id) {
         Comment comment = null;
         if (Common.networkConnected(activity)) {
             String url = Url.URL + "/CommentServlet";

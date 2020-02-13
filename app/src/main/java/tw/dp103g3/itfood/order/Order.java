@@ -26,6 +26,7 @@ public class Order implements Serializable {
 	private int order_area;
 	private int order_type;
 	private List<OrderDetail> orderDetails;
+	private boolean isExpanded;
 
     public Order() {
     }
@@ -246,6 +247,14 @@ public class Order implements Serializable {
 
 	public void setOrderDetails(List<OrderDetail> orderDetails) {
 		this.orderDetails = orderDetails;
+	}
+
+	public boolean isExpanded() {
+		return isExpanded;
+	}
+
+	public void setExpanded(boolean expanded) {
+		this.isExpanded = expanded;
 	}
 
 	@NonNull

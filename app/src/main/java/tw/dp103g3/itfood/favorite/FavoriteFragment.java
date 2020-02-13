@@ -1,6 +1,7 @@
 package tw.dp103g3.itfood.favorite;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -30,10 +31,11 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
@@ -42,28 +44,38 @@ import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
+import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
+
 
 public class FavoriteFragment extends Fragment {
     private final static String TAG = "TAG_FavoriteFragment";
     private AppCompatActivity activity;
-    private Toolbar toolbar;
     private CommonTask getFavoritesTask;
     private CommonTask getShopTask;
     private CommonTask favoriteDeleteTask;
     private Member member;
-    private int memId;
-    private RecyclerView rvFavorite;
+    @BindView(R.id.layoutFavoriteNoItem)
+    ConstraintLayout layoutFavoriteNoItem;
+    @BindView(R.id.ivFavoriteNoItem)
+    ImageView ivFavoriteNoItem;
     private List<Favorite> favorites;
     private List<Shop> shops;
     private ImageTask shopImageTask;
-    private ConstraintLayout layoutFavoriteNoItem;
-    private ImageView ivFavoriteNoItem, ivBack;
-    private Button btBackToMain;
+    @BindView(R.id.btBackToMain)
+    Button btBackToMain;
+    @BindView(R.id.rvFavorite)
+    RecyclerView rvFavorite;
+    @BindView(R.id.toolbarFavorite)
+    Toolbar toolbar;
+    private int mem_id;
+    private SharedPreferences pref;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = (AppCompatActivity) getActivity();
+        pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
+        mem_id = pref.getInt("mem_id", 0);
     }
 
     @Override
@@ -76,44 +88,16 @@ public class FavoriteFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         final NavController navController = Navigation.findNavController(view);
-        toolbar = view.findViewById(R.id.toolbarFavorite);
-        toolbar.setPadding(0, Common.getStatusBarHeight(activity), 0, 0);
-        activity.setSupportActionBar(toolbar);
-        rvFavorite = view.findViewById(R.id.rvFavorite);
+        ButterKnife.bind(this, view);
+
         rvFavorite.setLayoutManager(new LinearLayoutManager(activity));
-
-        try {
-            handleViews();
-        } catch (NullPointerException e) {
-            System.out.println(TAG + e.toString());
-            navController.popBackStack();
-        }
         btBackToMain.setOnClickListener(v -> navController.popBackStack());
-
+        toolbar.setNavigationOnClickListener(v -> {
+            navController.popBackStack();
+        });
         layoutFavoriteNoItem.setVisibility(View.GONE);
 
-        ivBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
-
-        //待登入判定功能完成後方更改
-//        Bundle bundle = getArguments();
-//        if (bundle == null || bundle.getSerializable("member") == null) {
-//            Common.showToast(activity, "error");
-//            navController.popBackStack();
-//            return;
-//        }
-
-        //member = (Member) bundle.getSerializable("member");
-        member = new Member(1, "莊雨軒", "123456789", "rerg@gmail.com", "0982731622", new Date(), null, 1);
-
-        try {
-            memId = member.getMemId();
-        } catch (Exception e) {
-            System.out.println(TAG + e.toString());
-            Common.showToast(activity, "error");
-            navController.popBackStack();
-            return;
-        }
-        favorites = getFavorites(memId);
+        favorites = getFavorites(mem_id);
         if (favorites == null || favorites.isEmpty()) {
             rvFavorite.setVisibility(View.GONE);
             layoutFavoriteNoItem.setVisibility(View.VISIBLE);
@@ -122,7 +106,6 @@ public class FavoriteFragment extends Fragment {
             for (int i = 0; i < favorites.size(); i++) {
                 shops.add(getShopById(favorites.get(i).getShopId()));
             }
-
             showShops();
         }
     }
@@ -135,7 +118,7 @@ public class FavoriteFragment extends Fragment {
             JsonObject jsonObject = new JsonObject();
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
             jsonObject.addProperty("action", "findByMemberId");
-            jsonObject.addProperty("memId", memId);
+            jsonObject.addProperty("mem_id", mem_id);
             String jsonOut = jsonObject.toString();
             getFavoritesTask = new CommonTask(url, jsonOut);
             try {
@@ -252,7 +235,7 @@ public class FavoriteFragment extends Fragment {
             shopImageTask.execute();
             holder.tvName.setText(shop.getName());
             holder.tvType.setText(type);
-            holder.tvRate.setText(String.format(Locale.getDefault(), "%.1f (%d)", rate ,shop.getTtrate()));
+            holder.tvRate.setText(String.format(Locale.getDefault(), "%.1f (%d)", rate, shop.getTtrate()));
 
             holder.itemView.setOnClickListener(v -> {
                 Bundle bundle = new Bundle();
@@ -269,9 +252,9 @@ public class FavoriteFragment extends Fragment {
                             String url1 = Url.URL + "/FavoriteServlet";
                             Gson gson = new Gson();
                             JsonObject jsonObject = new JsonObject();
-                            Favorite favorite = new Favorite(memId, shop.getId());
+                            Favorite favorite = new Favorite(mem_id, shop.getId());
                             String jsonOut = gson.toJson(favorite);
-                            jsonObject.addProperty("action", "favoriteDelete");
+                            jsonObject.addProperty("action", "delete");
                             jsonObject.addProperty("favorite", jsonOut);
                             int count = 0;
                             try {
@@ -287,7 +270,7 @@ public class FavoriteFragment extends Fragment {
                                 shops.remove(shop);
                                 ShopAdapter.this.notifyDataSetChanged();
                                 FavoriteFragment.this.shops.remove(shop);
-                                //Common.showToast(activity, "delete successfully");
+                                Common.showToast(activity, "delete successfully");
                             }
                         } else {
                             Common.showToast(activity, R.string.textNoNetwork);
@@ -301,12 +284,4 @@ public class FavoriteFragment extends Fragment {
         }
     }
 
-    private void handleViews() {
-        layoutFavoriteNoItem = this.getView().findViewById(R.id.layoutFavoriteNoItem);
-        ivBack = this.getView().findViewById(R.id.ivBack);
-        ivFavoriteNoItem = this.getView().findViewById(R.id.ivFavoriteNoItem);
-        btBackToMain = this.getView().findViewById(R.id.btBackToMain);
-        ivFavoriteNoItem.setImageResource(R.drawable.coffee);
-
-    }
 }

@@ -113,9 +113,9 @@ public class AddPaymentFragment extends Fragment {
                 }
 
                 if (count == 0) {
-                    Common.showToast(activity, R.string.addPaymentFail);
+                    Common.showToast(activity, R.string.textAddPaymentFail);
                 } else {
-                    Common.showToast(activity, R.string.addPaymentSuccess);
+                    Common.showToast(activity, R.string.textAddPaymentSuccess);
                     model.selectPayment(payment);
                     Navigation.findNavController(v).popBackStack();
                 }

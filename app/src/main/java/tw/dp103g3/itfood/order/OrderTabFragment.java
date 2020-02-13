@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -31,18 +32,22 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import tw.dp103g3.itfood.Common;
@@ -79,7 +84,7 @@ public class OrderTabFragment extends Fragment {
     private CommonTask editOrderTask;
     private LocalBroadcastManager broadcastManager;
 
-    OrderTabFragment(int counter){
+    OrderTabFragment(int counter) {
         this.counter = counter;
     }
 
@@ -100,7 +105,7 @@ public class OrderTabFragment extends Fragment {
         broadcastManager = LocalBroadcastManager.getInstance(activity);
         registerOrderReceiver();
         order_states = new HashSet<>();
-        if(order_states.isEmpty()) {
+        if (order_states.isEmpty()) {
             if (counter == 0) {
                 order_states.add(0);
                 order_states.add(1);
@@ -122,7 +127,7 @@ public class OrderTabFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if(OrderFragment.getOrders() == null || !OrderFragment.getOrders().isEmpty()){
+        if (OrderFragment.getOrders() == null || !OrderFragment.getOrders().isEmpty()) {
             layoutEmpty.setVisibility(GONE);
         }
         sortedOrders = OrderFragment.getOrders().stream().filter(order -> order_states.stream()
@@ -139,7 +144,9 @@ public class OrderTabFragment extends Fragment {
             Animator animator = AnimatorInflater.loadAnimator(getActivity(), nextAnim);
             animator.addListener(new Animator.AnimatorListener() {
                 @Override
-                public void onAnimationStart(Animator animation) {}
+                public void onAnimationStart(Animator animation) {
+                }
+
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     // We just need know animation ending when fragment entered and no need to know when exited
@@ -148,10 +155,14 @@ public class OrderTabFragment extends Fragment {
                         ShowOrders(sortedOrders);
                     }
                 }
+
                 @Override
-                public void onAnimationCancel(Animator animation) {}
+                public void onAnimationCancel(Animator animation) {
+                }
+
                 @Override
-                public void onAnimationRepeat(Animator animation) {}
+                public void onAnimationRepeat(Animator animation) {
+                }
             });
             return animator;
         }
@@ -192,11 +203,11 @@ public class OrderTabFragment extends Fragment {
         }
     };
 
-    private class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder>{
+    private class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder> {
         private Context context;
         private List<Order> orders;
 
-        OrderAdapter(Context context, List<Order> orders){
+        OrderAdapter(Context context, List<Order> orders) {
             this.context = context;
             this.orders = orders;
         }
@@ -205,97 +216,13 @@ public class OrderTabFragment extends Fragment {
             this.orders = orders;
         }
 
-
-        private class MyViewHolder extends RecyclerView.ViewHolder{
-            Order order;
-            TextView tvShopName, tvType, tvTotal, tvState, tvTime;
-            Button btAction;
-            RecyclerView rvOrderDetail;
-
-            MyViewHolder(@NonNull View itemView) {
-                super(itemView);
-                tvShopName = itemView.findViewById(R.id.tvShopName);
-                tvState = itemView.findViewById(R.id.tvState);
-                tvType = itemView.findViewById(R.id.tvType);
-                tvTotal = itemView.findViewById(R.id.tvTotal);
-                tvTime = itemView.findViewById(R.id.tvTime);
-                btAction = itemView.findViewById(R.id.btAction);
-                rvOrderDetail = itemView.findViewById(R.id.rvOrderDetail);
-                btAction.setOnClickListener(this::onBtActionClick);
-            }
-
-            void setOrder(Order order) {
-                this.order = order;
-            }
-
-            void onBtActionClick(View view) {
-                switch (order.getOrder_state()) {
-                    case UNCONFIRMED:
-                        new AlertDialog.Builder(activity)
-                                .setTitle(R.string.alertDialogTitleCancelOrder)
-                                .setMessage(R.string.alertDialogMessageCancelOrder)
-                                .setPositiveButton("確定", (dialog, which) -> {
-                                    String url = Url.URL + "/OrderServlet";
-                                    JsonObject jsonObject = new JsonObject();
-                                    Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-                                    jsonObject.addProperty("action", "orderUpdate");
-                                    order.setOrder_state(CANCEL);
-                                    jsonObject.addProperty("order", gson.toJson(order));
-                                    int count = 0;
-                                    try {
-                                        String result = new CommonTask(url, jsonObject.toString()).execute().get();
-                                        count = Integer.valueOf(result);
-                                    } catch (Exception e){
-                                        Log.e(TAG, e.toString());
-                                    }
-                                    if (count == 0){
-                                        Common.showToast(getActivity(), R.string.cancelOrderFail);
-                                    } else{
-                                        Common.showToast(getActivity(), R.string.cancelOrderSuccess);
-                                        Set<Order> orders = OrderFragment.getOrders();
-                                        orders.remove(order);
-                                        orders.add(order);
-                                        OrderFragment.setOrders(orders);
-                                        OrderMessage orderMessageShop = new OrderMessage(order, "shop" + order.getShop().getId());
-                                        String shopMessage = Common.gson.toJson(orderMessageShop);
-                                        orderWebSocketClient.send(shopMessage);
-                                        onResume();
-                                    }
-                                }).setNegativeButton("取消", (dialog, which) -> dialog.cancel())
-                                .show();
-                        break;
-                    case PICKUP: case DELIVERING:
-
-                        Bundle bundle = new Bundle();
-                        bundle.putSerializable("order", order);
-                        Navigation.findNavController(view)
-                                .navigate(R.id.action_orderFragment_to_QRCodeFragment, bundle);
-                        break;
-                    case DONE: case CANCEL:
-                        break;
-                }
-            }
-        }
-
-        @Override
-        public int getItemCount() {
-            return orders.size();
-        }
-
-
-        @NonNull
-        @Override
-        public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View itemView = LayoutInflater.from(context).inflate(R.layout.order_item_view, parent, false);
-            return new MyViewHolder(itemView);
-        }
-
         @Override
         public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
             final Order order = orders.get(position);
+            holder.rvOrderDetail.setVisibility(GONE);
             Shop shop = order.getShop();
             List<OrderDetail> orderDetails = order.getOrderDetails();
-            Log.d(TAG, "orderDetail1");
+//            Log.d(TAG, "orderDetail1");
             Date order_time = order.getOrder_time();
             Date order_ideal = order.getOrder_ideal();
             Date order_delivery = order.getOrder_delivery();
@@ -316,21 +243,25 @@ public class OrderTabFragment extends Fragment {
             DecimalFormat decimalFormat = new DecimalFormat("$ ###,###,###,###", symbols);
             order_ttprice_text = decimalFormat.format(order_ttprice);
 
+            holder.ibExpandable.setOnClickListener(v -> {
+                boolean show = toggleLayout(!order.isExpanded(), v, holder.rvOrderDetail);
+                order.setExpanded(show);
+            });
 
-            switch (order_state){
-                case UNCONFIRMED :
+            switch (order_state) {
+                case UNCONFIRMED:
                     order_state_text = "已付款，等待接單";
                     order_time_text = "下單時間 : " + simpleDateFormat.format(order_time);
                     holder.btAction.setText("取消訂單");
                     holder.btAction.setEnabled(true);
                     break;
-                case MAKING :
+                case MAKING:
                     order_state_text = "製作中";
                     order_time_text = "下單時間 : " + simpleDateFormat.format(order_time);
                     holder.btAction.setText("顯示QR CODE");
                     holder.btAction.setEnabled(false);
                     break;
-                case PICKUP :
+                case PICKUP:
                     order_state_text = "製作完成，待取餐";
                     order_time_text = "下單時間 : " + simpleDateFormat.format(order_time);
                     holder.btAction.setText("顯示QR CODE");
@@ -340,30 +271,68 @@ public class OrderTabFragment extends Fragment {
                         holder.btAction.setEnabled(false);
                     }
                     break;
-                case DELIVERING :
+                case DELIVERING:
                     order_state_text = "運送中";
-                    if (order.getOrder_ideal() != null){
+                    if (order.getOrder_ideal() != null) {
                         order_time_text = "預計送達時間 : " + simpleDateFormat.format(order_ideal);
                     }
                     holder.btAction.setText("顯示QR CODE");
                     holder.btAction.setEnabled(true);
                     break;
-                case DONE :
+                case DONE:
                     order_state_text = "已取餐";
                     order_time_text = "訂單完成時間 : " + simpleDateFormat.format(order_delivery);
                     holder.btAction.setText("重新下單");
+                    holder.btAction.setOnClickListener(v -> {
+                        File orderDetail = new File(activity.getFilesDir(), "orderDetail");
+                        Gson gson = Common.gson;
+                        try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail))) {
+                            Map<Integer, Integer> orderDetailsMap = new HashMap<>();
+                            for (int i = 0; i < orderDetails.size(); i++) {
+                                orderDetailsMap.put(orderDetails.get(i).getDish().getId(), orderDetails.get(i).getOd_count());
+                            }
+                            JsonObject jsonObject = new JsonObject();
+                            jsonObject.addProperty("shop", gson.toJson(shop));
+                            Type type = new TypeToken<Map<Integer, Integer>>() {
+                            }.getType();
+                            jsonObject.addProperty("orderDetails", gson.toJson(orderDetailsMap, type));
+                            out.write(jsonObject.toString());
+                            Navigation.findNavController(v).navigate(R.id.action_orderFragment_to_shoppingCartFragment);
+                        } catch (IOException e) {
+                            Log.e(TAG, e.toString());
+                        }
+                    });
                     break;
-                case CANCEL :
+                case CANCEL:
                     order_state_text = "已取消訂單";
-                    simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault() );
+                    simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                     order_time_text = "下單時間 : " + simpleDateFormat.format(order_time);
                     holder.btAction.setText("重新下單");
+                    holder.btAction.setOnClickListener(v -> {
+                        File orderDetail = new File(activity.getFilesDir(), "orderDetail");
+                        Gson gson = Common.gson;
+                        try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail))) {
+                            Map<Integer, Integer> orderDetailsMap = new HashMap<>();
+                            for (int i = 0; i < orderDetails.size(); i++) {
+                                orderDetailsMap.put(orderDetails.get(i).getDish().getId(), orderDetails.get(i).getOd_count());
+                            }
+                            JsonObject jsonObject = new JsonObject();
+                            jsonObject.addProperty("shop", gson.toJson(shop));
+                            Type type = new TypeToken<Map<Integer, Integer>>() {
+                            }.getType();
+                            jsonObject.addProperty("orderDetails", gson.toJson(orderDetailsMap, type));
+                            out.write(jsonObject.toString());
+                            Navigation.findNavController(v).navigate(R.id.action_orderFragment_to_shoppingCartFragment);
+                        } catch (IOException e) {
+                            Log.e(TAG, e.toString());
+                        }
+                    });
                     break;
             }
 
-            if (order_type == SELFPICK){
+            if (order_type == SELFPICK) {
                 order_type_text = "自取";
-            } else if (order_type == DELIVERY){
+            } else if (order_type == DELIVERY) {
                 order_type_text = "外送";
             }
 
@@ -377,40 +346,115 @@ public class OrderTabFragment extends Fragment {
             holder.rvOrderDetail.setAdapter(new OrderDetailAdapter(activity, orderDetails));
             holder.setOrder(order);
         }
-    }
-
-    private class OrderDetailAdapter extends RecyclerView.Adapter<OrderDetailAdapter.MyViewHolder>{
-        private Context context;
-        List<OrderDetail> orderDetails;
-
-        OrderDetailAdapter(Context context, List<OrderDetail> orderDetails){
-            this.context = context;
-            this.orderDetails = orderDetails;
-        }
-
-        private class MyViewHolder extends RecyclerView.ViewHolder{
-            TextView tvDishName, tvDishInfo, tvDishPrice, tvDishCount;
-
-            MyViewHolder(@NonNull View itemView) {
-                super(itemView);
-                tvDishName = itemView.findViewById(R.id.tvDishName);
-                tvDishInfo = itemView.findViewById(R.id.tvDishInfo);
-                tvDishPrice = itemView.findViewById(R.id.tvDishPrice);
-                tvDishCount = itemView.findViewById(R.id.tvDishCount);
-            }
-        }
-
 
         @Override
         public int getItemCount() {
-            return orderDetails.size();
+            return orders.size();
         }
+
 
         @NonNull
         @Override
-        public OrderDetailAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View itemView = LayoutInflater.from(context).inflate(R.layout.order_detail_item_view, parent, false);
+        public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View itemView = LayoutInflater.from(context).inflate(R.layout.order_item_view, parent, false);
             return new MyViewHolder(itemView);
+        }
+
+        private boolean toggleLayout(boolean isExpanded, View v, RecyclerView rv) {
+            OrderAnimations.toggleArrow(v, isExpanded);
+            if (isExpanded) {
+                OrderAnimations.expand(rv);
+            } else {
+                OrderAnimations.collapse(rv);
+            }
+            return isExpanded;
+
+        }
+
+        private class MyViewHolder extends RecyclerView.ViewHolder {
+            Order order;
+            TextView tvShopName, tvType, tvTotal, tvState, tvTime;
+            ImageButton ibExpandable;
+            Button btAction;
+            RecyclerView rvOrderDetail;
+
+            MyViewHolder(@NonNull View itemView) {
+                super(itemView);
+
+                tvShopName = itemView.findViewById(R.id.tvShopName);
+                tvState = itemView.findViewById(R.id.tvState);
+                tvType = itemView.findViewById(R.id.tvType);
+                tvTotal = itemView.findViewById(R.id.tvTotal);
+                ibExpandable = itemView.findViewById(R.id.ibExpandable);
+                tvTime = itemView.findViewById(R.id.tvTime);
+                btAction = itemView.findViewById(R.id.btAction);
+                rvOrderDetail = itemView.findViewById(R.id.rvOrderDetail);
+                btAction.setOnClickListener(this::onBtActionClick);
+            }
+
+            void setOrder(Order order) {
+                this.order = order;
+            }
+
+            void onBtActionClick(View view) {
+                switch (order.getOrder_state()) {
+                    case UNCONFIRMED:
+                        new AlertDialog.Builder(activity)
+                                .setTitle(R.string.textAlertDialogTitleCancelOrder)
+                                .setMessage(R.string.textAlertDialogMessageCancelOrder)
+                                .setPositiveButton("確定", (dialog, which) -> {
+                                    String url = Url.URL + "/OrderServlet";
+                                    JsonObject jsonObject = new JsonObject();
+                                    Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
+                                    jsonObject.addProperty("action", "orderUpdate");
+                                    order.setOrder_state(CANCEL);
+                                    jsonObject.addProperty("order", gson.toJson(order));
+                                    int count = 0;
+                                    try {
+                                        String result = new CommonTask(url, jsonObject.toString()).execute().get();
+                                        count = Integer.valueOf(result);
+                                    } catch (Exception e) {
+                                        Log.e(TAG, e.toString());
+                                    }
+                                    if (count == 0) {
+                                        Common.showToast(getActivity(), R.string.textCancelOrderFail);
+                                    } else {
+                                        Common.showToast(getActivity(), R.string.textCancelOrderSuccess);
+                                        Set<Order> orders = OrderFragment.getOrders();
+                                        orders.remove(order);
+                                        orders.add(order);
+                                        OrderFragment.setOrders(orders);
+                                        OrderMessage orderMessageShop = new OrderMessage(order, "shop" + order.getShop().getId());
+                                        String shopMessage = Common.gson.toJson(orderMessageShop);
+                                        orderWebSocketClient.send(shopMessage);
+                                        onResume();
+                                    }
+                                }).setNegativeButton("取消", (dialog, which) -> dialog.cancel())
+                                .show();
+                        break;
+                    case PICKUP:
+                    case DELIVERING:
+
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("order", order);
+                        Navigation.findNavController(view)
+                                .navigate(R.id.action_orderFragment_to_QRCodeFragment, bundle);
+                        break;
+                    case DONE:
+                    case CANCEL:
+                        break;
+                }
+            }
+        }
+    }
+
+    private class OrderDetailAdapter extends RecyclerView.Adapter<OrderDetailAdapter.MyViewHolder> {
+        private Context context;
+        List<OrderDetail> orderDetails;
+
+        OrderDetailAdapter(Context context, List<OrderDetail> orderDetails) {
+            this.context = context;
+            this.orderDetails = orderDetails;
         }
 
         @Override
@@ -427,12 +471,37 @@ public class OrderTabFragment extends Fragment {
             holder.tvDishCount.setText(tvDishCountText);
             holder.tvDishPrice.setText(decimalFormat.format(dishPrice));
 
-            if (dish.getInfo() == null || dish.getInfo().isEmpty()){
+            if (dish.getInfo() == null || dish.getInfo().isEmpty()) {
                 holder.tvDishInfo.setText("");
             } else {
                 holder.tvDishInfo.setText(dish.getInfo());
             }
             holder.tvDishName.setText(dish.getName());
+        }
+
+
+        @Override
+        public int getItemCount() {
+            return orderDetails.size();
+        }
+
+        @NonNull
+        @Override
+        public OrderDetailAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View itemView = LayoutInflater.from(context).inflate(R.layout.order_detail_item_view, parent, false);
+            return new MyViewHolder(itemView);
+        }
+
+        private class MyViewHolder extends RecyclerView.ViewHolder {
+            TextView tvDishName, tvDishInfo, tvDishPrice, tvDishCount;
+
+            MyViewHolder(@NonNull View itemView) {
+                super(itemView);
+                tvDishName = itemView.findViewById(R.id.tvDishName);
+                tvDishInfo = itemView.findViewById(R.id.tvDishInfo);
+                tvDishPrice = itemView.findViewById(R.id.tvDishPrice);
+                tvDishCount = itemView.findViewById(R.id.tvDishCount);
+            }
         }
     }
 
@@ -441,4 +510,6 @@ public class OrderTabFragment extends Fragment {
         super.onStop();
         broadcastManager.unregisterReceiver(orderReceiver);
     }
+
+
 }
