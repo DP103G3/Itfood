@@ -1,6 +1,8 @@
 package tw.dp103g3.itfood.payment;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -19,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -61,6 +64,7 @@ public class AddPaymentFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        hideBotNav();
         return inflater.inflate(R.layout.fragment_add_payment, container, false);
     }
 
@@ -86,6 +90,7 @@ public class AddPaymentFragment extends Fragment {
 
         etExpirationDate.getEditText().setOnClickListener(v -> {
             PaymentExpirationDatePicker picker = new PaymentExpirationDatePicker(activity, model);
+            Common.setDialogUi(picker, activity);
             picker.show();
         });
 
@@ -195,6 +200,36 @@ public class AddPaymentFragment extends Fragment {
         } else {
             etExpirationDate.setError(null);
             return true;
+        }
+    }
+
+    private void hideBotNav(){
+        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
+        if (bottomNavigationView.getVisibility() == View.VISIBLE){
+            Animator animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_down);
+            animator.setTarget(bottomNavigationView);
+            animator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    bottomNavigationView.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+
+                }
+            });
+            animator.start();
         }
     }
 

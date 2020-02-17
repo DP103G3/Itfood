@@ -90,8 +90,8 @@
             app:popEnterAnim="@anim/fragment_slide_in_left"
             app:popExitAnim="@anim/fragment_slide_out_right" />
         <action
-            android:id="@+id/action_personFragment_to_locationFragment"
-            app:destination="@id/locationFragment" />
+            android:id="@+id/action_personFragment_to_addressFragment"
+            app:destination="@id/AddressFragment" />
         <action
             android:id="@+id/action_personFragment_to_favoriteFragment"
             app:destination="@id/favoriteFragment"
@@ -171,19 +171,20 @@
             app:exitAnim="@anim/fragment_slide_out_left"
             app:popEnterAnim="@anim/fragment_slide_in_left"
             app:popExitAnim="@anim/fragment_slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/AddressFragment"
+        android:name="tw.dp103g3.itfood.AddressFragment"
+        android:label="fragment_address"
+        tools:layout="@layout/fragment_location">
         <action
-            android:id="@+id/action_paymentFragment_to_paymentDetailFragment"
-            app:destination="@id/paymentDetailFragment"
+            android:id="@+id/action_addressFragment_to_addAddressFragment"
+            app:destination="@id/addAddressFragment"
             app:enterAnim="@anim/fragment_slide_in_right"
             app:exitAnim="@anim/fragment_slide_out_left"
             app:popEnterAnim="@anim/fragment_slide_in_left"
             app:popExitAnim="@anim/fragment_slide_out_right" />
     </fragment>
-    <fragment
-        android:id="@+id/locationFragment"
-        android:name="tw.dp103g3.itfood.LocationFragment"
-        android:label="fragment_location"
-        tools:layout="@layout/fragment_location" />
     <fragment
         android:id="@+id/addressSelectFragment"
         android:name="tw.dp103g3.itfood.address.AddressSelectFragment"
@@ -250,9 +251,4 @@
             app:popEnterAnim="@anim/fragment_slide_in_left"
             app:popExitAnim="@anim/fragment_slide_out_right" />
     </fragment>
-    <fragment
-        android:id="@+id/paymentDetailFragment"
-        android:name="tw.dp103g3.itfood.payment.PaymentDetailFragment"
-        android:label="fragment_payment_detail"
-        tools:layout="@layout/fragment_payment_detail" />
 </navigation>

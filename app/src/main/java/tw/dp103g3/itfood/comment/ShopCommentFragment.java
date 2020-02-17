@@ -2,7 +2,10 @@ package tw.dp103g3.itfood.comment;
 
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -65,11 +68,13 @@ public class ShopCommentFragment extends Fragment {
     private Shop shop;
     private CommonTask getCommentTask;
     private LinearLayout layoutCommentLoggedIn, layoutShopComment;
-    private ConstraintLayout layoutCommentedTrue, layoutCommentedFalse;
+    private ConstraintLayout layoutCommentedTrue, layoutCommentedFalse, layoutReply, layoutExpandable;
     private Button btPostComment;
     private Member member;
     private int cmt_id;
     private BottomNavigationView bottomNavigationView;
+    private Fragment thisFragment;
+    private View view;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -87,7 +92,11 @@ public class ShopCommentFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        thisFragment = this;
+        this.view = view;
         layoutShopComment = view.findViewById(R.id.layoutShopComment);
+        layoutReply = view.findViewById(R.id.layoutReply);
+        layoutExpandable = view.findViewById(R.id.layoutExpandable);
         TextView tvUsername, tvCommentTime, tvCommentDetail;
         RatingBar ratingBar;
         ImageButton btCommentOptionMenu;
@@ -150,6 +159,8 @@ public class ShopCommentFragment extends Fragment {
                     System.out.println(TAG + "會員comment:" + jsonIn);
                     if (comment != null) {
                         layoutCommentedTrue.setVisibility(View.VISIBLE);
+                        layoutReply.setVisibility(GONE);
+                        layoutExpandable.setVisibility(GONE);
 
                         Member member = getMember(mem_id);
                         String rawMemberEmail = member.getMemEmail();
@@ -170,8 +181,31 @@ public class ShopCommentFragment extends Fragment {
 
                         btCommentOptionMenu.setOnClickListener(v -> {
                             cmt_id = comment.getCmt_id();
-                            showPopupMenu(v);
+                            showOptionMenu();
                         });
+
+                        if (comment.getCmt_feedback() != null && !comment.getCmt_feedback().isEmpty() && comment.getCmt_feedback_state() == 1) {
+                            TextView tvShopName = view.findViewById(R.id.tvShopName);
+                            TextView tvReplyDate = view.findViewById(R.id.tvReplyDate);
+                            TextView tvReplayContent = view.findViewById(R.id.tvReplyContent);
+                            TextView tvExpandReply = view.findViewById(R.id.tvExpandReply);
+                            ImageButton ibExpandable = view.findViewById(R.id.ibExpandable);
+                            layoutExpandable.setVisibility(View.VISIBLE);
+
+                            tvShopName.setText("店主");
+                            tvReplayContent.setText(comment.getCmt_feedback());
+                            tvReplyDate.setText(new SimpleDateFormat("MM月 dd, yyyy", Locale.getDefault()).format(comment.getCmt_feedback_time()));
+                            View.OnClickListener onClickListener = v -> {
+                                boolean show = toggleLayout(!comment.isExpanded(), ibExpandable, layoutReply);
+                                swapView(layoutExpandable, show);
+                                comment.setExpanded(show);
+                            };
+                            layoutExpandable.setOnClickListener(onClickListener);
+                            ibExpandable.setOnClickListener(onClickListener);
+                            tvExpandReply.setOnClickListener(onClickListener);
+
+
+                        }
 
                     } else {
                         layoutCommentedFalse.setVisibility(View.VISIBLE);
@@ -311,13 +345,25 @@ public class ShopCommentFragment extends Fragment {
         btPostComment = layoutShopComment.findViewById(R.id.btPostComment);
     }
 
-    private void showPopupMenu(View view) {
-        PopupMenu popupMenu = new PopupMenu(activity, view);
-        popupMenu.getMenuInflater().inflate(R.menu.comment_option_menu, popupMenu.getMenu());
-        popupMenu.show();
-        popupMenu.setOnMenuItemClickListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.delete: {
+    private void showOptionMenu() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        String[] options = new String[]{"編輯評論", "刪除評論"};
+        builder.setTitle("評論選項");
+        builder.setItems(options, (dialog, which) -> {
+            if (which == 0){
+                Bundle bundle = new Bundle();
+                bundle.putString("action", "edit");
+                bundle.putSerializable("member", member);
+                bundle.putSerializable("cmt_id", cmt_id);
+                bundle.putSerializable("shop", shop);
+                System.out.println(TAG + "output:" + bundle.toString());
+                dialog.dismiss();
+                Navigation.findNavController(view).navigate(R.id.action_shopCommentFragment_to_commentFragment, bundle);
+            } else {
+                AlertDialog.Builder deleteBuilder = new AlertDialog.Builder(activity);
+                deleteBuilder.setTitle("刪除評論");
+                deleteBuilder.setMessage("你確定要刪除這筆評論？");
+                deleteBuilder.setPositiveButton("確定", (dialog12, which12) -> {
                     if (Common.networkConnected(activity)) {
                         Comment comment = getComment(cmt_id);
                         if (comment.getCmt_state() != 0) {
@@ -342,46 +388,38 @@ public class ShopCommentFragment extends Fragment {
                                 String jsonIn = commonTask.execute().get();
                                 count = Integer.valueOf(jsonIn);
                             } catch (Exception e) {
-                                System.out.println(TAG + e.toString());
+                                Log.e(TAG, e.toString());
                             }
                             if (count == 0) {
                                 shop.setTtscore(originalTtscroe);
                                 shop.setTtrate(originalTtrate);
-                                Common.showToast(activity, "delete failed");
+                                Common.showToast(activity, "刪除評論失敗");
                             } else {
-                                Common.showToast(activity, "message deleted");
+                                Common.showToast(activity, "刪除評論成功");
                                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                                 if (Build.VERSION.SDK_INT >= 26) {
                                     ft.setReorderingAllowed(false);
                                 }
-                                ft.detach(this).attach(this).commit();
+                                dialog12.dismiss();
+                                ft.detach(thisFragment).attach(thisFragment).commit();
                             }
                         } else {
-                            Common.showToast(activity, "delete error");
+                            Common.showToast(activity, "刪除評論失敗");
                         }
                     } else {
                         Common.showToast(activity, R.string.textNoNetwork);
                     }
-
-                    break;
-
-                }
-                case R.id.edit: {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("action", "edit");
-                    bundle.putSerializable("member", member);
-                    bundle.putSerializable("cmt_id", cmt_id);
-                    bundle.putSerializable("shop", shop);
-                    System.out.println(TAG + "output:" + bundle.toString());
-                    Navigation.findNavController(view).navigate(R.id.action_shopCommentFragment_to_commentFragment, bundle);
-                    break;
-
-                }
+                });
+                deleteBuilder.setNegativeButton("取消", (dialog1, which1) -> dialog1.dismiss());
+                Dialog deleteDialog = deleteBuilder.create();
+                Common.setDialogUi(deleteDialog, activity);
+                dialog.dismiss();
+                deleteDialog.show();
             }
-            return true;
         });
-        popupMenu.setOnDismissListener(menu -> {
-        });
+        Dialog dialog = builder.create();
+        Common.setDialogUi(dialog, activity);
+        dialog.show();
     }
 
     private void ShowComments(List<Comment> comments) {
@@ -457,28 +495,8 @@ public class ShopCommentFragment extends Fragment {
             return new MyViewHolder(itemView);
         }
 
-        private boolean toggleLayout(boolean isExpanded, View v, ConstraintLayout cl) {
-            OrderAnimations.toggleArrow(v, isExpanded);
-            if (isExpanded) {
-                OrderAnimations.expand(cl);
-            } else {
-                OrderAnimations.collapse(cl);
-            }
-            return isExpanded;
 
-        }
 
-        private void swapView(ConstraintLayout v, boolean show) {
-            ConstraintSet csOld = new ConstraintSet();
-            ConstraintSet csNew = new ConstraintSet();
-            csOld.clone(activity, R.layout.comment_reply_not_expanded_view);
-            csNew.clone(activity, R.layout.comment_reply_expanded_view);
-            if (show) {
-                csNew.applyTo(v);
-            } else {
-                csOld.applyTo(v);
-            }
-        }
 
         private class MyViewHolder extends RecyclerView.ViewHolder {
             TextView tvUsername, tvCommentTime, tvCommentDetail, tvShopName, tvReplyDate, tvReplayContent, tvExpandReply;
@@ -501,6 +519,27 @@ public class ShopCommentFragment extends Fragment {
                 ibExpandable = itemView.findViewById(R.id.ibExpandable);
             }
         }
+    }
 
+    private void swapView(ConstraintLayout v, boolean show) {
+        ConstraintSet csOld = new ConstraintSet();
+        ConstraintSet csNew = new ConstraintSet();
+        csOld.clone(activity, R.layout.comment_reply_not_expanded_view);
+        csNew.clone(activity, R.layout.comment_reply_expanded_view);
+        if (show) {
+            csNew.applyTo(v);
+        } else {
+            csOld.applyTo(v);
+        }
+    }
+
+    private boolean toggleLayout(boolean isExpanded, View v, ConstraintLayout cl) {
+        OrderAnimations.toggleArrow(v, isExpanded);
+        if (isExpanded) {
+            OrderAnimations.expand(cl);
+        } else {
+            OrderAnimations.collapse(cl);
+        }
+        return isExpanded;
     }
 }

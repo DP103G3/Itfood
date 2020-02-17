@@ -1,11 +1,16 @@
 package tw.dp103g3.itfood.payment;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +26,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -52,6 +58,8 @@ public class PaymentFragment extends Fragment {
     private CommonTask getPaymentTask;
     private SharedPreferences pref;
     private int mem_id;
+    private String TAG = "TAG_PaymentFragment";
+
 
 
     public PaymentFragment() {
@@ -133,13 +141,11 @@ public class PaymentFragment extends Fragment {
         private class MyViewHolder extends RecyclerView.ViewHolder {
             ImageView ivCardType;
             TextView tvCardNum;
-            ImageView ivChevRight;
 
             public MyViewHolder(@NonNull View itemView) {
                 super(itemView);
                 ivCardType = itemView.findViewById(R.id.ivCardType);
                 tvCardNum = itemView.findViewById(R.id.tvCardNum);
-                ivChevRight = itemView.findViewById(R.id.ivChevRight);
             }
         }
 
@@ -169,7 +175,6 @@ public class PaymentFragment extends Fragment {
                 holder.itemView.setOnClickListener(v -> {
                     navController.navigate(R.id.action_paymentFragment_to_addPaymentFragment);
                 });
-                holder.ivChevRight.setVisibility(GONE);
             } else {
                 final Payment payment = payments.get(position);
                 String cardNum = Common.formatCardNum(payment.getPay_cardnum());
@@ -182,10 +187,52 @@ public class PaymentFragment extends Fragment {
                 } else {
                     holder.ivCardType.setVisibility(View.INVISIBLE);
                 }
+                String[] actions = new String[]{"刪除"};
+
                 holder.itemView.setOnClickListener(v -> {
-                    Bundle bundle = new Bundle();
-                    bundle.putSerializable("payment", payment);
-                    navController.navigate(R.id.action_paymentFragment_to_paymentDetailFragment, bundle);
+                    String url = Url.URL + "/PaymentServlet";
+                    Gson gson = Common.gson;
+                    AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                    builder.setTitle("信用卡 " + Common.formatCardNum(payment.getPay_cardnum()));
+
+                    builder.setItems(actions, (dialog, which) -> {
+                        if (which == 0){
+                            AlertDialog.Builder bd = new AlertDialog.Builder(activity);
+                            bd.setTitle("刪除付款資訊");
+                            bd.setMessage("你確定要刪除這筆付款資訊？");
+                            bd.setPositiveButton("確定", (dialog12, which12) -> {
+                                JsonObject jsonObject = new JsonObject();
+                                payment.setPay_state(0);
+                                jsonObject.addProperty("action", "update");
+                                jsonObject.addProperty("payment", gson.toJson(payment, Payment.class));
+                                String jsonOut = jsonObject.toString();
+                                int count = 0;
+                                if (Common.networkConnected(activity)){
+                                    try {
+                                        count = Integer.parseInt(new CommonTask(url, jsonOut).execute().get());
+                                    } catch (Exception e){
+                                        Log.e(TAG, e.toString());
+                                    }
+                                } else {
+                                    Common.showToast(activity, R.string.textNoNetwork);
+                                }
+                                if (count != 0){
+                                    Common.showToast(activity, R.string.textDeleteSuccess);
+                                    dialog12.dismiss();
+                                } else {
+                                    Common.showToast(activity, R.string.textDeleteFail);
+                                }
+                            });
+                            bd.setNegativeButton("取消", (dialog1, which1) -> dialog1.cancel());
+                            Dialog dialog1 = bd.create();
+                            Common.setDialogUi(dialog1, activity);
+                            dialog1.show();
+                            dialog.dismiss();
+                        }
+                    });
+                    Dialog dialog = builder.create();
+                    Common.setDialogUi(dialog, activity);
+                    dialog.show();
                 });
 
             }
@@ -198,5 +245,34 @@ public class PaymentFragment extends Fragment {
         rvPayments.setLayoutManager(new LinearLayoutManager(activity));
         List<Payment> payments = getPayments(mem_id);
         ShowPayments(payments);
+        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
+        if (bottomNavigationView.getVisibility() == GONE){
+            Animator animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_up);
+            animator.setTarget(bottomNavigationView);
+            animator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    bottomNavigationView.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+
+                }
+            });
+            animator.start();
+        }
     }
+
+
 }

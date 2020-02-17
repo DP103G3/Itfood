@@ -1,6 +1,8 @@
 package tw.dp103g3.itfood.address;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -9,8 +11,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -22,6 +27,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -50,6 +56,8 @@ public class AddAddressFragment extends Fragment {
     private int mem_id;
     private CommonTask getAddressTask;
     private String TAG = "TAG_AddAddressFragment";
+    private BottomNavigationView bottomNavigationView;
+    private Animator animator;
 
 
     public AddAddressFragment() {
@@ -89,12 +97,31 @@ public class AddAddressFragment extends Fragment {
         toast.setGravity(Gravity.CENTER, 0, 0);
         etAdminDistrict.setOnClickListener(v -> toast.show());
 
+        view.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                View view = activity.getCurrentFocus();
+                if (view != null) {
+                    InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
+                return true;
+            }
+        });
+
         model.getSelectedCity().observe(getViewLifecycleOwner(), city -> {
             this.city = city;
             if (city != null) {
                 etCity.setText(city.getName());
                 etAdminDistrict.setOnClickListener(null);
-                etAdminDistrict.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.action_addAddressFragment_to_addressDistrictsFragment));
+                etAdminDistrict.setOnClickListener(v -> {
+                    Navigation.findNavController(v).navigate(R.id.action_addAddressFragment_to_addressDistrictsFragment);
+                    View view1 = activity.getCurrentFocus();
+                    if (view1 != null) {
+                        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    }
+                });
             }
         });
 
@@ -109,6 +136,11 @@ public class AddAddressFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.action_addAddressFragment_to_addressCitiesFragment);
             model.selectDistrict(null);
             etAdminDistrict.setText("");
+            View view2 = activity.getCurrentFocus();
+            if (view2 != null) {
+                InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
         });
 
         cardViewConfirm.setOnClickListener(v -> {
@@ -145,6 +177,7 @@ public class AddAddressFragment extends Fragment {
                     if (count == 0) {
                         Toast.makeText(activity, "新增失敗，請稍後再試", Toast.LENGTH_SHORT).show();
                     } else {
+                        Common.showToast(activity, "新增地址成功");
                         Navigation.findNavController(v).popBackStack();
                     }
 
@@ -178,5 +211,41 @@ public class AddAddressFragment extends Fragment {
         } else {
             return addressList.get(0);
         }
+    }
+
+    private void handleViews() {
+        bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
+        if (bottomNavigationView.getVisibility() == View.VISIBLE) {
+            animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_down);
+            animator.setTarget(bottomNavigationView);
+            animator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    bottomNavigationView.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+
+                }
+            });
+            animator.start();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        handleViews();
     }
 }

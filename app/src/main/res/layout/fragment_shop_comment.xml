@@ -163,76 +163,182 @@
                     android:id="@+id/layoutCommentedTrue"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorItemBackground"
-                    android:paddingStart="16dp"
-                    android:paddingTop="16dp"
-                    android:paddingEnd="16dp"
-                    android:paddingBottom="16dp"
                     android:visibility="gone">
 
-                    <TextView
-                        android:id="@+id/tvUsername"
-                        android:layout_width="wrap_content"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layoutComment"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:text="Wen" />
-
-                    <TextView
-                        android:id="@+id/tvCommentTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/tvUsername"
-                        tools:text="12月 21, 2019" />
-
-                    <TextView
-                        android:id="@+id/tvCommentDetail"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/tvCommentTime"
-                        tools:text="好喝" />
-
-                    <RatingBar
-                        android:id="@+id/ratingBarComment"
-                        style="@android:style/Widget.Material.RatingBar.Small"
-                        android:layout_width="79dp"
-                        android:layout_height="16dp"
-                        android:isIndicator="true"
-                        android:numStars="5"
-                        android:stepSize="1"
-                        app:layout_constraintBottom_toBottomOf="@+id/textView"
+                        android:background="@color/colorItemBackground"
+                        android:paddingStart="16dp"
+                        android:paddingTop="16dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="16dp"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
 
-                    <ImageButton
-                        android:id="@+id/btCommentOptionMenu"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:backgroundTint="@android:color/transparent"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/round_more_vert_black_24dp"
-                        android:tint="@color/colorTextOnP"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/ratingBarComment" />
+                        <TextView
+                            android:id="@+id/tvUsername"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="Wen" />
 
-                    <TextView
-                        android:id="@+id/textView"
-                        android:layout_width="wrap_content"
+                        <TextView
+                            android:id="@+id/tvCommentTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/tvUsername"
+                            tools:text="12月 21, 2019" />
+
+                        <TextView
+                            android:id="@+id/tvCommentDetail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:background="@drawable/comment_message_background"
+                            android:paddingStart="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingEnd="8dp"
+                            android:paddingBottom="4dp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/tvCommentTime"
+                            tools:text="好喝" />
+
+                        <RatingBar
+                            android:id="@+id/ratingBarComment"
+                            style="@android:style/Widget.Material.RatingBar.Small"
+                            android:layout_width="79dp"
+                            android:layout_height="16dp"
+                            android:isIndicator="true"
+                            android:numStars="5"
+                            android:stepSize="1"
+                            app:layout_constraintBottom_toBottomOf="@+id/textView"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <ImageButton
+                            android:id="@+id/btCommentOptionMenu"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:backgroundTint="@android:color/transparent"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/round_more_vert_black_24dp"
+                            android:tint="@color/colorTextOnP"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/ratingBarComment" />
+
+                        <TextView
+                            android:id="@+id/textView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="4dp"
+                            android:alpha="80"
+                            android:text="@string/textYourComment"
+                            android:textSize="12sp"
+                            app:layout_constraintEnd_toStartOf="@+id/ratingBarComment"
+                            app:layout_constraintTop_toTopOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layoutExpandable"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="4dp"
-                        android:alpha="80"
-                        android:text="@string/textYourComment"
-                        android:textSize="12sp"
-                        app:layout_constraintEnd_toStartOf="@+id/ratingBarComment"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        android:background="@color/colorItemBackground"
+                        app:layout_constraintEnd_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/layoutComment"
+                        app:layout_constraintEnd_toEndOf="parent">
 
+                        <TextView
+                            android:id="@+id/tvExpandReply"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="查看店家回覆"
+                            android:textColor="@color/colorNormalText"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/ibExpandable"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <ImageButton
+                            android:id="@+id/ibExpandable"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="64dp"
+                            android:layout_marginEnd="4dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:background="@color/zxing_transparent"
+                            android:src="@drawable/ic_expand_more_black_24dp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/tvExpandReply"
+                            app:layout_constraintTop_toTopOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layoutReply"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#FADADA"
+                        android:paddingStart="0dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/layoutExpandable">
+
+                        <TextView
+                            android:id="@+id/tvShopName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="64dp"
+                            android:fontFamily="@font/noto_sans"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="四海遊龍 (店主)" />
+
+                        <TextView
+                            android:id="@+id/tvReplyDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:fontFamily="@font/noto_sans"
+                            android:textColor="@color/colorTextOnS"
+                            android:textSize="14sp"
+                            app:layout_constraintStart_toStartOf="@id/tvShopName"
+                            app:layout_constraintTop_toBottomOf="@+id/tvShopName"
+                            tools:text="12月 22, 2019" />
+
+                        <TextView
+                            android:id="@+id/tvReplyContent"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:background="@drawable/comment_message_background"
+                            android:fontFamily="@font/noto_sans"
+                            android:paddingStart="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingEnd="8dp"
+                            android:paddingBottom="4dp"
+                            android:textColor="@color/colorTextOnS"
+                            android:textSize="14sp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="@id/tvReplyDate"
+                            app:layout_constraintTop_toBottomOf="@id/tvReplyDate"
+                            tools:text="謝謝好評" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
+
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/layoutCommentedFalse"

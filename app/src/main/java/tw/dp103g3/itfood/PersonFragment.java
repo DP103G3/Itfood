@@ -91,7 +91,7 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
         String[] memberTitle = new String[]{getString(R.string.textPersonInfo), getString(R.string.textPayment), getString(R.string.textSendLocation), getString(R.string.textFavoriteShops), getString(R.string.textLogout)};
         memberAction = new int[]{R.id.action_personFragment_to_personalInfoFragment,
                 R.id.action_personFragment_to_paymentFragment,
-                R.id.action_personFragment_to_locationFragment,
+                R.id.action_personFragment_to_addressFragment,
                 R.id.action_personFragment_to_favoriteFragment,};
         guestList = new ArrayList<>();
         int[] guestIcon = new int[]{R.drawable.login};
