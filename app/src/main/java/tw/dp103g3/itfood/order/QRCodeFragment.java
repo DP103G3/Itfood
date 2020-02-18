@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.google.zxing.BarcodeFormat;
@@ -43,6 +44,7 @@ public class QRCodeFragment extends Fragment {
     private final static String TAG = "TAG_QRCodeFragment";
     private Activity activity;
     private ImageView ivQRCode;
+    private ImageButton ibBack;
     private Order order;
     private LocalBroadcastManager broadcastManager;
     private NavController navController;
@@ -61,9 +63,11 @@ public class QRCodeFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        navController = Navigation.findNavController(view);
+        ibBack = view.findViewById(R.id.ibBack);
+        ibBack.setOnClickListener(v -> navController.popBackStack());
         broadcastManager = LocalBroadcastManager.getInstance(activity);
         registerOrderReceiver();
-        navController = Navigation.findNavController(view);
         Bundle bundle = getArguments();
         if (bundle != null) {
             order = (Order) bundle.getSerializable("order");

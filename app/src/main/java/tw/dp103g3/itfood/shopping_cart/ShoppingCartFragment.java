@@ -136,10 +136,6 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
     @BindView(R.id.btLogin)
     Button btLogin;
 
-    public static ShoppingCartFragment newInstance() {
-        return new ShoppingCartFragment();
-    }
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -150,11 +146,10 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
         model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         model.selectDeliveryTime(null);
         model.selectPayment(null);
-        model.selectAddress(null);
         orderType = DELIVERY;
         totals = new SparseIntArray();
         memberPref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
-        mem_id = memberPref.getInt("mem_id", LOGIN_FALSE);
+        mem_id = Common.getMemId(activity);
 
         orderDetail = new File(activity.getFilesDir(), "orderDetail");
 
@@ -686,17 +681,17 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
                         return;
                     }
                 }
-                Order order = new Order();
+                Order order;
                 int pay_id = payment == null ? 0 : payment.getPay_id();
 
                 if (payment != null) {
                     order = new Order(shop, mem_id, 0, pay_id, 0, orderIdeal,
                             now.getTime(), null, adrs_id, member.getMemName(), member.getMemPhone(),
-                            totalAfter, 0, 1, orderType);
+                            totalAfter, 0, 0, orderType);
                 } else {
                     order = new Order(shop, mem_id, 0, pay_id, 0, orderIdeal,
                             now.getTime(), null, adrs_id, member.getMemName(), member.getMemPhone(),
-                            totalAfter, 0, 1, orderType);
+                            totalAfter, 0, 0, orderType);
                 }
 
                 int orderCount = sendOrder(order);

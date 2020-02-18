@@ -1,7 +1,6 @@
 package tw.dp103g3.itfood.favorite;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -25,12 +24,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -39,26 +36,20 @@ import butterknife.ButterKnife;
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
-import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
-
-import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 
 
 public class FavoriteFragment extends Fragment {
     private final static String TAG = "TAG_FavoriteFragment";
     private AppCompatActivity activity;
     private CommonTask getFavoritesTask;
-    private CommonTask getShopTask;
     private CommonTask favoriteDeleteTask;
-    private Member member;
     @BindView(R.id.layoutFavoriteNoItem)
     ConstraintLayout layoutFavoriteNoItem;
     @BindView(R.id.ivFavoriteNoItem)
     ImageView ivFavoriteNoItem;
-    private List<Favorite> favorites;
     private List<Shop> shops;
     private ImageTask shopImageTask;
     @BindView(R.id.btBackToMain)
@@ -68,14 +59,12 @@ public class FavoriteFragment extends Fragment {
     @BindView(R.id.toolbarFavorite)
     Toolbar toolbar;
     private int mem_id;
-    private SharedPreferences pref;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = (AppCompatActivity) getActivity();
-        pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
-        mem_id = pref.getInt("mem_id", 0);
+        mem_id = Common.getMemId(activity);
     }
 
     @Override
@@ -97,65 +86,60 @@ public class FavoriteFragment extends Fragment {
         });
         layoutFavoriteNoItem.setVisibility(View.GONE);
 
-        favorites = getFavorites(mem_id);
-        if (favorites == null || favorites.isEmpty()) {
+        shops = getShops(mem_id);
+        if (shops == null || shops.isEmpty()) {
             rvFavorite.setVisibility(View.GONE);
             layoutFavoriteNoItem.setVisibility(View.VISIBLE);
         } else {
-            shops = new ArrayList<>();
-            for (int i = 0; i < favorites.size(); i++) {
-                shops.add(getShopById(favorites.get(i).getShopId()));
-            }
             showShops();
         }
     }
 
 
-    private List<Favorite> getFavorites(int memId) {
-        List<Favorite> favorites = null;
+    private List<Shop> getShops(int memId) {
+        List<Shop> shops = null;
         if (Common.networkConnected(activity)) {
             String url = Url.URL + "/FavoriteServlet";
             JsonObject jsonObject = new JsonObject();
-            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
             jsonObject.addProperty("action", "findByMemberId");
-            jsonObject.addProperty("mem_id", mem_id);
+            jsonObject.addProperty("mem_id", memId);
             String jsonOut = jsonObject.toString();
             getFavoritesTask = new CommonTask(url, jsonOut);
             try {
                 String jsonIn = getFavoritesTask.execute().get();
-                Type listType = new TypeToken<List<Favorite>>() {
+                Type listType = new TypeToken<List<Shop>>() {
                 }.getType();
-                favorites = gson.fromJson(jsonIn, listType);
+                shops = Common.gson.fromJson(jsonIn, listType);
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
             }
         } else {
             Common.showToast(activity, R.string.textNoNetwork);
         }
-        return favorites;
+        return shops;
     }
 
-    private Shop getShopById(int shopId) {
-        Shop shop = null;
-        if (Common.networkConnected(activity)) {
-            String url = Url.URL + "/ShopServlet";
-            JsonObject jsonObject = new JsonObject();
-            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-            jsonObject.addProperty("action", "getShopById");
-            jsonObject.addProperty("id", shopId);
-            String jsonOut = jsonObject.toString();
-            getShopTask = new CommonTask(url, jsonOut);
-            try {
-                String jsonIn = getShopTask.execute().get();
-                shop = gson.fromJson(jsonIn, Shop.class);
-            } catch (Exception e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Common.showToast(activity, R.string.textNoNetwork);
-        }
-        return shop;
-    }
+//    private Shop getShopById(int shopId) {
+//        Shop shop = null;
+//        if (Common.networkConnected(activity)) {
+//            String url = Url.URL + "/ShopServlet";
+//            JsonObject jsonObject = new JsonObject();
+//            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+//            jsonObject.addProperty("action", "getShopById");
+//            jsonObject.addProperty("id", shopId);
+//            String jsonOut = jsonObject.toString();
+//            getShopTask = new CommonTask(url, jsonOut);
+//            try {
+//                String jsonIn = getShopTask.execute().get();
+//                shop = gson.fromJson(jsonIn, Shop.class);
+//            } catch (Exception e) {
+//                Log.e(TAG, e.toString());
+//            }
+//        } else {
+//            Common.showToast(activity, R.string.textNoNetwork);
+//        }
+//        return shop;
+//    }
 
     private void setAdapter(RecyclerView recyclerView, List<Shop> shops, int itemViewResId) {
         if (shops == null || shops.isEmpty()) {

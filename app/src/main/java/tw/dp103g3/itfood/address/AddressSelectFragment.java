@@ -21,23 +21,12 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.main.SharedViewModel;
 import tw.dp103g3.itfood.task.CommonTask;
-
-import static tw.dp103g3.itfood.Common.DATE_FORMAT;
-import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 
 
 public class AddressSelectFragment extends Fragment {
@@ -54,19 +43,13 @@ public class AddressSelectFragment extends Fragment {
     private View view;
     private SharedViewModel model;
 
-
-    public AddressSelectFragment() {
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();
-        pref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
-        mem_id = pref.getInt("mem_id", 0);
-
+        mem_id = Common.getMemId(activity);
+        pref = activity.getSharedPreferences(Common.PREFERENCES_ADDRESS, Context.MODE_PRIVATE);
         model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-
     }
 
     @Override
@@ -77,12 +60,9 @@ public class AddressSelectFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
         this.view = view;
 
-        model.getSelectedAddress().observe(getViewLifecycleOwner(), address -> {
-            selectedAddress = address;
-        });
+        model.getSelectedAddress().observe(getViewLifecycleOwner(), address -> selectedAddress = address);
 
         toolbar = view.findViewById(R.id.toolbarAddressSelect);
         cardViewCheck = view.findViewById(R.id.cardViewCheck);
@@ -90,42 +70,15 @@ public class AddressSelectFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(activity));
 
         toolbar.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());
-        cardViewCheck.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                model.selectAddress(selectedAddress);
-                Navigation.findNavController(v).popBackStack();
-            }
+        cardViewCheck.setOnClickListener(v -> {
+            model.selectAddress(selectedAddress);
+            Navigation.findNavController(v).popBackStack();
         });
 
-        addresses = getAddresses(mem_id);
+        addresses = Common.getAddresses(activity, mem_id);
 
         ShowAddress(addresses);
 
-    }
-
-    private List<Address> getAddresses(int mem_id) {
-        List<Address> addresses = new ArrayList<>();
-        if (Common.networkConnected(activity)) {
-            String url = Url.URL + "/AddressServlet";
-            JsonObject jsonObject = new JsonObject();
-            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
-            jsonObject.addProperty("action", "getAllShow");
-            jsonObject.addProperty("mem_id", mem_id);
-            String jsonOut = jsonObject.toString();
-            getAddressTask = new CommonTask(url, jsonOut);
-            try {
-                String jsonIn = getAddressTask.execute().get();
-                Type listType = new TypeToken<List<Address>>() {
-                }.getType();
-                addresses = gson.fromJson(jsonIn, listType);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            Common.showToast(activity, R.string.textNoNetwork);
-        }
-        return addresses;
     }
 
     private void ShowAddress(List<Address> addresses) {
@@ -188,11 +141,14 @@ public class AddressSelectFragment extends Fragment {
                 holder.radioButton.setText(R.string.textAddAddress);
                 Drawable add = getResources().getDrawable(R.drawable.add, activity.getTheme());
                 holder.radioButton.setCompoundDrawablesWithIntrinsicBounds(add, null, null, null);
-                holder.radioButton.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.action_addressSelectFragment_to_addAddressFragment));
+                holder.radioButton.setOnClickListener(v -> Navigation.findNavController(v)
+                        .navigate(R.id.action_addressSelectFragment_to_addAddressFragment));
             } else {
                 final Address address = addresses.get(position);
                 holder.radioButton.setCompoundDrawablesWithIntrinsicBounds(checkedIcon, null, null, null);
-                holder.radioButton.setText(address.getInfo());
+                String addressStr = address.getName() +
+                        (address.getInfo() == null ? "" : "   " + address.getInfo());
+                holder.radioButton.setText(addressStr);
                 holder.radioButton.setTag(position);
 
                 if (address.getId() == selectedAddress.getId()) {
@@ -212,10 +168,9 @@ public class AddressSelectFragment extends Fragment {
                         lastChecked = rb;
                     }
                     selectedAddress = address;
+                    model.selectAddress(selectedAddress);
                 });
             }
         }
-
-
     }
 }

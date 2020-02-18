@@ -24,6 +24,7 @@ public class Shop implements Serializable {
 	private int ttscore;
 	private int ttrate;
 	private List<String> types;
+	private boolean favorite;
 
 	public Shop(int id, String email, String password, String name, String phone, String tax, String address, double latitude,
 			double longitude, int area, byte state, String info, Date jointime, Date suspendtime, int ttscore,
@@ -225,4 +226,11 @@ public class Shop implements Serializable {
 		this.types = types;
 	}
 
+	public void setFavorite(boolean favorite) {
+		this.favorite = favorite;
+	}
+
+	public boolean getFavorite() {
+		return favorite;
+	}
 }

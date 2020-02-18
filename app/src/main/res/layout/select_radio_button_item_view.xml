@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/colorItemBackground"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -10,20 +11,18 @@
         style="@android:style/Widget.Holo.Light.CompoundButton.RadioButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorItemBackground"
         android:button="@null"
         android:checked="false"
         android:drawablePadding="16dp"
-        android:fontFamily="@font/noto_sans"
         android:paddingStart="16dp"
         android:paddingTop="16dp"
         android:paddingEnd="16dp"
         android:paddingBottom="16dp"
         android:textColor="@color/colorTextOnS"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="台北市敦化南路100號7樓" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:text="公司" />
 
     <View
         android:id="@+id/divider4"

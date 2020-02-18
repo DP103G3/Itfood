@@ -125,7 +125,7 @@ public class ShopFragment extends Fragment {
             }
         });
         animator.start();
-        simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd EEEE HH:mm");
+        simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd EEEE HH:mm", Locale.getDefault());
         tbTitle = view.findViewById(R.id.tbTitle);
         orderDetail = new File(activity.getFilesDir(), "orderDetail");
         try (BufferedReader in = new BufferedReader(new FileReader(orderDetail))) {
@@ -135,8 +135,7 @@ public class ShopFragment extends Fragment {
             String orderDetailsStr = jsonObject.get("orderDetails").getAsString();
             Type type = new TypeToken<Map<Integer, Integer>>(){}.getType();
             orderDetails = gson.fromJson(orderDetailsStr, type) != null ?
-                    gson.fromJson(orderDetailsStr, type) : new HashMap<Integer, Integer>();
-//            orderDetails.forEach((v,u) -> Log.d(TAG, String.format("%d, %d", v, u)));
+                    gson.fromJson(orderDetailsStr, type) : new HashMap<>();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -154,9 +153,7 @@ public class ShopFragment extends Fragment {
             dialog.show();
         });
         ivBack = view.findViewById(R.id.ivBack);
-        ivBack.setOnClickListener(v -> {
-            Navigation.findNavController(v).popBackStack();
-        });
+        ivBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
         ivCart = view.findViewById(R.id.ivCart);
         ivCart.setOnClickListener(v -> {
             navController.navigate(R.id.action_shopFragment_to_shoppingCartFragment);

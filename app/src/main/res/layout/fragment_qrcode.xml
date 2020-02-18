@@ -15,12 +15,22 @@
         android:elevation="4dp"
         android:minHeight="?attr/actionBarSize"
         android:background="@color/colorPrimary"
-        app:contentInsetStart="16dp">
+        app:contentInsetStart="0dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintLayout"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize">
+
+            <ImageButton
+                android:id="@+id/ibBack"
+                android:layout_width="?attr/actionBarSize"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:background="@color/colorPrimary"
+                android:src="@drawable/back"
+                android:scaleType="centerInside" />
 
             <ImageView
                 android:id="@+id/logo"
@@ -28,7 +38,7 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ibBack"
                 android:src="@drawable/logo" />
 
             <ImageView

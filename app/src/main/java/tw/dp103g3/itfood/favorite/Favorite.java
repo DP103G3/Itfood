@@ -9,22 +9,20 @@ public class Favorite {
 		this.memberId = memberId;
 		this.shopId = shopId;
 	}
+
 	public int getMemberId() {
 		return memberId;
 	}
+
 	public void setMemberId(int memberId) {
 		this.memberId = memberId;
 	}
+
 	public int getShopId() {
 		return shopId;
 	}
+
 	public void setShopId(int shopId) {
 		this.shopId = shopId;
 	}
-	
-	
-	
-	
-
-
 }

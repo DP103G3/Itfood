@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -48,6 +50,7 @@ import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.address.Address;
 import tw.dp103g3.itfood.main.MainActivity;
+import tw.dp103g3.itfood.main.SharedViewModel;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
@@ -62,23 +65,26 @@ public class MainFragment extends Fragment {
     private ImageTask shopImageTask;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ScrollView scrollView;
-    private Spinner spAddress;
+    private Button btAddress;
     private int memId;
     private Address selectedAddress;
     private Gson gson;
     private NavController navController;
     private View view;
-    private SharedPreferences preferences;
     private BottomNavigationView bottomNavigationView;
     private Animator animator;
+    private SharedViewModel model;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = (MainActivity) getActivity();
         activity.checkLocationSettings();
-        preferences = activity.getSharedPreferences(Common.PREFERENCES_MEMBER,
-                Context.MODE_PRIVATE);
+        memId = Common.getMemId(activity);
+        model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        addresses = Common.getAddresses(activity, memId);
+        selectedAddress = addresses.get(Common.getSelectedAddressId(activity));
+        model.selectAddress(null);
     }
 
     @Override
@@ -91,7 +97,6 @@ public class MainFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Common.disconnectServer();
         bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
-        memId = Common.getMemId(activity);
         this.view = view;
         ivCart = view.findViewById(R.id.ivCart);
         navController = Navigation.findNavController(view);
@@ -99,45 +104,25 @@ public class MainFragment extends Fragment {
         ivCart.setOnClickListener(v -> navController.
                 navigate(R.id.action_mainFragment_to_shoppingCartFragment));
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-        Log.d(TAG, "1");
-        Address localAddress = new Address(0, getString(R.string.textLocalPosition),
-                null, -1, -1);
-        addresses = getAddresses(memId) != null ?
-                getAddresses(memId) : new ArrayList<>();
-        File file = new File(activity.getFilesDir(), "localAddress");
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
-            localAddress = (Address) in.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            Log.e(TAG, e.toString());
-        }
-        addresses.add(0, localAddress);
-        List<String> addressNames = new ArrayList<>();
-        for (int i = 0; i < addresses.size(); i++) {
-            addressNames.add(addresses.get(i).getName());
-        }
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(activity,
-                android.R.layout.simple_spinner_dropdown_item, addressNames);
-        spAddress = view.findViewById(R.id.spAddress);
-        spAddress.setAdapter(arrayAdapter);
-        spAddress.setSelection(0, true);
-        selectedAddress = addresses.get(0);
-        spAddress.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedAddress = addresses.get(position);
-                showShops();
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+        btAddress = view.findViewById(R.id.btAddress);
+        btAddress.setOnClickListener(v -> {
+            navController.navigate(R.id.action_mainFragment_to_addressSelectFragment);
         });
+        if (memId != Common.LOGIN_FALSE) {
+            model.selectAddress(addresses.get(Common.getSelectedAddressId(activity)));
+        }
+        model.getSelectedAddress().observe(getViewLifecycleOwner(), address -> {
+            selectedAddress = address;
+            btAddress.setText(selectedAddress.getName());
+            showShops();
+        });
+
         if (shops == null) {
-            shops = getShops();
+            shops = getShops(memId);
         }
         ivMap = view.findViewById(R.id.ivMap);
-        ivMap.setOnClickListener(v -> {
-            navController.navigate(R.id.action_mainFragment_to_mapFragment);
-        });
+        ivMap.setOnClickListener(v -> navController.navigate(R.id.action_mainFragment_to_mapFragment));
         scrollView = view.findViewById(R.id.scrollView);
         scrollView.setVisibility(Common.networkConnected(activity) || !shops.isEmpty() ?
                 View.VISIBLE : View.GONE);
@@ -157,7 +142,7 @@ public class MainFragment extends Fragment {
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(() -> {
             if (Common.networkConnected(activity)) {
-                shops = getShops();
+                shops = getShops(memId);
             }
             scrollView.setVisibility(Common.networkConnected(activity) || !shops.isEmpty() ?
                     View.VISIBLE : View.GONE);
@@ -168,39 +153,40 @@ public class MainFragment extends Fragment {
         showShops();
     }
 
-    private List<Address> getAddresses(int mem_id) {
-        List<Address> adresses = new ArrayList<>();
-        if (Common.networkConnected(activity)) {
-            String url = Url.URL + "/AddressServlet";
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("action", "getAllShow");
-            jsonObject.addProperty("mem_id", mem_id);
-            String jsonOut = jsonObject.toString();
-            getAllAddressTask = new CommonTask(url, jsonOut);
-            try {
-                String jsonIn = getAllAddressTask.execute().get();
-                Type listType = new TypeToken<List<Address>>() {
-                }.getType();
-                adresses = gson.fromJson(jsonIn, listType);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            Common.showToast(activity, R.string.textNoNetwork);
-        }
-        return adresses;
-    }
+//    private List<Address> getAddresses(int mem_id) {
+//        List<Address> adresses = new ArrayList<>();
+//        if (Common.networkConnected(activity)) {
+//            String url = Url.URL + "/AddressServlet";
+//            JsonObject jsonObject = new JsonObject();
+//            jsonObject.addProperty("action", "getAllShow");
+//            jsonObject.addProperty("mem_id", mem_id);
+//            String jsonOut = jsonObject.toString();
+//            getAllAddressTask = new CommonTask(url, jsonOut);
+//            try {
+//                String jsonIn = getAllAddressTask.execute().get();
+//                Type listType = new TypeToken<List<Address>>() {
+//                }.getType();
+//                adresses = gson.fromJson(jsonIn, listType);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        } else {
+//            Common.showToast(activity, R.string.textNoNetwork);
+//        }
+//        return adresses;
+//    }
 
     private List<Shop> typeFilter(String type, List<Shop> shops) {
         return shops.stream().filter(v -> v.getTypes().contains(type)).collect(Collectors.toList());
     }
 
-    private List<Shop> getShops() {
+    private List<Shop> getShops(int id) {
         List<Shop> shops = new ArrayList<>();
         if (Common.networkConnected(activity)) {
             String url = Url.URL + "/ShopServlet";
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("action", "getAllShow");
+            jsonObject.addProperty("id", id);
             String jsonOut = jsonObject.toString();
             getAllShopTask = new CommonTask(url, jsonOut);
             try {
@@ -234,9 +220,9 @@ public class MainFragment extends Fragment {
             }
             shops = new ArrayList<>();
         }
-        List<Shop> showShops = shops.stream().filter(v -> Common.Distance(v.getLatitude(), v.getLongitude(),
+        List<Shop> showShops = selectedAddress != null ? shops.stream().filter(v -> Common.Distance(v.getLatitude(), v.getLongitude(),
                 selectedAddress.getLatitude(), selectedAddress.getLongitude()) < 5000)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : new ArrayList<>();
         List<Shop> newShop = showShops.stream()
                 .filter(v -> System.currentTimeMillis() - v.getJointime().getTime() <= 2592000000L)
                 .collect(Collectors.toList());

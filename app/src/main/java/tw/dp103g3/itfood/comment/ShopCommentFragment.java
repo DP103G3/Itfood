@@ -44,11 +44,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.favorite.Favorite;
 import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.order.OrderAnimations;
 import tw.dp103g3.itfood.shop.Shop;
@@ -62,11 +64,11 @@ import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 public class ShopCommentFragment extends Fragment {
     private final static String TAG = "TAG_ShopCommentFragment";
     private Activity activity;
-    private ImageView ivShop, ivBack;
+    private ImageView ivShop, ivBack, ivFavorite;
     private TextView tvCommentsTotal, tvName, tvRatingTotal, tvAverageRating;
     private RecyclerView rvComments;
     private Shop shop;
-    private CommonTask getCommentTask;
+    private CommonTask getCommentTask, favoriteTask;
     private LinearLayout layoutCommentLoggedIn, layoutShopComment;
     private ConstraintLayout layoutCommentedTrue, layoutCommentedFalse, layoutReply, layoutExpandable;
     private Button btPostComment;
@@ -122,6 +124,33 @@ public class ShopCommentFragment extends Fragment {
             sendBundle.putSerializable("member", member);
             sendBundle.putSerializable("shop", shop);
             Navigation.findNavController(v).navigate(R.id.action_shopCommentFragment_to_commentFragment, sendBundle);
+        });
+
+        ivFavorite.setImageResource(shop.getFavorite() ? R.drawable.favorite_on : R.drawable.favorite);
+        ivFavorite.setOnClickListener(v -> {
+            if (Common.networkConnected(activity)) {
+                String url = Url.URL + "/FavoriteServlet";
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("action", shop.getFavorite() ? "delete" : "insert");
+                jsonObject.addProperty("favorite", Common.gson.toJson(new Favorite(mem_id, shop.getId())));
+                favoriteTask = new CommonTask(url, jsonObject.toString());
+                int count = 0;
+                try {
+                    String result = favoriteTask.execute().get();
+                    count = Integer.parseInt(result);
+                } catch (Exception e) {
+                    Log.e(TAG, e.toString());
+                }
+                if (count != 0) {
+                    shop.setFavorite(!shop.getFavorite());
+                    ivFavorite.setImageResource(shop.getFavorite() ? R.drawable.favorite_on : R.drawable.favorite);
+                } else {
+                    Common.showToast(activity, R.string.textFavoriteFail);
+                }
+            } else {
+                Common.showToast(activity, R.string.textNoNetwork);
+            }
+
         });
 
         //如果preferences中的mem_id為0即代表為未登入
@@ -343,6 +372,7 @@ public class ShopCommentFragment extends Fragment {
         layoutCommentedFalse = layoutShopComment.findViewById(R.id.layoutCommentedFalse);
         layoutCommentedTrue = layoutShopComment.findViewById(R.id.layoutCommentedTrue);
         btPostComment = layoutShopComment.findViewById(R.id.btPostComment);
+        ivFavorite = layoutShopComment.findViewById(R.id.ivFavorite);
     }
 
     private void showOptionMenu() {

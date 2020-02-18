@@ -23,22 +23,29 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import tw.dp103g3.itfood.address.Address;
 import tw.dp103g3.itfood.order.OrderWebSocketClient;
 import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
+import tw.dp103g3.itfood.task.CommonTask;
 
 public class Common {
     private static final String TAG = "TAG_Common";
     private static final double EARTH_RADIUS = 6378.137;
     public static final String PREFERENCES_MEMBER = "member";
+    public static final String PREFERENCES_ADDRESS = "address";
     public static final String PREFERENCES_CART = "cart";
     public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final int LOGIN_FALSE = 0;
@@ -67,7 +74,12 @@ public class Common {
 
     public static int getMemId(Context context) {
         SharedPreferences pref = context.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
-        return pref.getInt("mem_id", 0);
+        return pref.getInt("mem_id", LOGIN_FALSE);
+    }
+
+    public static int getSelectedAddressId(Context context) {
+        SharedPreferences pref = context.getSharedPreferences(PREFERENCES_ADDRESS, Context.MODE_PRIVATE);
+        return pref.getInt("address_id", LOGIN_FALSE);
     }
 
     public static boolean networkConnected(Activity activity) {
@@ -85,6 +97,41 @@ public class Common {
         } else {
             return false;
         }
+    }
+
+    public static List<Address> getAddresses(Activity activity, int memId) {
+        List<Address> addresses = new ArrayList<>();
+        if (Common.networkConnected(activity)) {
+            Address localAddress = new Address(0, activity.getString(R.string.textLocalPosition),
+                    null, -1, -1);
+            String url = Url.URL + "/AddressServlet";
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("action", "getAllShow");
+            jsonObject.addProperty("mem_id", memId);
+            String jsonOut = jsonObject.toString();
+            CommonTask getAllAddressTask = new CommonTask(url, jsonOut);
+            try {
+                String jsonIn = getAllAddressTask.execute().get();
+                Type listType = new TypeToken<List<Address>>() {
+                }.getType();
+                addresses = gson.fromJson(jsonIn, listType);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                getAllAddressTask.cancel(true);
+            }
+            addresses = addresses != null ? addresses : new ArrayList<>();
+            File file = new File(activity.getFilesDir(), "localAddress");
+            try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+                localAddress = (Address) in.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                Log.e(TAG, e.toString());
+            }
+            addresses.add(0, localAddress);
+        } else {
+            Common.showToast(activity, R.string.textNoNetwork);
+        }
+        return addresses;
     }
 
     public static void showToast(Context context, String message) {

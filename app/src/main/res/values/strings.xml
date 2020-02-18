@@ -98,6 +98,7 @@
     <string name="textCreditCardType">信用卡種類</string>
     <string name="textFavoriteShops">收藏店家</string>
     <string name="textDetailDishes">詳細品項</string>
+    <string name="textFavoriteFail">按讚失敗，請稍候重試</string>
     <string name="textAddressName">地址名稱</string>
     <string name="textDeleteSuccess">刪除成功</string>
     <string name="textDeleteFail">刪除失敗，請稍後再試</string>
