@@ -4,6 +4,7 @@ package tw.dp103g3.itfood.shopping_cart;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -46,6 +47,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -71,6 +73,7 @@ import static tw.dp103g3.itfood.Common.LOGIN_FALSE;
 import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 import static tw.dp103g3.itfood.Common.formatCardNum;
 import static tw.dp103g3.itfood.Common.getDayOfWeek;
+import static tw.dp103g3.itfood.Common.setDialogUi;
 import static tw.dp103g3.itfood.Common.showLoginDialog;
 
 
@@ -140,7 +143,6 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();
-        address = null;
         payment = null;
         date = null;
         model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
@@ -175,8 +177,6 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
         cart = getCart(dishIds, mem_id);
 
         if (mem_id != LOGIN_FALSE) {
-            address = cart.getAddresses().isEmpty() ? null : cart.getAddresses().get(0);
-            model.selectAddress(address);
             payment = cart.getPayments().isEmpty() ? null : cart.getPayments().get(0);
             model.selectPayment(payment);
             member = cart.getMember();
@@ -193,14 +193,15 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         ButterKnife.bind(this, view);
         handleViews();
         navController = Navigation.findNavController(view);
+
         model.getSelectedAddress().observe(getViewLifecycleOwner(), address -> {
             this.address = address;
             if (address != null) {
-                tvAddress.setText(address.getInfo());
+                String addressString = address.getName() + " " + address.getInfo();
+                tvAddress.setText(addressString);
             } else {
                 tvAddress.setText("");
             }
@@ -308,6 +309,36 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
 
         //結帳按鈕
         layoutCheckOut.setOnClickListener(layoutCheckListener());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        /* 確認餐車內的店家可以送達選取的地址 */
+        if (Common.Distance(address.getLatitude(), address.getLongitude()
+                , shop.getLatitude(), shop.getLongitude()) > 5000) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            builder.setTitle("送餐地址無法送達");
+            builder.setMessage("餐車內的店家無法送達你所選取的地址，你要移除餐車嗎？");
+            builder.setNegativeButton("返回", (dialog, which) -> {
+                navController.popBackStack();
+                dialog.cancel();
+            });
+            builder.setPositiveButton("好", (dialog, which) -> {
+                clearCart();
+                navController.popBackStack();
+                dialog.dismiss();
+            });
+            Dialog dialog = builder.create();
+            setDialogUi(dialog, activity);
+            dialog.show();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Common.showBottomNav(activity);
     }
 
     private int sendOrder(Order order) {
@@ -540,34 +571,6 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
     }
 
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_up);
-        animator.setTarget(bottomNavigationView);
-        animator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                bottomNavigationView.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-        animator.start();
-    }
 
 
     private Cart getCart(List<Integer> dishIds, int mem_id) {
@@ -625,7 +628,10 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
 
     private void navigateToAddressSelect() {
         model.selectAddress(address);
-        navController.navigate(R.id.action_shoppingCartFragment_to_addressSelectFragment);
+        Bundle bundle = new Bundle();
+        bundle.putInt("FROM", R.id.shoppingCartFragment);
+        bundle.putSerializable("shop", shop);
+        navController.navigate(R.id.action_shoppingCartFragment_to_addressSelectFragment, bundle);
     }
 
     private void navigateToPaymentSelect() {
@@ -715,6 +721,17 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
                 showLoginDialog(this);
             }
         };
+    }
 
+    private void clearCart() {
+        Map<Integer, Integer> orderDetails = new HashMap<>();
+        try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail))) {
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("shop", gson.toJson(shop));
+            jsonObject.addProperty("orderDetails", gson.toJson(orderDetails));
+            out.write(jsonObject.toString());
+        } catch (IOException e) {
+            Log.e(TAG, e.toString());
+        }
     }
 }

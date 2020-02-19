@@ -59,8 +59,6 @@ public class AddressCitiesFragment extends Fragment {
         rvCities.setAdapter(new CityAdapter(activity, cities));
         model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         toolbarCities.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());
-
-
     }
 
     private class CityAdapter extends RecyclerView.Adapter<CityAdapter.MyViewHolder> {

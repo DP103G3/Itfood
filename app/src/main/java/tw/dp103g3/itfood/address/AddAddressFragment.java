@@ -2,7 +2,6 @@ package tw.dp103g3.itfood.address;
 
 
 import android.animation.Animator;
-import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -14,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -188,6 +186,12 @@ public class AddAddressFragment extends Fragment {
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Common.hideBottomNav(activity);
+    }
+
     private void setViews(View view) {
         etCity = view.findViewById(R.id.etCity);
         etAdminDistrict = view.findViewById(R.id.etAdminDistrict);
@@ -213,39 +217,5 @@ public class AddAddressFragment extends Fragment {
         }
     }
 
-    private void handleViews() {
-        bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
-        if (bottomNavigationView.getVisibility() == View.VISIBLE) {
-            animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_down);
-            animator.setTarget(bottomNavigationView);
-            animator.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animation) {
 
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    bottomNavigationView.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animation) {
-
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animation) {
-
-                }
-            });
-            animator.start();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        handleViews();
-    }
 }

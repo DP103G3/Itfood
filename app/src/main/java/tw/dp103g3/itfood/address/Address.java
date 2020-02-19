@@ -64,6 +64,15 @@ public class Address implements Serializable {
 		this.longitude = longitude;
 	}
 
+	//現在位置的建構式
+	public Address(double latitude, double longitude) {
+		this.name = "現在位置";
+		this.info = "";
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.id = 0;
+	}
+
 	public LatLng getLatLng() {
 		return new LatLng(getLatitude(), getLongitude());
 	}

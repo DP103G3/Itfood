@@ -3,18 +3,15 @@ package tw.dp103g3.itfood.shop;
 
 import android.animation.Animator;
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ScrollView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,10 +32,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -51,10 +45,16 @@ import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.address.Address;
 import tw.dp103g3.itfood.main.MainActivity;
 import tw.dp103g3.itfood.main.SharedViewModel;
+import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
-public class MainFragment extends Fragment {
+import static tw.dp103g3.itfood.Common.LOGIN_FALSE;
+import static tw.dp103g3.itfood.Common.getAddresses;
+import static tw.dp103g3.itfood.Common.showLoginDialog;
+import static tw.dp103g3.itfood.main.MainActivity.getLocation;
+
+public class MainFragment extends Fragment implements LoginDialogFragment.LoginDialogContract {
     private final static String TAG = "TAG_MainFragment";
     private MainActivity activity;
     private ImageView ivCart, ivMap;
@@ -74,6 +74,8 @@ public class MainFragment extends Fragment {
     private BottomNavigationView bottomNavigationView;
     private Animator animator;
     private SharedViewModel model;
+    private Location location;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -81,10 +83,12 @@ public class MainFragment extends Fragment {
         activity = (MainActivity) getActivity();
         activity.checkLocationSettings();
         memId = Common.getMemId(activity);
+        location = getLocation();
         model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-        addresses = Common.getAddresses(activity, memId);
-        selectedAddress = addresses.get(Common.getSelectedAddressId(activity));
         model.selectAddress(null);
+//        addresses = Common.getAddresses(activity, memId);
+//        selectedAddress = addresses.get(Common.getSelectedAddressId(activity));
+//        model.selectAddress(null);
     }
 
     @Override
@@ -107,14 +111,42 @@ public class MainFragment extends Fragment {
 
         btAddress = view.findViewById(R.id.btAddress);
         btAddress.setOnClickListener(v -> {
-            navController.navigate(R.id.action_mainFragment_to_addressSelectFragment);
+            if (memId != LOGIN_FALSE) {
+                navController.navigate(R.id.action_mainFragment_to_addressSelectFragment);
+            } else {
+                showLoginDialog(this);
+            }
         });
-        if (memId != Common.LOGIN_FALSE) {
-            model.selectAddress(addresses.get(Common.getSelectedAddressId(activity)));
-        }
+//        if (memId != Common.LOGIN_FALSE) {
+//            model.selectAddress(addresses.get(Common.getSelectedAddressId(activity)));
+//        }
+
         model.getSelectedAddress().observe(getViewLifecycleOwner(), address -> {
-            selectedAddress = address;
-            btAddress.setText(selectedAddress.getName());
+            if (address == null) {
+                Log.d(TAG, "1");
+                if (location == null) {
+                    Common.showToast(activity, "無法取得現在位置");
+                    if (memId == 0) {
+                        btAddress.setText("無法取得");
+                        Log.d(TAG, "3");
+                    } else {
+                        addresses = getAddresses(activity, memId);
+                        selectedAddress = addresses.get(0);
+                        model.selectAddress(selectedAddress);
+                        Log.d(TAG, "4" + selectedAddress.getName());
+                    }
+                } else {
+                    selectedAddress = new Address(location.getLatitude(), location.getLongitude());
+                    model.selectAddress(selectedAddress);
+                    Log.d(TAG, "5" + selectedAddress.getLatitude() + " , " + selectedAddress.getLongitude());
+                }
+            } else if (address.getId() != 0) {  //id為0的Address為現在位置, 設定條件防止遞迴 (只有在輸入非現在位置的地址才會更新）
+                selectedAddress = address;
+                Log.d(TAG, "2");
+            } else {
+                selectedAddress = address;
+                Log.d(TAG, "6" + selectedAddress.getLatitude() + " , " + selectedAddress.getLongitude());
+            }
             showShops();
         });
 
@@ -237,6 +269,16 @@ public class MainFragment extends Fragment {
         setAdapter(rvAllShop, sortedShops, R.layout.large_shop_item_view);
     }
 
+    @Override
+    public void sendLoginResult(boolean isSuccessful) {
+        if (isSuccessful) {
+            NavOptions.Builder builder = new NavOptions.Builder();
+            builder.setPopUpTo(R.id.mainFragment, false);
+            NavOptions navOptions = builder.build();
+            Navigation.findNavController(view).navigate(R.id.mainFragment, null, navOptions);
+        }
+    }
+
     private class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> {
         private Context context;
         private List<Shop> shops;
@@ -327,5 +369,10 @@ public class MainFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Common.checkCart(activity, ivCart);
+        btAddress.setText(selectedAddress.getName());
+        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
+        if (bottomNavigationView.getVisibility() == View.GONE) {
+            Common.showBottomNav(activity);
+        }
     }
 }

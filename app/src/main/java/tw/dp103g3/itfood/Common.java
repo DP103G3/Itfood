@@ -1,5 +1,7 @@
 package tw.dp103g3.itfood;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -16,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -23,10 +26,8 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -99,40 +100,63 @@ public class Common {
         }
     }
 
-    public static List<Address> getAddresses(Activity activity, int memId) {
+    public static List<Address> getAddresses(Activity activity, int mem_id) {
         List<Address> addresses = new ArrayList<>();
         if (Common.networkConnected(activity)) {
-            Address localAddress = new Address(0, activity.getString(R.string.textLocalPosition),
-                    null, -1, -1);
             String url = Url.URL + "/AddressServlet";
             JsonObject jsonObject = new JsonObject();
+            Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
             jsonObject.addProperty("action", "getAllShow");
-            jsonObject.addProperty("mem_id", memId);
+            jsonObject.addProperty("mem_id", mem_id);
             String jsonOut = jsonObject.toString();
-            CommonTask getAllAddressTask = new CommonTask(url, jsonOut);
             try {
-                String jsonIn = getAllAddressTask.execute().get();
+                String jsonIn = new CommonTask(url, jsonOut).execute().get();
                 Type listType = new TypeToken<List<Address>>() {
                 }.getType();
                 addresses = gson.fromJson(jsonIn, listType);
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                getAllAddressTask.cancel(true);
             }
-            addresses = addresses != null ? addresses : new ArrayList<>();
-            File file = new File(activity.getFilesDir(), "localAddress");
-            try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
-                localAddress = (Address) in.readObject();
-            } catch (IOException | ClassNotFoundException e) {
-                Log.e(TAG, e.toString());
-            }
-            addresses.add(0, localAddress);
         } else {
             Common.showToast(activity, R.string.textNoNetwork);
         }
         return addresses;
     }
+
+//    public static List<Address> getAddresses(Activity activity, int memId) {
+//        List<Address> addresses = new ArrayList<>();
+//        if (Common.networkConnected(activity)) {
+//            Address localAddress = new Address(0, activity.getString(R.string.textLocalPosition),
+//                    null, -1, -1);
+//            String url = Url.URL + "/AddressServlet";
+//            JsonObject jsonObject = new JsonObject();
+//            jsonObject.addProperty("action", "getAllShow");
+//            jsonObject.addProperty("mem_id", memId);
+//            String jsonOut = jsonObject.toString();
+//            CommonTask getAllAddressTask = new CommonTask(url, jsonOut);
+//            try {
+//                String jsonIn = getAllAddressTask.execute().get();
+//                Type listType = new TypeToken<List<Address>>() {
+//                }.getType();
+//                addresses = gson.fromJson(jsonIn, listType);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            } finally {
+//                getAllAddressTask.cancel(true);
+//            }
+//            addresses = addresses != null ? addresses : new ArrayList<>();
+//            File file = new File(activity.getFilesDir(), "localAddress");
+//            try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+//                localAddress = (Address) in.readObject();
+//            } catch (IOException | ClassNotFoundException e) {
+//                Log.e(TAG, e.toString());
+//            }
+//            addresses.add(0, localAddress);
+//        } else {
+//            Common.showToast(activity, R.string.textNoNetwork);
+//        }
+//        return addresses;
+//    }
 
     public static void showToast(Context context, String message) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
@@ -256,4 +280,64 @@ public class Common {
         });
     }
 
+    public static void hideBottomNav(Activity activity) {
+        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
+        if (bottomNavigationView.getVisibility() == View.VISIBLE) {
+            Animator animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_down);
+            animator.setTarget(bottomNavigationView);
+            animator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    bottomNavigationView.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+
+                }
+            });
+            animator.start();
+        }
+    }
+
+    public static void showBottomNav(Activity activity) {
+        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
+        if (bottomNavigationView.getVisibility() == View.GONE) {
+            Animator animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_up);
+            animator.setTarget(bottomNavigationView);
+            animator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    bottomNavigationView.setVisibility(View.VISIBLE);
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+
+                }
+            });
+            animator.start();
+        }
+    }
 }

@@ -1,24 +1,18 @@
-package tw.dp103g3.itfood;
+package tw.dp103g3.itfood.address;
 
 
-import android.animation.Animator;
-import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
-import android.graphics.fonts.FontVariationAxis;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -29,7 +23,6 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -43,11 +36,11 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import tw.dp103g3.itfood.address.Address;
-import tw.dp103g3.itfood.payment.Payment;
+import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.R;
+import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.task.CommonTask;
 
-import static android.view.View.GONE;
 import static tw.dp103g3.itfood.Common.DATE_FORMAT;
 import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
 
@@ -294,33 +287,7 @@ public class AddressFragment extends Fragment {
         rvAddress.setLayoutManager(new LinearLayoutManager(activity));
         List<Address> addresses = getAddresses(mem_id);
         ShowAddress(addresses);
-        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
-        if (bottomNavigationView.getVisibility() == GONE){
-            Animator animator = AnimatorInflater.loadAnimator(activity, R.animator.anim_bottom_navigation_slide_up);
-            animator.setTarget(bottomNavigationView);
-            animator.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    bottomNavigationView.setVisibility(View.VISIBLE);
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animation) {
-
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animation) {
-
-                }
-            });
-            animator.start();
-        }
+        Common.showBottomNav(activity);
     }
 
     private android.location.Address geocode(String locationName) {

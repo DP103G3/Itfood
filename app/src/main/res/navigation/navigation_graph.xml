@@ -177,7 +177,7 @@
     </fragment>
     <fragment
         android:id="@+id/AddressFragment"
-        android:name="tw.dp103g3.itfood.AddressFragment"
+        android:name="tw.dp103g3.itfood.address.AddressFragment"
         android:label="fragment_address"
         tools:layout="@layout/fragment_location">
         <action
