@@ -127,7 +127,7 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
                 if (location == null) {
                     Common.showToast(activity, "無法取得現在位置");
                     if (memId == 0) {
-                        btAddress.setText("無法取得");
+                        selectedAddress = new Address(0, "", "無法取得", -1, -1);
                         Log.d(TAG, "3");
                     } else {
                         addresses = getAddresses(activity, memId);

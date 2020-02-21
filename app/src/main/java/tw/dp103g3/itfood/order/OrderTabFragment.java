@@ -5,6 +5,7 @@ import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -60,6 +61,7 @@ import tw.dp103g3.itfood.task.CommonTask;
 import static android.view.View.GONE;
 import static tw.dp103g3.itfood.Common.DATE_FORMAT;
 import static tw.dp103g3.itfood.Common.orderWebSocketClient;
+import static tw.dp103g3.itfood.Common.setDialogUi;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -399,7 +401,7 @@ public class OrderTabFragment extends Fragment {
             void onBtActionClick(View view) {
                 switch (order.getOrder_state()) {
                     case UNCONFIRMED:
-                        new AlertDialog.Builder(activity)
+                        Dialog dialogCancel = new AlertDialog.Builder(activity)
                                 .setTitle(R.string.textAlertDialogTitleCancelOrder)
                                 .setMessage(R.string.textAlertDialogMessageCancelOrder)
                                 .setPositiveButton("確定", (dialog, which) -> {
@@ -430,7 +432,9 @@ public class OrderTabFragment extends Fragment {
                                         onResume();
                                     }
                                 }).setNegativeButton("取消", (dialog, which) -> dialog.cancel())
-                                .show();
+                                .create();
+                        setDialogUi(dialogCancel, activity);
+                        dialogCancel.show();
                         break;
                     case PICKUP:
                     case DELIVERING:

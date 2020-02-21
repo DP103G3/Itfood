@@ -82,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
             Common.showToast(this, R.string.textNoNetwork);
         }
         SharedViewModel model = new ViewModelProvider(this).get(SharedViewModel.class);
-        model.selectAddress(null);
 
         bottomNavigationView = findViewById(R.id.bottomNavigation);
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);

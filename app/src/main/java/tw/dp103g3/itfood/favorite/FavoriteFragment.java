@@ -24,10 +24,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -97,7 +99,8 @@ public class FavoriteFragment extends Fragment {
 
 
     private List<Shop> getShops(int memId) {
-        List<Shop> shops = null;
+        List<Shop> shops = new ArrayList<>();
+        List<Favorite> favorites = new ArrayList<>();
         if (Common.networkConnected(activity)) {
             String url = Url.URL + "/FavoriteServlet";
             JsonObject jsonObject = new JsonObject();
@@ -107,9 +110,12 @@ public class FavoriteFragment extends Fragment {
             getFavoritesTask = new CommonTask(url, jsonOut);
             try {
                 String jsonIn = getFavoritesTask.execute().get();
-                Type listType = new TypeToken<List<Shop>>() {
+                Type listType = new TypeToken<List<Favorite>>() {
                 }.getType();
-                shops = Common.gson.fromJson(jsonIn, listType);
+                favorites = Common.gson.fromJson(jsonIn, listType);
+                for (Favorite f : favorites) {
+                    shops.add(getShopById(f.getShopId()));
+                }
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
             }
@@ -119,27 +125,26 @@ public class FavoriteFragment extends Fragment {
         return shops;
     }
 
-//    private Shop getShopById(int shopId) {
-//        Shop shop = null;
-//        if (Common.networkConnected(activity)) {
-//            String url = Url.URL + "/ShopServlet";
-//            JsonObject jsonObject = new JsonObject();
-//            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-//            jsonObject.addProperty("action", "getShopById");
-//            jsonObject.addProperty("id", shopId);
-//            String jsonOut = jsonObject.toString();
-//            getShopTask = new CommonTask(url, jsonOut);
-//            try {
-//                String jsonIn = getShopTask.execute().get();
-//                shop = gson.fromJson(jsonIn, Shop.class);
-//            } catch (Exception e) {
-//                Log.e(TAG, e.toString());
-//            }
-//        } else {
-//            Common.showToast(activity, R.string.textNoNetwork);
-//        }
-//        return shop;
-//    }
+    private Shop getShopById(int shopId) {
+        Shop shop = null;
+        if (Common.networkConnected(activity)) {
+            String url = Url.URL + "/ShopServlet";
+            JsonObject jsonObject = new JsonObject();
+            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+            jsonObject.addProperty("action", "getShopById");
+            jsonObject.addProperty("id", shopId);
+            String jsonOut = jsonObject.toString();
+            try {
+                String jsonIn = new CommonTask(url, jsonOut).execute().get();
+                shop = gson.fromJson(jsonIn, Shop.class);
+            } catch (Exception e) {
+                Log.e(TAG, e.toString());
+            }
+        } else {
+            Common.showToast(activity, R.string.textNoNetwork);
+        }
+        return shop;
+    }
 
     private void setAdapter(RecyclerView recyclerView, List<Shop> shops, int itemViewResId) {
         if (shops == null || shops.isEmpty()) {
@@ -209,8 +214,12 @@ public class FavoriteFragment extends Fragment {
             String url = Url.URL + "/ShopServlet";
             List<String> types = shop.getTypes();
             StringBuilder typeSb = new StringBuilder();
-            for (String line : types) {
-                typeSb.append(line + " ");
+            if (types != null) {
+                for (String line : types) {
+                    typeSb.append(line + " ");
+                }
+            } else {
+                typeSb.append("");
             }
             String type = typeSb.toString().trim().replaceAll(" ", "，");
             int id = shop.getId();

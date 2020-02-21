@@ -6,7 +6,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,6 +22,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -50,6 +50,8 @@ public class AddressFragment extends Fragment {
     RecyclerView rvAddress;
     @BindView(R.id.toolbarLocation)
     Toolbar toolbarLocation;
+    @BindView(R.id.fabAdd)
+    FloatingActionButton fabAdd;
     private Activity activity;
     private SharedPreferences pref;
     private int mem_id;
@@ -73,7 +75,7 @@ public class AddressFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_location, container, false);
+        return inflater.inflate(R.layout.fragment_address, container, false);
     }
 
     @Override
@@ -82,6 +84,8 @@ public class AddressFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         toolbarLocation.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());
+
+        fabAdd.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.action_addressFragment_to_addAddressFragment));
     }
 
     private List<Address> getAddresses(int mem_id) {
@@ -144,11 +148,7 @@ public class AddressFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            if (addresses.isEmpty()) {
-                return 1;
-            } else {
-                return addresses.size() + 1;
-            }
+            return addresses.size();
         }
 
         @NonNull
@@ -161,14 +161,6 @@ public class AddressFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull AddressFragment.AddressAdapter.MyViewHolder holder, int position) {
-            if (position == addresses.size()) {
-                Drawable add = getResources().getDrawable(R.drawable.add, activity.getTheme());
-                holder.tvAddressName.setText(R.string.textAddAddress);
-                holder.tvAddressDetail.setText("");
-                holder.itemView.setOnClickListener(v -> {
-                    Navigation.findNavController(v).navigate(R.id.action_addressFragment_to_addAddressFragment);
-                });
-            } else {
                 final Address address = addresses.get(position);
                 Gson gson = Common.gson;
                 String url = Url.URL + "/AddressServlet";
@@ -278,7 +270,6 @@ public class AddressFragment extends Fragment {
                 });
 
             }
-        }
     }
 
     @Override
