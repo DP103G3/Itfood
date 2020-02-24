@@ -125,13 +125,16 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
             if (address == null) {
                 Log.d(TAG, "1");
                 if (location == null) {
-                    Common.showToast(activity, "無法取得現在位置");
                     if (memId == 0) {
                         selectedAddress = new Address(0, "", "無法取得", -1, -1);
                         Log.d(TAG, "3");
                     } else {
                         addresses = getAddresses(activity, memId);
-                        selectedAddress = addresses.get(0);
+                        if (addresses == null) {
+                            selectedAddress = addresses.get(0);
+                        } else {
+                            selectedAddress = new Address(0, "", "無法取得", -1, -1);
+                        }
                         model.selectAddress(selectedAddress);
                         Log.d(TAG, "4" + selectedAddress.getName());
                     }
@@ -145,6 +148,7 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
                 Log.d(TAG, "2");
             } else {
                 selectedAddress = address;
+                btAddress.setText(address.getName());
                 Log.d(TAG, "6" + selectedAddress.getLatitude() + " , " + selectedAddress.getLongitude());
             }
             showShops();
