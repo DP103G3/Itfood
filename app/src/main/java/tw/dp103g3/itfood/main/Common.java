@@ -1,4 +1,4 @@
-package tw.dp103g3.itfood;
+package tw.dp103g3.itfood.main;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.address.Address;
 import tw.dp103g3.itfood.order.OrderWebSocketClient;
 import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
@@ -50,6 +51,8 @@ public class Common {
     public static final String PREFERENCES_CART = "cart";
     public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final int LOGIN_FALSE = 0;
+    public static final String REGEX_EMAIL = "^\\w+((-\\w+)|(.\\w+))*@[A-Za-z0-9]+((\\.|\\-)[A-Za-z0-9]+)*\\.[A-Za-z]+$";
+    public static final String REGEX_PHONE = "^09[0-9]{8}$";
     public static final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
     public static OrderWebSocketClient orderWebSocketClient;
 
@@ -79,8 +82,12 @@ public class Common {
     }
 
     public static int getSelectedAddressId(Context context) {
-        SharedPreferences pref = context.getSharedPreferences(PREFERENCES_ADDRESS, Context.MODE_PRIVATE);
-        return pref.getInt("address_id", LOGIN_FALSE);
+        if (getMemId(context) != 0) {
+            SharedPreferences pref = context.getSharedPreferences(PREFERENCES_ADDRESS, Context.MODE_PRIVATE);
+            return pref.getInt("address_id", LOGIN_FALSE);
+        } else {
+            return 0;
+        }
     }
 
     public static boolean networkConnected(Activity activity) {

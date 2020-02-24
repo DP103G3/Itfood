@@ -1,4 +1,4 @@
-package tw.dp103g3.itfood;
+package tw.dp103g3.itfood.person;
 
 
 import android.os.Bundle;
@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import tw.dp103g3.itfood.R;
 
 
 /**

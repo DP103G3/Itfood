@@ -49,11 +49,10 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.address.Address;
-import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 

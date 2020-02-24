@@ -54,27 +54,28 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.address.Address;
 import tw.dp103g3.itfood.main.SharedViewModel;
 import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.order.Order;
 import tw.dp103g3.itfood.order.OrderDetail;
+import tw.dp103g3.itfood.order.OrderMessage;
 import tw.dp103g3.itfood.payment.Payment;
 import tw.dp103g3.itfood.shop.Dish;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 
 import static android.view.View.GONE;
-import static tw.dp103g3.itfood.Common.DATE_FORMAT;
-import static tw.dp103g3.itfood.Common.LOGIN_FALSE;
-import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
-import static tw.dp103g3.itfood.Common.formatCardNum;
-import static tw.dp103g3.itfood.Common.getDayOfWeek;
-import static tw.dp103g3.itfood.Common.setDialogUi;
-import static tw.dp103g3.itfood.Common.showLoginDialog;
+import static tw.dp103g3.itfood.main.Common.DATE_FORMAT;
+import static tw.dp103g3.itfood.main.Common.LOGIN_FALSE;
+import static tw.dp103g3.itfood.main.Common.PREFERENCES_MEMBER;
+import static tw.dp103g3.itfood.main.Common.formatCardNum;
+import static tw.dp103g3.itfood.main.Common.getDayOfWeek;
+import static tw.dp103g3.itfood.main.Common.setDialogUi;
+import static tw.dp103g3.itfood.main.Common.showLoginDialog;
 
 
 public class ShoppingCartFragment extends Fragment implements LoginDialogFragment.LoginDialogContract {
@@ -192,7 +193,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        Common.connectServer(activity, mem_id);
         ButterKnife.bind(this, view);
         handleViews();
         navController = Navigation.findNavController(view);
@@ -419,6 +420,11 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
             layoutPayment.setOnClickListener(layoutPaymentListener());
             btLogin.setVisibility(GONE);
         }
+    }
+
+    @Override
+    public void sendRegisterRequest() {
+        navController.navigate(R.id.registerFragment);
     }
 
     private class DishAdapter extends RecyclerView.Adapter<DishAdapter.MyViewHolder> {
@@ -699,8 +705,17 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
                             now.getTime(), null, adrs_id, member.getMemName(), member.getMemPhone(),
                             totalAfter, 0, 0, orderType);
                 }
-
                 int orderCount = sendOrder(order);
+                String url = Url.URL + "/OrderServlet";
+                JsonObject getOrderJson = new JsonObject();
+                getOrderJson.addProperty("action", "findByOrderId");
+                getOrderJson.addProperty("order_id", orderCount);
+                try {
+                    String orderJson = new CommonTask(url, getOrderJson.toString()).execute().get();
+                    order = Common.gson.fromJson(orderJson, Order.class);
+                } catch (Exception e) {
+                    Log.e(TAG, e.toString());
+                }
                 if (orderCount != 0) {
                     try (BufferedWriter out = new BufferedWriter(new FileWriter(orderDetail))) {
                         JsonObject jsonObject = new JsonObject();
@@ -708,6 +723,8 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
                         orderDetails.clear();
                         jsonObject.addProperty("orderDetails", gson.toJson(orderDetails));
                         out.write(jsonObject.toString());
+                        OrderMessage orderMessage = new OrderMessage(order, "shop" + order.getShop().getId());
+                        Common.orderWebSocketClient.send(Common.gson.toJson(orderMessage));
                         navController.popBackStack();
                         Common.showToast(activity, "訂單下訂成功");
                     } catch (IOException e) {
@@ -733,5 +750,11 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
         } catch (IOException e) {
             Log.e(TAG, e.toString());
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Common.disconnectServer();
     }
 }

@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -19,7 +18,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -44,12 +42,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.favorite.Favorite;
 import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.order.OrderAnimations;
@@ -58,7 +55,7 @@ import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
 import static android.view.View.GONE;
-import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
+import static tw.dp103g3.itfood.main.Common.PREFERENCES_MEMBER;
 
 
 public class ShopCommentFragment extends Fragment {

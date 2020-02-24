@@ -102,4 +102,16 @@
     <string name="textAddressName">地址名稱</string>
     <string name="textDeleteSuccess">刪除成功</string>
     <string name="textDeleteFail">刪除失敗，請稍後再試</string>
+    <string name="textRegister">會員注册</string>
+    <string name="textName">姓名</string>
+    <string name="textPasswordConfirm">確認密碼</string>
+    <string name="textPhone">電話</string>
+    <string name="textEmailFormatError">Email格式錯誤</string>
+    <string name="textNoEmpty">欄位不可為空</string>
+    <string name="textConfirmError">輸入密碼不一致</string>
+    <string name="textPhoneFormatError">電話格式錯誤</string>
+    <string name="textEmailUsed">此Email已被注册</string>
+    <string name="textRegisterFail">注册失敗</string>
+    <string name="textRegisterSuccess">註冊成功</string>
+    <string name="textCheckEditText">請檢查所有欄位是否確實填寫</string>
 </resources>

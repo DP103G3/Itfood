@@ -1,7 +1,5 @@
 package tw.dp103g3.itfood.shop;
 
-
-import android.animation.Animator;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
@@ -39,9 +37,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.address.Address;
 import tw.dp103g3.itfood.main.MainActivity;
 import tw.dp103g3.itfood.main.SharedViewModel;
@@ -49,9 +47,9 @@ import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
-import static tw.dp103g3.itfood.Common.LOGIN_FALSE;
-import static tw.dp103g3.itfood.Common.getAddresses;
-import static tw.dp103g3.itfood.Common.showLoginDialog;
+import static tw.dp103g3.itfood.main.Common.LOGIN_FALSE;
+import static tw.dp103g3.itfood.main.Common.getAddresses;
+import static tw.dp103g3.itfood.main.Common.showLoginDialog;
 import static tw.dp103g3.itfood.main.MainActivity.getLocation;
 
 public class MainFragment extends Fragment implements LoginDialogFragment.LoginDialogContract {
@@ -71,8 +69,6 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
     private Gson gson;
     private NavController navController;
     private View view;
-    private BottomNavigationView bottomNavigationView;
-    private Animator animator;
     private SharedViewModel model;
     private Location location;
 
@@ -86,9 +82,6 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
         location = getLocation();
         model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         model.selectAddress(null);
-//        addresses = Common.getAddresses(activity, memId);
-//        selectedAddress = addresses.get(Common.getSelectedAddressId(activity));
-//        model.selectAddress(null);
     }
 
     @Override
@@ -100,7 +93,6 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Common.disconnectServer();
-        bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
         this.view = view;
         ivCart = view.findViewById(R.id.ivCart);
         navController = Navigation.findNavController(view);
@@ -117,9 +109,6 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
                 showLoginDialog(this);
             }
         });
-//        if (memId != Common.LOGIN_FALSE) {
-//            model.selectAddress(addresses.get(Common.getSelectedAddressId(activity)));
-//        }
 
         model.getSelectedAddress().observe(getViewLifecycleOwner(), address -> {
             if (address == null) {
@@ -184,29 +173,6 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
         });
         showShops();
     }
-
-//    private List<Address> getAddresses(int mem_id) {
-//        List<Address> adresses = new ArrayList<>();
-//        if (Common.networkConnected(activity)) {
-//            String url = Url.URL + "/AddressServlet";
-//            JsonObject jsonObject = new JsonObject();
-//            jsonObject.addProperty("action", "getAllShow");
-//            jsonObject.addProperty("mem_id", mem_id);
-//            String jsonOut = jsonObject.toString();
-//            getAllAddressTask = new CommonTask(url, jsonOut);
-//            try {
-//                String jsonIn = getAllAddressTask.execute().get();
-//                Type listType = new TypeToken<List<Address>>() {
-//                }.getType();
-//                adresses = gson.fromJson(jsonIn, listType);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        } else {
-//            Common.showToast(activity, R.string.textNoNetwork);
-//        }
-//        return adresses;
-//    }
 
     private List<Shop> typeFilter(String type, List<Shop> shops) {
         return shops.stream().filter(v -> v.getTypes().contains(type)).collect(Collectors.toList());
@@ -277,6 +243,15 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
             NavOptions navOptions = builder.build();
             Navigation.findNavController(view).navigate(R.id.mainFragment, null, navOptions);
         }
+    }
+
+    @Override
+    public void sendRegisterRequest() {
+        NavOptions.Builder builder = new NavOptions.Builder();
+        builder.setPopUpTo(R.id.mainFragment, false);
+        NavOptions navOptions = builder.build();
+        Navigation.findNavController(view).navigate(R.id.mainFragment, null, navOptions);
+        Navigation.findNavController(view).navigate(R.id.action_mainFragment_to_registerFragment);
     }
 
     private class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> {
@@ -369,7 +344,9 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
     public void onResume() {
         super.onResume();
         Common.checkCart(activity, ivCart);
-        btAddress.setText(selectedAddress.getName());
+        if (selectedAddress != null) {
+            btAddress.setText(selectedAddress.getName());
+        }
         BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
         if (bottomNavigationView.getVisibility() == View.GONE) {
             Common.showBottomNav(activity);

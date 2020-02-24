@@ -42,15 +42,13 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 
-import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.address.Address;
 import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 
-import static tw.dp103g3.itfood.Common.DATE_FORMAT;
+import static tw.dp103g3.itfood.main.Common.DATE_FORMAT;
 
 public class MainActivity extends AppCompatActivity {
     private final static String TAG = "TAG_MainActivity";
@@ -165,7 +163,10 @@ public class MainActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     lastLocation = task.getResult();
                     Address localAddress = new Address(0, getString(R.string.textLocalPosition), null,
-                            lastLocation.getLatitude(), lastLocation.getLongitude());
+                            lastLocation == null ? -1 : lastLocation.getLatitude(),
+                            lastLocation == null ? -1 : lastLocation.getLongitude());
+                    SharedViewModel model = new ViewModelProvider(this).get(SharedViewModel.class);
+                    model.selectAddress(localAddress);
                     File file = new File(this.getFilesDir(), "localAddress");
                     try (ObjectOutputStream out =
                                  new ObjectOutputStream(new FileOutputStream(file))) {

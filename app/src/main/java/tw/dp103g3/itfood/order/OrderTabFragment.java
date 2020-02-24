@@ -51,17 +51,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.shop.Dish;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 
 import static android.view.View.GONE;
-import static tw.dp103g3.itfood.Common.DATE_FORMAT;
-import static tw.dp103g3.itfood.Common.orderWebSocketClient;
-import static tw.dp103g3.itfood.Common.setDialogUi;
+import static tw.dp103g3.itfood.main.Common.DATE_FORMAT;
+import static tw.dp103g3.itfood.main.Common.orderWebSocketClient;
+import static tw.dp103g3.itfood.main.Common.setDialogUi;
 
 /**
  * A simple {@link Fragment} subclass.
