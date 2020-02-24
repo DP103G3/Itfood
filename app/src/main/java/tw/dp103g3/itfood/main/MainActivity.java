@@ -60,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
     private static Location lastLocation;
     private FusedLocationProviderClient fusedLocationClient;
     private View decorView;
+    private SharedViewModel model;
+    private boolean addressUpdated;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +72,10 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences memberPref = activity.getSharedPreferences(Common.PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         int mem_id = memberPref.getInt("mem_id", 0);
         String mem_password = memberPref.getString("mem_password", null);
+
+        model = new ViewModelProvider(this).get(SharedViewModel.class);
+
+
         if (mem_id != 0 & Common.networkConnected(activity)) {
             Member member = getMember(mem_id);
             if (mem_password == null || !mem_password.equals(member.getMemPassword())) {
@@ -165,8 +171,10 @@ public class MainActivity extends AppCompatActivity {
                     Address localAddress = new Address(0, getString(R.string.textLocalPosition), null,
                             lastLocation == null ? -1 : lastLocation.getLatitude(),
                             lastLocation == null ? -1 : lastLocation.getLongitude());
-                    SharedViewModel model = new ViewModelProvider(this).get(SharedViewModel.class);
-                    model.selectAddress(localAddress);
+                    if (!addressUpdated){
+                        model.selectAddress(new Address(lastLocation.getLatitude(), lastLocation.getLongitude()));
+                        addressUpdated = true;
+                    }
                     File file = new File(this.getFilesDir(), "localAddress");
                     try (ObjectOutputStream out =
                                  new ObjectOutputStream(new FileOutputStream(file))) {
