@@ -26,9 +26,6 @@
         <action
             android:id="@+id/action_mainFragment_to_addressSelectFragment"
             app:destination="@id/addressSelectFragment" />
-        <action
-            android:id="@+id/action_mainFragment_to_registerFragment"
-            app:destination="@id/registerFragment" />
     </fragment>
     <fragment
         android:id="@+id/shopFragment"
@@ -79,9 +76,6 @@
             app:popEnterAnim="@anim/fragment_close_enter"
             app:popExitAnim="@anim/fragment_slide_down_anim"
             app:popUpTo="@id/shoppingCartFragment" />
-        <action
-            android:id="@+id/action_orderFragment_to_registerFragment"
-            app:destination="@id/registerFragment" />
     </fragment>
     <fragment
         android:id="@+id/personFragment"
@@ -112,9 +106,6 @@
             app:exitAnim="@anim/fragment_slide_out_left"
             app:popEnterAnim="@anim/fragment_slide_in_left"
             app:popExitAnim="@anim/fragment_slide_out_right" />
-        <action
-            android:id="@+id/action_personFragment_to_registerFragment"
-            app:destination="@id/registerFragment" />
     </fragment>
     <fragment
         android:id="@+id/commentFragment"
@@ -169,9 +160,6 @@
             app:exitAnim="@anim/fragment_slide_out_left"
             app:popEnterAnim="@anim/fragment_slide_in_left"
             app:popExitAnim="@anim/fragment_slide_out_right" />
-        <action
-            android:id="@+id/action_shoppingCartFragment_to_registerFragment"
-            app:destination="@id/registerFragment" />
     </fragment>
     <fragment
         android:id="@+id/personalInfoFragment"
@@ -275,4 +263,14 @@
         android:name="tw.dp103g3.itfood.person.RegisterFragment"
         android:label="fragment_register"
         tools:layout="@layout/fragment_register" />
+    <fragment
+        android:id="@+id/shopRegisterFragment"
+        android:name="tw.dp103g3.itfood.person.ShopRegisterFragment"
+        android:label="fragment_register_shop"
+        tools:layout="@layout/fragment_register_shop" />
+    <fragment
+        android:id="@+id/delRegisterFragment"
+        android:name="tw.dp103g3.itfood.person.DelRegisterFragment"
+        android:label="fragment_register_del"
+        tools:layout="@layout/fragment_register_del" />
 </navigation>

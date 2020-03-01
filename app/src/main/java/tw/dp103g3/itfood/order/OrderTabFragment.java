@@ -264,7 +264,7 @@ public class OrderTabFragment extends Fragment {
                     holder.btAction.setEnabled(false);
                     break;
                 case PICKUP:
-                    order_state_text = "製作完成，待取餐";
+                    order_state_text = order.getOrder_type() == 0 ? "製作完成，待取餐" : "等待外送員取餐";
                     order_time_text = "下單時間 : " + simpleDateFormat.format(order_time);
                     holder.btAction.setText("顯示QR CODE");
                     if (order.getOrder_type() == 0) {

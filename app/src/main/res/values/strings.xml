@@ -114,4 +114,22 @@
     <string name="textRegisterFail">注册失敗</string>
     <string name="textRegisterSuccess">註冊成功</string>
     <string name="textCheckEditText">請檢查所有欄位是否確實填寫</string>
+    <string name="textShopName">店名</string>
+    <string name="textTax">統一編號</string>
+    <string name="textAddress">地址</string>
+    <string name="textShopRegister">店家註冊</string>
+    <string name="textTaxFormatError">統一編號格式錯誤</string>
+    <string name="textNoThisAddress">查無此地址</string>
+    <string name="textBecomeShop">成為店家</string>
+    <string name="textBecomeDelivery">成為外送員</string>
+    <string name="textInfo">店家介紹</string>
+    <string name="textInfoUnnecessary">店家介紹(選填)</string>
+    <string name="textTakePicture">拍攝照片</string>
+    <string name="textPickPicture">選擇照片</string>
+    <string name="textNoCameraAppFound">找不到相機</string>
+    <string name="textNoCropAppFound">找不到截圖程式</string>
+    <string name="textOpenCameraPermission">請開啟相機權限</string>
+    <string name="textIdentityId">身分證字號</string>
+    <string name="textIdentityIdFormatError">身份證字號格式錯誤</string>
+    <string name="textIdentityIdUsed">身分證字號已被註冊</string>
 </resources>

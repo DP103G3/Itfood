@@ -255,7 +255,7 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
         builder.setPopUpTo(R.id.mainFragment, false);
         NavOptions navOptions = builder.build();
         Navigation.findNavController(view).navigate(R.id.mainFragment, null, navOptions);
-        Navigation.findNavController(view).navigate(R.id.action_mainFragment_to_registerFragment);
+        Navigation.findNavController(view).navigate(R.id.registerFragment);
     }
 
     private class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> {

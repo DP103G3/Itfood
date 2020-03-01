@@ -53,6 +53,7 @@ public class Common {
     public static final int LOGIN_FALSE = 0;
     public static final String REGEX_EMAIL = "^\\w+((-\\w+)|(.\\w+))*@[A-Za-z0-9]+((\\.|\\-)[A-Za-z0-9]+)*\\.[A-Za-z]+$";
     public static final String REGEX_PHONE = "^09[0-9]{8}$";
+    public static final String REGEX_IDENTITY_ID = "^[A-Za-z]{1}[0-9]{9}$";
     public static final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
     public static OrderWebSocketClient orderWebSocketClient;
 

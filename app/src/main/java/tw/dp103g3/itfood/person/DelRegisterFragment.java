@@ -5,12 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -19,24 +13,29 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import com.google.gson.JsonObject;
 
-import java.util.Calendar;
-
-import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.task.CommonTask;
 
-public class RegisterFragment extends Fragment {
+public class DelRegisterFragment extends Fragment {
     private static final String TAG = "TAG_RegisterFragment";
     private Activity activity;
-    private EditText etEmail, etPassword, etConfirm, etName, etPhone;
+    private ImageButton ibBack;
+    private EditText etEmail, etPassword, etConfirm, etName, etPhone, etIdentityId;
     private Button btRegister;
-    private String textEmail, textPassword, textName, textPhone;
-    private boolean emailCheck, passwordCheck, confrimCheck, nameCheck, phoneCheck;
+    private String textEmail, textPassword, textName, textPhone, textIdentityId;
+    private boolean emailCheck, passwordCheck, confirmCheck, nameCheck, phoneCheck, identityIdCheck;
     private CommonTask registerTask;
 
     @Override
@@ -45,7 +44,7 @@ public class RegisterFragment extends Fragment {
         activity = getActivity();
         emailCheck = false;
         passwordCheck = false;
-        confrimCheck = false;
+        confirmCheck = false;
         nameCheck = false;
         phoneCheck = false;
     }
@@ -53,12 +52,13 @@ public class RegisterFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_register, container, false);
+        return inflater.inflate(R.layout.fragment_register_del, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         handledViews(view);
+        ibBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
         etEmail.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -122,14 +122,14 @@ public class RegisterFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                confrimCheck = false;
+                confirmCheck = false;
                 String textConfirm = s.toString().trim();
                 if (textConfirm.isEmpty()) {
                     etConfirm.setError(getString(R.string.textNoEmpty));
                 } else if (!textConfirm.equals(textPassword)) {
                     etConfirm.setError(getString(R.string.textConfirmError));
                 } else {
-                    confrimCheck = true;
+                    confirmCheck = true;
                 }
             }
         });
@@ -152,6 +152,79 @@ public class RegisterFragment extends Fragment {
                     etName.setError(getString(R.string.textNoEmpty));
                 } else {
                     nameCheck = true;
+                }
+            }
+        });
+        etIdentityId.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                identityIdCheck = false;
+                textIdentityId = s.toString().trim().toUpperCase();
+                if (textIdentityId.isEmpty()) {
+                    etIdentityId.setError(getString(R.string.textNoEmpty));
+                } else if (!textIdentityId.matches(Common.REGEX_IDENTITY_ID)) {
+                    etIdentityId.setError(getString(R.string.textIdentityIdFormatError));
+                } else {
+                    char[] identityIdChar = textIdentityId.toCharArray();
+                    char letterChar = identityIdChar[0];
+                    int letterInt;
+                    switch (letterChar) {
+                        case 'A': letterInt = 10; break;
+                        case 'B': letterInt = 11; break;
+                        case 'C': letterInt = 12; break;
+                        case 'D': letterInt = 13; break;
+                        case 'E': letterInt = 14; break;
+                        case 'F': letterInt = 15; break;
+                        case 'G': letterInt = 16; break;
+                        case 'H': letterInt = 17; break;
+                        case 'I': letterInt = 34; break;
+                        case 'J': letterInt = 18; break;
+                        case 'K': letterInt = 19; break;
+                        case 'L': letterInt = 20; break;
+                        case 'M': letterInt = 21; break;
+                        case 'N': letterInt = 22; break;
+                        case 'O': letterInt = 35; break;
+                        case 'P': letterInt = 23; break;
+                        case 'Q': letterInt = 24; break;
+                        case 'R': letterInt = 25; break;
+                        case 'S': letterInt = 26; break;
+                        case 'T': letterInt = 27; break;
+                        case 'U': letterInt = 28; break;
+                        case 'V': letterInt = 29; break;
+                        case 'W': letterInt = 32; break;
+                        case 'X': letterInt = 30; break;
+                        case 'Y': letterInt = 31; break;
+                        default: letterInt = 33; break;
+                    }
+                    int[] identityIdInt = new int[11];
+                    for (int i = 0; i < identityIdInt.length; i++) {
+                        if (i == 0) {
+                            identityIdInt[i] = letterInt / 10;
+                        } else if (i == 1) {
+                            identityIdInt[i] = letterInt % 10;
+                        } else {
+                            identityIdInt[i] = Integer.parseInt(String.valueOf(identityIdChar[i - 1]));
+                        }
+                    }
+                    int[] check = {1, 9, 8, 7, 6, 5, 4, 3, 2 ,1, 1};
+                    int sum = 0;
+                    for (int i = 0; i < check.length; i++) {
+                        sum += check[i] * identityIdInt[i];
+                    }
+                    identityIdCheck = sum % 10 == 0;
+                    if (!identityIdCheck) {
+                        etIdentityId.setError(getString(R.string.textIdentityIdFormatError));
+                    }
                 }
             }
         });
@@ -184,15 +257,16 @@ public class RegisterFragment extends Fragment {
         etConfirm.setOnFocusChangeListener(this::focusChanged);
         etName.setOnFocusChangeListener(this::focusChanged);
         etPhone.setOnFocusChangeListener(this::focusChanged);
+        etIdentityId.setOnFocusChangeListener(this::focusChanged);
         btRegister.setOnClickListener(v -> {
-            if (emailCheck && passwordCheck && confrimCheck && nameCheck && phoneCheck) {
+            if (emailCheck && passwordCheck && confirmCheck && nameCheck && phoneCheck && identityIdCheck) {
                 if (Common.networkConnected(activity)) {
-                    String url = Url.URL + "/MemberServlet";
+                    String url = Url.URL + "/DeliveryServlet";
                     JsonObject jsonObject = new JsonObject();
                     jsonObject.addProperty("action", "insert");
-                    Member member = new Member(0, textName, textPassword, textEmail, textPhone,
-                            null, 1);
-                    jsonObject.addProperty("member", Common.gson.toJson(member));
+                    Delivery delivery = new Delivery(textName, textPassword, textEmail, textPhone,
+                            textIdentityId, 0);
+                    jsonObject.addProperty("delivery", Common.gson.toJson(delivery));
                     registerTask = new CommonTask(url, jsonObject.toString());
                     int count = 0;
                     try {
@@ -205,6 +279,8 @@ public class RegisterFragment extends Fragment {
                         Common.showToast(activity, R.string.textEmailUsed);
                     } else if (count == 0) {
                         Common.showToast(activity, R.string.textRegisterFail);
+                    } else if (count == -2) {
+                        Common.showToast(activity, R.string.textIdentityIdUsed);
                     } else {
                         SharedPreferences pref = activity.getSharedPreferences(
                                 Common.PREFERENCES_MEMBER, Context.MODE_PRIVATE);
@@ -223,10 +299,12 @@ public class RegisterFragment extends Fragment {
     }
 
     private void handledViews(View view) {
+        ibBack = view.findViewById(R.id.ibBack);
         etEmail = view.findViewById(R.id.etEmail);
         etPassword = view.findViewById(R.id.etPassword);
         etConfirm = view.findViewById(R.id.etConfirm);
         etName = view.findViewById(R.id.etName);
+        etIdentityId = view.findViewById(R.id.etIdentityId);
         etPhone = view.findViewById(R.id.etPhone);
         btRegister = view.findViewById(R.id.btRegister);
     }

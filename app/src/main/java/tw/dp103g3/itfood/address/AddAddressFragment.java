@@ -153,7 +153,7 @@ public class AddAddressFragment extends Fragment {
                 locationName = sb.toString();
                 android.location.Address newAddress = geocode(locationName);
                 if (newAddress == null) {
-                    Toast.makeText(activity, "查無此地址", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, getString(R.string.textNoThisAddress), Toast.LENGTH_SHORT).show();
                 } else {
                     String url = Url.URL + "/AddressServlet";
                     Address address = new Address(0, mem_id, addressName, locationName, 1, newAddress.getLatitude(), newAddress.getLongitude());

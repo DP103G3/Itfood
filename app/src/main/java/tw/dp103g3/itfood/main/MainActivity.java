@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
                             lastLocation == null ? -1 : lastLocation.getLatitude(),
                             lastLocation == null ? -1 : lastLocation.getLongitude());
                     if (!addressUpdated){
-                        model.selectAddress(new Address(lastLocation.getLatitude(), lastLocation.getLongitude()));
+                        model.selectAddress(new Address(localAddress.getLatitude(), localAddress.getLongitude()));
                         addressUpdated = true;
                     }
                     File file = new File(this.getFilesDir(), "localAddress");

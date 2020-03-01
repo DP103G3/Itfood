@@ -71,7 +71,6 @@ public class ShopCommentFragment extends Fragment {
     private Button btPostComment;
     private Member member;
     private int cmt_id;
-    private BottomNavigationView bottomNavigationView;
     private Fragment thisFragment;
     private View view;
 
@@ -123,7 +122,11 @@ public class ShopCommentFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.action_shopCommentFragment_to_commentFragment, sendBundle);
         });
 
-        ivFavorite.setImageResource(shop.getFavorite() ? R.drawable.favorite_on : R.drawable.favorite);
+        int color = Color.argb(255, 255, 255, 255);
+        int favoriteColor = Color.rgb(255, 128, 128);
+        ivBack.setColorFilter(color);
+        ivFavorite.setColorFilter(shop.getFavorite() ? favoriteColor : color);
+//        ivFavorite.setImageResource(shop.getFavorite() ? R.drawable.favorite_on : R.drawable.favorite);
         ivFavorite.setOnClickListener(v -> {
             if (Common.networkConnected(activity)) {
                 String url = Url.URL + "/FavoriteServlet";
@@ -140,7 +143,7 @@ public class ShopCommentFragment extends Fragment {
                 }
                 if (count != 0) {
                     shop.setFavorite(!shop.getFavorite());
-                    ivFavorite.setImageResource(shop.getFavorite() ? R.drawable.favorite_on : R.drawable.favorite);
+                    ivFavorite.setColorFilter(shop.getFavorite() ? favoriteColor : color);
                 } else {
                     Common.showToast(activity, R.string.textFavoriteFail);
                 }
@@ -243,9 +246,6 @@ public class ShopCommentFragment extends Fragment {
                 Common.showToast(activity, R.string.textNoNetwork);
             }
         }
-
-        int color = Color.argb(255, 255, 255, 255);
-        ivBack.setColorFilter(color);
 
         Bundle bundle = getArguments();
         shop = (Shop) bundle.getSerializable("shop");
