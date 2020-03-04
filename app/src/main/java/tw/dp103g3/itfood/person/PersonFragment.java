@@ -1,4 +1,4 @@
-package tw.dp103g3.itfood;
+package tw.dp103g3.itfood.person;
 
 import android.app.Activity;
 import android.content.Context;
@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
 
 public class PersonFragment extends Fragment implements LoginDialogFragment.LoginDialogContract {

@@ -102,4 +102,11 @@
     <string name="textAddressName">地址名稱</string>
     <string name="textDeleteSuccess">刪除成功</string>
     <string name="textDeleteFail">刪除失敗，請稍後再試</string>
+    <string name="textChangPassword">修改密碼</string>
+    <string name="textNoMembersFound">No Members Found</string>
+    <string name="textUpdateSuccess">修改成功</string>
+    <string name="textNameIsInvalid">請輸入姓名！</string>
+    <string name="textPhoneIsInvalid">請輸入電話號碼！</string>
+    <string name="textPhoneError">號碼數不足,請再確認！</string>
+    <string name="textUpdateFail">修改失敗！請聯絡系統人員。</string>
 </resources>
