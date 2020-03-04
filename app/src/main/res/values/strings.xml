@@ -102,6 +102,7 @@
     <string name="textAddressName">地址名稱</string>
     <string name="textDeleteSuccess">刪除成功</string>
     <string name="textDeleteFail">刪除失敗，請稍後再試</string>
+<<<<<<< HEAD
     <string name="textChangPassword">修改密碼</string>
     <string name="textNoMembersFound">No Members Found</string>
     <string name="textUpdateSuccess">修改成功</string>
@@ -109,4 +110,36 @@
     <string name="textPhoneIsInvalid">請輸入電話號碼！</string>
     <string name="textPhoneError">號碼數不足,請再確認！</string>
     <string name="textUpdateFail">修改失敗！請聯絡系統人員。</string>
+=======
+    <string name="textRegister">會員注册</string>
+    <string name="textName">姓名</string>
+    <string name="textPasswordConfirm">確認密碼</string>
+    <string name="textPhone">電話</string>
+    <string name="textEmailFormatError">Email格式錯誤</string>
+    <string name="textNoEmpty">欄位不可為空</string>
+    <string name="textConfirmError">輸入密碼不一致</string>
+    <string name="textPhoneFormatError">電話格式錯誤</string>
+    <string name="textEmailUsed">此Email已被注册</string>
+    <string name="textRegisterFail">注册失敗</string>
+    <string name="textRegisterSuccess">註冊成功</string>
+    <string name="textCheckEditText">請檢查所有欄位是否確實填寫</string>
+    <string name="textShopName">店名</string>
+    <string name="textTax">統一編號</string>
+    <string name="textAddress">地址</string>
+    <string name="textShopRegister">店家註冊</string>
+    <string name="textTaxFormatError">統一編號格式錯誤</string>
+    <string name="textNoThisAddress">查無此地址</string>
+    <string name="textBecomeShop">成為店家</string>
+    <string name="textBecomeDelivery">成為外送員</string>
+    <string name="textInfo">店家介紹</string>
+    <string name="textInfoUnnecessary">店家介紹(選填)</string>
+    <string name="textTakePicture">拍攝照片</string>
+    <string name="textPickPicture">選擇照片</string>
+    <string name="textNoCameraAppFound">找不到相機</string>
+    <string name="textNoCropAppFound">找不到截圖程式</string>
+    <string name="textOpenCameraPermission">請開啟相機權限</string>
+    <string name="textIdentityId">身分證字號</string>
+    <string name="textIdentityIdFormatError">身份證字號格式錯誤</string>
+    <string name="textIdentityIdUsed">身分證字號已被註冊</string>
+>>>>>>> 193d476066915f65df57f8079f8cbfc2796ef53a
 </resources>

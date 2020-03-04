@@ -35,9 +35,9 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
@@ -82,10 +82,8 @@ public class FavoriteFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         rvFavorite.setLayoutManager(new LinearLayoutManager(activity));
-        btBackToMain.setOnClickListener(v -> navController.popBackStack());
-        toolbar.setNavigationOnClickListener(v -> {
-            navController.popBackStack();
-        });
+        btBackToMain.setOnClickListener(v -> navController.popBackStack(R.id.mainFragment, false));
+        toolbar.setNavigationOnClickListener(v -> navController.popBackStack());
         layoutFavoriteNoItem.setVisibility(View.GONE);
 
         shops = getShops(mem_id);
@@ -100,7 +98,6 @@ public class FavoriteFragment extends Fragment {
 
     private List<Shop> getShops(int memId) {
         List<Shop> shops = new ArrayList<>();
-        List<Favorite> favorites = new ArrayList<>();
         if (Common.networkConnected(activity)) {
             String url = Url.URL + "/FavoriteServlet";
             JsonObject jsonObject = new JsonObject();
@@ -110,12 +107,9 @@ public class FavoriteFragment extends Fragment {
             getFavoritesTask = new CommonTask(url, jsonOut);
             try {
                 String jsonIn = getFavoritesTask.execute().get();
-                Type listType = new TypeToken<List<Favorite>>() {
+                Type listType = new TypeToken<List<Shop>>() {
                 }.getType();
-                favorites = Common.gson.fromJson(jsonIn, listType);
-                for (Favorite f : favorites) {
-                    shops.add(getShopById(f.getShopId()));
-                }
+                shops = Common.gson.fromJson(jsonIn, listType);
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
             }
@@ -123,27 +117,6 @@ public class FavoriteFragment extends Fragment {
             Common.showToast(activity, R.string.textNoNetwork);
         }
         return shops;
-    }
-
-    private Shop getShopById(int shopId) {
-        Shop shop = null;
-        if (Common.networkConnected(activity)) {
-            String url = Url.URL + "/ShopServlet";
-            JsonObject jsonObject = new JsonObject();
-            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-            jsonObject.addProperty("action", "getShopById");
-            jsonObject.addProperty("id", shopId);
-            String jsonOut = jsonObject.toString();
-            try {
-                String jsonIn = new CommonTask(url, jsonOut).execute().get();
-                shop = gson.fromJson(jsonIn, Shop.class);
-            } catch (Exception e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Common.showToast(activity, R.string.textNoNetwork);
-        }
-        return shop;
     }
 
     private void setAdapter(RecyclerView recyclerView, List<Shop> shops, int itemViewResId) {
@@ -236,44 +209,44 @@ public class FavoriteFragment extends Fragment {
                 Navigation.findNavController(v).navigate(R.id.action_favoriteFragment_to_shopFragment, bundle);
             });
 
-            holder.itemView.setOnLongClickListener(v -> {
-                PopupMenu popupMenu = new PopupMenu(activity, v, Gravity.END);
-                popupMenu.inflate(R.menu.favorite_menu);
-                popupMenu.setOnMenuItemClickListener(item -> {
-                    if (item.getItemId() == R.id.delete) {
-                        if (Common.networkConnected(activity)) {
-                            String url1 = Url.URL + "/FavoriteServlet";
-                            Gson gson = new Gson();
-                            JsonObject jsonObject = new JsonObject();
-                            Favorite favorite = new Favorite(mem_id, shop.getId());
-                            String jsonOut = gson.toJson(favorite);
-                            jsonObject.addProperty("action", "delete");
-                            jsonObject.addProperty("favorite", jsonOut);
-                            int count = 0;
-                            try {
-                                favoriteDeleteTask = new CommonTask(url1, jsonObject.toString());
-                                String result = favoriteDeleteTask.execute().get();
-                                count = Integer.valueOf(result);
-                            } catch (Exception e) {
-                                Log.e(TAG, e.toString());
-                            }
-                            if (count == 0) {
-                                Common.showToast(activity, "delete fail");
-                            } else {
-                                shops.remove(shop);
-                                ShopAdapter.this.notifyDataSetChanged();
-                                FavoriteFragment.this.shops.remove(shop);
-                                Common.showToast(activity, "delete successfully");
-                            }
-                        } else {
-                            Common.showToast(activity, R.string.textNoNetwork);
-                        }
-                    }
-                    return true;
-                });
-                popupMenu.show();
-                return true;
-            });
+//            holder.itemView.setOnLongClickListener(v -> {
+//                PopupMenu popupMenu = new PopupMenu(activity, v, Gravity.END);
+//                popupMenu.inflate(R.menu.favorite_menu);
+//                popupMenu.setOnMenuItemClickListener(item -> {
+//                    if (item.getItemId() == R.id.delete) {
+//                        if (Common.networkConnected(activity)) {
+//                            String url1 = Url.URL + "/FavoriteServlet";
+//                            Gson gson = new Gson();
+//                            JsonObject jsonObject = new JsonObject();
+//                            Favorite favorite = new Favorite(mem_id, shop.getId());
+//                            String jsonOut = gson.toJson(favorite);
+//                            jsonObject.addProperty("action", "delete");
+//                            jsonObject.addProperty("favorite", jsonOut);
+//                            int count = 0;
+//                            try {
+//                                favoriteDeleteTask = new CommonTask(url1, jsonObject.toString());
+//                                String result = favoriteDeleteTask.execute().get();
+//                                count = Integer.valueOf(result);
+//                            } catch (Exception e) {
+//                                Log.e(TAG, e.toString());
+//                            }
+//                            if (count == 0) {
+//                                Common.showToast(activity, "delete fail");
+//                            } else {
+//                                shops.remove(shop);
+//                                ShopAdapter.this.notifyDataSetChanged();
+//                                FavoriteFragment.this.shops.remove(shop);
+//                                Common.showToast(activity, "delete successfully");
+//                            }
+//                        } else {
+//                            Common.showToast(activity, R.string.textNoNetwork);
+//                        }
+//                    }
+//                    return true;
+//                });
+//                popupMenu.show();
+//                return true;
+//            });
         }
     }
 

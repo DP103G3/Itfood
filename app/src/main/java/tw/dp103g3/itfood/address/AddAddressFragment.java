@@ -33,13 +33,13 @@ import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.util.List;
 
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.main.SharedViewModel;
 import tw.dp103g3.itfood.task.CommonTask;
 
-import static tw.dp103g3.itfood.Common.DATE_FORMAT;
+import static tw.dp103g3.itfood.main.Common.DATE_FORMAT;
 
 
 public class AddAddressFragment extends Fragment {
@@ -153,7 +153,7 @@ public class AddAddressFragment extends Fragment {
                 locationName = sb.toString();
                 android.location.Address newAddress = geocode(locationName);
                 if (newAddress == null) {
-                    Toast.makeText(activity, "查無此地址", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, getString(R.string.textNoThisAddress), Toast.LENGTH_SHORT).show();
                 } else {
                     String url = Url.URL + "/AddressServlet";
                     Address address = new Address(0, mem_id, addressName, locationName, 1, newAddress.getLatitude(), newAddress.getLongitude());

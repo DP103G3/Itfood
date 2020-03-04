@@ -269,6 +269,7 @@
             app:popExitAnim="@anim/fragment_slide_out_right" />
     </fragment>
     <fragment
+<<<<<<< HEAD
         android:id="@+id/nameUpdateFragment"
         android:name="tw.dp103g3.itfood.person.NameUpdateFragment"
         android:label="fragment_name_update"
@@ -287,4 +288,20 @@
             android:id="@+id/action_passwordUpdateFragment_to_personFragment"
             app:destination="@id/personFragment" />
     </fragment>
+=======
+        android:id="@+id/registerFragment"
+        android:name="tw.dp103g3.itfood.person.RegisterFragment"
+        android:label="fragment_register"
+        tools:layout="@layout/fragment_register" />
+    <fragment
+        android:id="@+id/shopRegisterFragment"
+        android:name="tw.dp103g3.itfood.person.ShopRegisterFragment"
+        android:label="fragment_register_shop"
+        tools:layout="@layout/fragment_register_shop" />
+    <fragment
+        android:id="@+id/delRegisterFragment"
+        android:name="tw.dp103g3.itfood.person.DelRegisterFragment"
+        android:label="fragment_register_del"
+        tools:layout="@layout/fragment_register_del" />
+>>>>>>> 193d476066915f65df57f8079f8cbfc2796ef53a
 </navigation>

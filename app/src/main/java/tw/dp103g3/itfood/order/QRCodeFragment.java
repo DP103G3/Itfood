@@ -26,13 +26,10 @@ import android.widget.ImageView;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 
-import java.util.Comparator;
 import java.util.Set;
 
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.order.Order;
-import tw.dp103g3.itfood.order.OrderFragment;
 import tw.dp103g3.itfood.qrcode.Contents;
 import tw.dp103g3.itfood.qrcode.QRCodeEncoder;
 

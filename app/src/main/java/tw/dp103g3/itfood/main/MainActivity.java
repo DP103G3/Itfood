@@ -42,15 +42,13 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 
-import tw.dp103g3.itfood.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
 import tw.dp103g3.itfood.address.Address;
 import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 
-import static tw.dp103g3.itfood.Common.DATE_FORMAT;
+import static tw.dp103g3.itfood.main.Common.DATE_FORMAT;
 
 public class MainActivity extends AppCompatActivity {
     private final static String TAG = "TAG_MainActivity";
@@ -62,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
     private static Location lastLocation;
     private FusedLocationProviderClient fusedLocationClient;
     private View decorView;
+    private SharedViewModel model;
+    private boolean addressUpdated;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +72,10 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences memberPref = activity.getSharedPreferences(Common.PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         int mem_id = memberPref.getInt("mem_id", 0);
         String mem_password = memberPref.getString("mem_password", null);
+
+        model = new ViewModelProvider(this).get(SharedViewModel.class);
+
+
         if (mem_id != 0 & Common.networkConnected(activity)) {
             Member member = getMember(mem_id);
             if (mem_password == null || !mem_password.equals(member.getMemPassword())) {
@@ -165,7 +169,12 @@ public class MainActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     lastLocation = task.getResult();
                     Address localAddress = new Address(0, getString(R.string.textLocalPosition), null,
-                            lastLocation.getLatitude(), lastLocation.getLongitude());
+                            lastLocation == null ? -1 : lastLocation.getLatitude(),
+                            lastLocation == null ? -1 : lastLocation.getLongitude());
+                    if (!addressUpdated){
+                        model.selectAddress(new Address(localAddress.getLatitude(), localAddress.getLongitude()));
+                        addressUpdated = true;
+                    }
                     File file = new File(this.getFilesDir(), "localAddress");
                     try (ObjectOutputStream out =
                                  new ObjectOutputStream(new FileOutputStream(file))) {

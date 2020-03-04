@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+<<<<<<< HEAD
     android:orientation="vertical"
     android:background="@color/colorBackground"
     tools:context=".person.PersonalInfoFragment">
@@ -162,6 +163,9 @@
         </LinearLayout>
     </LinearLayout>
 
+=======
+    tools:context=".person.PersonalInfoFragment">
+>>>>>>> 193d476066915f65df57f8079f8cbfc2796ef53a
 
     <TextView
         android:id="@+id/textView"

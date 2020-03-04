@@ -23,8 +23,8 @@ import java.util.Locale;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.main.SharedViewModel;
 
-import static tw.dp103g3.itfood.Common.DATE_FORMAT;
-import static tw.dp103g3.itfood.Common.getDayOfWeek;
+import static tw.dp103g3.itfood.main.Common.DATE_FORMAT;
+import static tw.dp103g3.itfood.main.Common.getDayOfWeek;
 
 public class DeliveryTimeSelectDialog extends AlertDialog {
     private Spinner spTime;
