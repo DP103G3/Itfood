@@ -85,7 +85,7 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
             listView.setAdapter(memberAdapter);
             listView.setOnItemClickListener(((parent, v, position, id) -> {
                 NavController navController = Navigation.findNavController(v);
-                if (position != 7) {
+                if (position != 6) {
                     navController.navigate(memberAction[position]);
                 } else {
                     preferences.edit().putInt("mem_id", 0).apply();
