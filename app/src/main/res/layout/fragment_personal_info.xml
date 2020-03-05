@@ -1,13 +1,227 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+<<<<<<< HEAD
+    android:orientation="vertical"
+    android:background="@color/colorBackground"
     tools:context=".person.PersonalInfoFragment">
 
-    <TextView
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarShopDishList"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/textPersonInfo" />
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/back"
+        app:title="基本資料"
+        app:titleTextColor="@color/colorTextOnP" />
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:padding="10dp"
+        android:text="一般資料"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarShopDishList"
+        app:navigationIcon="@drawable/back" />
+
+
+
+    <ImageView
+        android:id="@+id/ivMemberName"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:src="@android:color/transparent"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintBottom_toBottomOf="@+id/itemMemberName"
+        app:layout_constraintEnd_toEndOf="@+id/itemMemberName"
+        app:layout_constraintStart_toStartOf="@+id/itemMemberName"
+        app:layout_constraintTop_toTopOf="@+id/itemMemberName" />
+
+    <ImageView
+        android:id="@+id/ivMemberPhone"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@android:color/transparent"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintBottom_toBottomOf="@+id/itemMemberPhone"
+        app:layout_constraintEnd_toEndOf="@+id/itemMemberPhone"
+        app:layout_constraintStart_toStartOf="@+id/itemMemberPhone"
+        app:layout_constraintTop_toTopOf="@+id/itemMemberPhone" />
+
+    <ImageView
+        android:id="@+id/ivMemberPassword"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?android:attr/listDivider"
+        android:src="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="@+id/itemMemberPassword"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/itemMemberPassword"
+        app:layout_constraintTop_toTopOf="@+id/itemMemberPassword" />
+
+    <LinearLayout
+        android:id="@+id/itemMemberName"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center_vertical"
+        android:background="@color/colorBackgroundLight"
+        android:paddingRight="20dp"
+        app:layout_constraintStart_toStartOf="@+id/textView2"
+        app:layout_constraintTop_toBottomOf="@+id/textView2">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:text="姓名" />
+
+            <TextView
+                android:id="@+id/tvMemberName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:text="Content"
+                android:textColor="@color/colorTextOnP"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/chevron_thin_right" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/itemMemberPhone"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/colorBackgroundLight"
+        android:gravity="center_vertical"
+        android:paddingRight="20dp"
+        app:layout_constraintStart_toStartOf="@+id/itemMemberName"
+        app:layout_constraintTop_toBottomOf="@+id/itemMemberName">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:text="電話" />
+
+            <TextView
+                android:id="@+id/tvMemberPhone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:text="Content"
+                android:textColor="@color/colorTextOnP"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/chevron_thin_right" />
+        </LinearLayout>
+    </LinearLayout>
+
+=======
+    tools:context=".person.PersonalInfoFragment">
+>>>>>>> 193d476066915f65df57f8079f8cbfc2796ef53a
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:padding="10dp"
+        android:text="重要資料"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@+id/textView2"
+        app:layout_constraintTop_toBottomOf="@+id/ivMemberPhone" />
+
+    <LinearLayout
+        android:id="@+id/itemMemberPassword"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/colorBackgroundLight"
+        android:gravity="center_vertical"
+        android:paddingRight="20dp"
+        app:layout_constraintStart_toStartOf="@+id/itemMemberName"
+        app:layout_constraintTop_toBottomOf="@+id/textView">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:text="密碼" />
+
+            <TextView
+                android:id="@+id/tvMemberPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:text="變更您的帳號密碼"
+                android:textColor="@color/colorTextOnP"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/chevron_thin_right" />
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

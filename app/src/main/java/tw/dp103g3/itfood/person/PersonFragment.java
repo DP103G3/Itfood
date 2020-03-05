@@ -23,7 +23,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+<<<<<<< HEAD:app/src/main/java/tw/dp103g3/itfood/person/PersonFragment.java
+import tw.dp103g3.itfood.Common;
+=======
 import tw.dp103g3.itfood.main.Common;
+>>>>>>> 193d476066915f65df57f8079f8cbfc2796ef53a:app/src/main/java/tw/dp103g3/itfood/person/PersonFragment.java
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
 
