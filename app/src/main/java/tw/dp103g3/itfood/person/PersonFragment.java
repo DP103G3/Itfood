@@ -1,4 +1,4 @@
-package tw.dp103g3.itfood;
+package tw.dp103g3.itfood.person;
 
 import android.app.Activity;
 import android.content.Context;
@@ -23,6 +23,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+<<<<<<< HEAD:app/src/main/java/tw/dp103g3/itfood/person/PersonFragment.java
+import tw.dp103g3.itfood.Common;
+=======
+import tw.dp103g3.itfood.main.Common;
+>>>>>>> 193d476066915f65df57f8079f8cbfc2796ef53a:app/src/main/java/tw/dp103g3/itfood/person/PersonFragment.java
+import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
 
 public class PersonFragment extends Fragment implements LoginDialogFragment.LoginDialogContract {
@@ -55,6 +61,7 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         this.view = view;
+        activity.findViewById(R.id.bottomNavigation).setVisibility(View.VISIBLE);
         Common.disconnectServer();
         initListMap();
         ivCart = view.findViewById(R.id.ivCart);
@@ -66,8 +73,14 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
             guestAdapter = new SimpleAdapter(activity, guestList, R.layout.basic_list_item,
                     new String[]{"icon", "title"}, new int[]{R.id.ivIcon, R.id.tvTitle});
             listView.setAdapter(guestAdapter);
-            listView.setOnItemClickListener(((parent, v, position, id) ->
-                    Common.showLoginDialog(this)));
+            listView.setOnItemClickListener(((parent, v, position, id) -> {
+                if (position == 0) {
+                    Common.showLoginDialog(this);
+                } else {
+                    NavController navController = Navigation.findNavController(v);
+                    navController.navigate(guestAction[position]);
+                }
+                    }));
         } else {
             memberAdapter = new SimpleAdapter(activity, memberList, R.layout.basic_list_item,
                     new String[]{"icon", "title"}, new int[]{R.id.ivIcon, R.id.tvTitle});
@@ -87,15 +100,26 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
 
     private void initListMap() {
         memberList = new ArrayList<>();
-        int[] memberIcon = new int[]{R.drawable.person, R.drawable.payment, R.drawable.location, R.drawable.ic_local_dining_black_24dp, R.drawable.logout};
-        String[] memberTitle = new String[]{getString(R.string.textPersonInfo), getString(R.string.textPayment), getString(R.string.textSendLocation), getString(R.string.textFavoriteShops), getString(R.string.textLogout)};
+        int[] memberIcon = new int[]{R.drawable.person, R.drawable.payment,
+                R.drawable.location, R.drawable.ic_local_dining_black_24dp,
+                R.drawable.logout, R.drawable.restaurant, R.drawable.delivery};
+        String[] memberTitle = new String[]{getString(R.string.textPersonInfo), getString(R.string.textPayment),
+                getString(R.string.textSendLocation), getString(R.string.textFavoriteShops),
+                getString(R.string.textLogout), getString(R.string.textBecomeShop), getString(R.string.textBecomeDelivery)};
         memberAction = new int[]{R.id.action_personFragment_to_personalInfoFragment,
                 R.id.action_personFragment_to_paymentFragment,
                 R.id.action_personFragment_to_addressFragment,
-                R.id.action_personFragment_to_favoriteFragment,};
+                R.id.action_personFragment_to_favoriteFragment,
+                0,
+                R.id.shopRegisterFragment,
+                R.id.delRegisterFragment};
         guestList = new ArrayList<>();
-        int[] guestIcon = new int[]{R.drawable.login};
-        String[] guestTitle = new String[]{getString(R.string.textLogin)};
+        int[] guestIcon = new int[]{R.drawable.login, R.drawable.restaurant, R.drawable.delivery};
+        String[] guestTitle = new String[]{getString(R.string.textLogin),
+                getString(R.string.textBecomeShop), getString(R.string.textBecomeDelivery)};
+        guestAction = new int[]{0,
+                R.id.shopRegisterFragment,
+                R.id.delRegisterFragment};
         for (int i = 0; i < memberIcon.length; i++) {
             Map<String, Object> memberItem = new HashMap<>();
             memberItem.put("icon", memberIcon[i]);
@@ -115,6 +139,11 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
         if (isSuccessful) {
             Navigation.findNavController(view).popBackStack(R.id.mainFragment, false);
         }
+    }
 
+    @Override
+    public void sendRegisterRequest() {
+        Navigation.findNavController(view).popBackStack(R.id.mainFragment, false);
+        Navigation.findNavController(view).navigate(R.id.registerFragment);
     }
 }

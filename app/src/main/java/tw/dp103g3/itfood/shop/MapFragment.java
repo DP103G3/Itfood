@@ -49,11 +49,10 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.address.Address;
-import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
@@ -77,8 +76,6 @@ public class MapFragment extends Fragment {
     private List<Shop> shops;
     private RecyclerView rvShop;
     private List<Marker> markers;
-    private BottomNavigationView bottomNavigationView;
-    private Animator animator;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,7 +92,6 @@ public class MapFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         navController = Navigation.findNavController(view);
-        bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
         memId = Common.getMemId(activity);
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
         Address localAddress = null;
@@ -219,6 +215,7 @@ public class MapFragment extends Fragment {
             String url = Url.URL + "/ShopServlet";
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("action", "getAllShow");
+            jsonObject.addProperty("id", Common.getMemId(activity));
             String jsonOut = jsonObject.toString();
             getAllShopTask = new CommonTask(url, jsonOut);
             try {

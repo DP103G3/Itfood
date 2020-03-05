@@ -27,14 +27,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.main.SharedViewModel;
 import tw.dp103g3.itfood.task.CommonTask;
 
-import static tw.dp103g3.itfood.Common.DATE_FORMAT;
-import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
+import static tw.dp103g3.itfood.main.Common.DATE_FORMAT;
+import static tw.dp103g3.itfood.main.Common.PREFERENCES_MEMBER;
 
 
 public class AddPaymentFragment extends Fragment {

@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.main.MainActivity;
 import tw.dp103g3.itfood.main.SharedViewModel;

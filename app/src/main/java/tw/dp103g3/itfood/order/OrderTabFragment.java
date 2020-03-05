@@ -51,17 +51,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.shop.Dish;
 import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 
 import static android.view.View.GONE;
-import static tw.dp103g3.itfood.Common.DATE_FORMAT;
-import static tw.dp103g3.itfood.Common.orderWebSocketClient;
-import static tw.dp103g3.itfood.Common.setDialogUi;
+import static tw.dp103g3.itfood.main.Common.DATE_FORMAT;
+import static tw.dp103g3.itfood.main.Common.orderWebSocketClient;
+import static tw.dp103g3.itfood.main.Common.setDialogUi;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -264,7 +264,7 @@ public class OrderTabFragment extends Fragment {
                     holder.btAction.setEnabled(false);
                     break;
                 case PICKUP:
-                    order_state_text = "製作完成，待取餐";
+                    order_state_text = order.getOrder_type() == 0 ? "製作完成，待取餐" : "等待外送員取餐";
                     order_time_text = "下單時間 : " + simpleDateFormat.format(order_time);
                     holder.btAction.setText("顯示QR CODE");
                     if (order.getOrder_type() == 0) {

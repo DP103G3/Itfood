@@ -79,7 +79,7 @@
     </fragment>
     <fragment
         android:id="@+id/personFragment"
-        android:name="tw.dp103g3.itfood.PersonFragment"
+        android:name="tw.dp103g3.itfood.person.PersonFragment"
         android:label="fragment_person"
         tools:layout="@layout/fragment_person" >
         <action
@@ -163,9 +163,19 @@
     </fragment>
     <fragment
         android:id="@+id/personalInfoFragment"
-        android:name="tw.dp103g3.itfood.PersonalInfoFragment"
+        android:name="tw.dp103g3.itfood.person.PersonalInfoFragment"
         android:label="fragment_personal_info"
-        tools:layout="@layout/fragment_personal_info" />
+        tools:layout="@layout/fragment_personal_info" >
+        <action
+            android:id="@+id/action_personalInfoFragment_to_nameUpdateFragment"
+            app:destination="@id/nameUpdateFragment" />
+        <action
+            android:id="@+id/action_personalInfoFragment_to_phoneUpdateFragment"
+            app:destination="@id/phoneUpdateFragment" />
+        <action
+            android:id="@+id/action_personalInfoFragment_to_passwordUpdateFragment"
+            app:destination="@id/passwordUpdateFragment" />
+    </fragment>
     <fragment
         android:id="@+id/paymentFragment"
         android:name="tw.dp103g3.itfood.payment.PaymentFragment"
@@ -258,4 +268,40 @@
             app:popEnterAnim="@anim/fragment_slide_in_left"
             app:popExitAnim="@anim/fragment_slide_out_right" />
     </fragment>
+    <fragment
+<<<<<<< HEAD
+        android:id="@+id/nameUpdateFragment"
+        android:name="tw.dp103g3.itfood.person.NameUpdateFragment"
+        android:label="fragment_name_update"
+        tools:layout="@layout/fragment_name_update" />
+    <fragment
+        android:id="@+id/phoneUpdateFragment"
+        android:name="tw.dp103g3.itfood.person.PhoneUpdateFragment"
+        android:label="fragment_phone_update"
+        tools:layout="@layout/fragment_phone_update" />
+    <fragment
+        android:id="@+id/passwordUpdateFragment"
+        android:name="tw.dp103g3.itfood.person.PasswordUpdateFragment"
+        android:label="fragment_password_update"
+        tools:layout="@layout/fragment_password_update" >
+        <action
+            android:id="@+id/action_passwordUpdateFragment_to_personFragment"
+            app:destination="@id/personFragment" />
+    </fragment>
+=======
+        android:id="@+id/registerFragment"
+        android:name="tw.dp103g3.itfood.person.RegisterFragment"
+        android:label="fragment_register"
+        tools:layout="@layout/fragment_register" />
+    <fragment
+        android:id="@+id/shopRegisterFragment"
+        android:name="tw.dp103g3.itfood.person.ShopRegisterFragment"
+        android:label="fragment_register_shop"
+        tools:layout="@layout/fragment_register_shop" />
+    <fragment
+        android:id="@+id/delRegisterFragment"
+        android:name="tw.dp103g3.itfood.person.DelRegisterFragment"
+        android:label="fragment_register_del"
+        tools:layout="@layout/fragment_register_del" />
+>>>>>>> 193d476066915f65df57f8079f8cbfc2796ef53a
 </navigation>

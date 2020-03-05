@@ -27,13 +27,13 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.task.CommonTask;
 
-import static tw.dp103g3.itfood.Common.DATE_FORMAT;
-import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
+import static tw.dp103g3.itfood.main.Common.DATE_FORMAT;
+import static tw.dp103g3.itfood.main.Common.PREFERENCES_MEMBER;
 
 public class LoginDialogFragment extends DialogFragment {
     private String TAG = "TAG_LoginDialogFragment";
@@ -59,6 +59,7 @@ public class LoginDialogFragment extends DialogFragment {
 
     public interface LoginDialogContract {
         void sendLoginResult(boolean isSuccessful);
+        void sendRegisterRequest();
     }
 
     @Override
@@ -88,6 +89,11 @@ public class LoginDialogFragment extends DialogFragment {
         btSignUp = view.findViewById(R.id.btSignUp);
         textInputLayoutUsername = view.findViewById(R.id.textInputLayoutUsername);
         textInputLayoutPassword = view.findViewById(R.id.textInputLayoutPassword);
+
+        btSignUp.setOnClickListener(v -> {
+            mHost.sendRegisterRequest();
+            dismiss();
+        });
 
         btLogin.setOnClickListener(v -> {
             if (!validateUsername() | !validatePassword()) {

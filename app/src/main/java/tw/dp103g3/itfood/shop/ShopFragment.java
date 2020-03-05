@@ -52,14 +52,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.main.DateTimePickerDialog;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
-import static tw.dp103g3.itfood.Common.PREFERENCES_CART;
+import static tw.dp103g3.itfood.main.Common.PREFERENCES_CART;
 
 public class ShopFragment extends Fragment {
     private final static String TAG = "TAG_ShopFragment";

@@ -30,15 +30,15 @@ import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Set;
 
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
 import tw.dp103g3.itfood.task.CommonTask;
 
-import static tw.dp103g3.itfood.Common.DATE_FORMAT;
-import static tw.dp103g3.itfood.Common.PREFERENCES_MEMBER;
-import static tw.dp103g3.itfood.Common.showLoginDialog;
+import static tw.dp103g3.itfood.main.Common.DATE_FORMAT;
+import static tw.dp103g3.itfood.main.Common.PREFERENCES_MEMBER;
+import static tw.dp103g3.itfood.main.Common.showLoginDialog;
 
 public class OrderFragment extends Fragment implements LoginDialogFragment.LoginDialogContract {
     private final static String TAG = "TAG_OrderFragment";
@@ -150,6 +150,11 @@ public class OrderFragment extends Fragment implements LoginDialogFragment.Login
         if (isSuccessful) {
             navController.popBackStack(R.id.mainFragment, false);
         }
+    }
+
+    @Override
+    public void sendRegisterRequest() {
+        navController.navigate(R.id.registerFragment);
     }
 
     public class ViewPagerAdapter extends FragmentStateAdapter {
