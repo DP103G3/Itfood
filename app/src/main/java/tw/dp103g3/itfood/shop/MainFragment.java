@@ -119,7 +119,7 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
                         Log.d(TAG, "3");
                     } else {
                         addresses = getAddresses(activity, memId);
-                        if (addresses == null) {
+                        if (addresses != null) {
                             selectedAddress = addresses.get(0);
                         } else {
                             selectedAddress = new Address(0, "", "無法取得", -1, -1);
@@ -132,8 +132,9 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
                     model.selectAddress(selectedAddress);
                     Log.d(TAG, "5" + selectedAddress.getLatitude() + " , " + selectedAddress.getLongitude());
                 }
-            } else if (address.getId() != 0) {  //id為0的Address為現在位置, 設定條件防止遞迴 (只有在輸入非現在位置的地址才會更新）
+            } else if (address.getId() == 0) {  //id為0的Address為現在位置, 設定條件防止遞迴 (只有在輸入非現在位置的地址才會更新）
                 selectedAddress = address;
+                btAddress.setText(address.getName());
                 Log.d(TAG, "2");
             } else {
                 selectedAddress = address;

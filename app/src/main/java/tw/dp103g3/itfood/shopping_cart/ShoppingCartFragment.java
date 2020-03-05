@@ -698,12 +698,12 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
 
                 if (payment != null) {
                     order = new Order(shop, mem_id, 0, pay_id, 0, orderIdeal,
-                            now.getTime(), null, adrs_id, member.getMemName(), member.getMemPhone(),
-                            totalAfter, 0, 0, orderType);
+                            now.getTime(), new Address(adrs_id), member.getMemName(), member.getMemPhone(),
+                            totalAfter, orderType, null);
                 } else {
                     order = new Order(shop, mem_id, 0, pay_id, 0, orderIdeal,
-                            now.getTime(), null, adrs_id, member.getMemName(), member.getMemPhone(),
-                            totalAfter, 0, 0, orderType);
+                            now.getTime(), new Address(adrs_id), member.getMemName(), member.getMemPhone(),
+                            totalAfter, orderType, null);
                 }
                 int orderCount = sendOrder(order);
                 String url = Url.URL + "/OrderServlet";

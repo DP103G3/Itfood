@@ -73,7 +73,7 @@ public class AddressSelectFragment extends Fragment {
 
         model.getSelectedAddress().observe(getViewLifecycleOwner(), address -> {
             selectedAddress = address;
-            Log.d(TAG, address.getName());
+//            Log.d(TAG, address.getName());
         });
 
         toolbar = view.findViewById(R.id.toolbarAddressSelect);
