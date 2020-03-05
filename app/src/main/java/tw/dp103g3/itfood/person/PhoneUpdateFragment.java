@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -22,9 +23,9 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import tw.dp103g3.itfood.Common;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.task.CommonTask;
 
@@ -36,6 +37,7 @@ public class PhoneUpdateFragment extends Fragment {
     private EditText etMemberPhone;
     private Button btOk;
     private TextView tvWarning;
+    private Toolbar toolbarPhoneUpdate;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,6 +60,10 @@ public class PhoneUpdateFragment extends Fragment {
         etMemberPhone = view.findViewById(R.id.etMemberPhone);
         btOk = view.findViewById(R.id.btOk);
         tvWarning = view.findViewById(R.id.tvWarning);
+        toolbarPhoneUpdate = view.findViewById(R.id.toolbarPhoneUpdate);
+
+        toolbarPhoneUpdate.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());
+
 
         final NavController navController = Navigation.findNavController(view);
         Bundle bundle = getArguments();

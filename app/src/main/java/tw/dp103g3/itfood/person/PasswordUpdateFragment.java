@@ -26,10 +26,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.Url;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.member.Member;
-import tw.dp103g3.itfood.shop.Shop;
 import tw.dp103g3.itfood.task.CommonTask;
 
 import static androidx.constraintlayout.widget.Constraints.TAG;
@@ -144,7 +143,7 @@ public class PasswordUpdateFragment extends Fragment {
                                 JsonObject jsonObject = new JsonObject();
                                 Gson gson = new GsonBuilder().create();
                                 jsonObject.addProperty("action", "getAccount");
-                                jsonObject.addProperty("id", id);
+                                jsonObject.addProperty("mem_id", id);
                                 String jsonOut = jsonObject.toString();
                                 CommonTask getShopTask = new CommonTask(url, jsonOut);
                                 try {
@@ -172,6 +171,7 @@ public class PasswordUpdateFragment extends Fragment {
                             }
                             if (count == 0) {
                                 Common.showToast(activity, R.string.textUpdateFail);
+                                navController.popBackStack();
                             } else {
                                 Common.showToast(activity, R.string.textUpdateSuccess);
                                 /* 回前一個Fragment */

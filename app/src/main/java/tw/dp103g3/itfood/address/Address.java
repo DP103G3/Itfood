@@ -9,10 +9,10 @@ public class Address implements Serializable {
 	private int mem_id;
 	private String name;
 	private String info;
-    private int state;
+	private int state;
 	private double latitude;
 	private double longitude;
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -36,7 +36,7 @@ public class Address implements Serializable {
 		return address.getLatitude() == this.getLatitude() && address.getLongitude() == this.getLongitude();
 	}
 
-    public Address(int id, int mem_id, String name, String info, int state, double latitude, double longitude) {
+	public Address(int id, int mem_id, String name, String info, int state, double latitude, double longitude) {
 		this.id = id;
 		this.mem_id = mem_id;
 		this.name = name;
@@ -45,18 +45,9 @@ public class Address implements Serializable {
 		this.latitude = latitude;
 		this.longitude = longitude;
 	}
-
-    public Address(int mem_id, String name, String info, int state, double latitude, double longitude) {
-        this.mem_id = mem_id;
-        this.name = name;
-        this.info = info;
-        this.state = state;
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
-
+	
 	public Address(int id, String name, String info, double latitude, double longitude) {
-        super();
+		super();
 		this.id = id;
 		this.name = name;
 		this.info = info;
@@ -64,7 +55,6 @@ public class Address implements Serializable {
 		this.longitude = longitude;
 	}
 
-	//現在位置的建構式
 	public Address(double latitude, double longitude) {
 		this.name = "現在位置";
 		this.info = "";
@@ -73,8 +63,8 @@ public class Address implements Serializable {
 		this.id = 0;
 	}
 
-	public LatLng getLatLng() {
-		return new LatLng(getLatitude(), getLongitude());
+	public Address(int id) {
+		this(id, null, null, -1, -1);
 	}
 
 	public int getId() {
@@ -109,11 +99,11 @@ public class Address implements Serializable {
 		this.info = info;
 	}
 
-    public int getState() {
+	public int getState() {
 		return state;
 	}
 
-    public void setState(int state) {
+	public void setState(int state) {
 		this.state = state;
 	}
 
@@ -132,6 +122,8 @@ public class Address implements Serializable {
 	public void setLongitude(double longitude) {
 		this.longitude = longitude;
 	}
-	
-	
+
+	public LatLng getLatLng() {
+		return new LatLng(latitude, longitude);
+	}
 }

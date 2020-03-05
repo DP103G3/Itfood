@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:background="@color/colorBackground"
+android:orientation="vertical"
+tools:context=".person.InformationFragment">
+
+<androidx.appcompat.widget.Toolbar
+    android:id="@+id/toolbarInformation"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/colorPrimary"
+    android:minHeight="?attr/actionBarSize"
+    android:theme="?attr/actionBarTheme"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:navigationIcon="@drawable/back"
+    app:title="相關資訊"
+    app:titleTextColor="@color/colorTextOnP" />
+
+
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="60dp"
+    app:layout_constraintEnd_toEndOf="@+id/toolbarInformation"
+    app:layout_constraintHorizontal_bias="1.0"
+    app:layout_constraintStart_toStartOf="@+id/toolbarInformation"
+    app:layout_constraintTop_toBottomOf="@+id/toolbarInformation">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="發佈時間：2020年"
+            android:layout_marginBottom="10dp"
+            android:textColor="@color/colorTextOnP"
+            android:textSize="18sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="itfood服務條款"
+            android:textColor="@color/colorTextOnP"
+            android:textSize="18sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"
+            android:text="在您使用itfood的產品和服務前，請詳讀以下的服務條款。不論是透過網站或是手機APP，只要您使用產品和服務，即表示您同意本條款"
+            android:textColor="@color/colorTextOnP"
+            android:textSize="18sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/textInputInfo"
+            android:textColor="@color/colorTextOnP"
+            android:textSize="18sp"/>
+    </LinearLayout>
+</ScrollView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

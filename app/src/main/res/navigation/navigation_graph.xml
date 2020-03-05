@@ -106,6 +106,12 @@
             app:exitAnim="@anim/fragment_slide_out_left"
             app:popEnterAnim="@anim/fragment_slide_in_left"
             app:popExitAnim="@anim/fragment_slide_out_right" />
+        <action
+            android:id="@+id/action_personFragment_to_aboutFragment"
+            app:destination="@id/aboutFragment" />
+        <action
+            android:id="@+id/action_personFragment_to_informationFragment"
+            app:destination="@id/informationFragment" />
     </fragment>
     <fragment
         android:id="@+id/commentFragment"
@@ -269,7 +275,6 @@
             app:popExitAnim="@anim/fragment_slide_out_right" />
     </fragment>
     <fragment
-<<<<<<< HEAD
         android:id="@+id/nameUpdateFragment"
         android:name="tw.dp103g3.itfood.person.NameUpdateFragment"
         android:label="fragment_name_update"
@@ -288,11 +293,7 @@
             android:id="@+id/action_passwordUpdateFragment_to_personFragment"
             app:destination="@id/personFragment" />
     </fragment>
-=======
-        android:id="@+id/registerFragment"
-        android:name="tw.dp103g3.itfood.person.RegisterFragment"
-        android:label="fragment_register"
-        tools:layout="@layout/fragment_register" />
+
     <fragment
         android:id="@+id/shopRegisterFragment"
         android:name="tw.dp103g3.itfood.person.ShopRegisterFragment"
@@ -303,5 +304,20 @@
         android:name="tw.dp103g3.itfood.person.DelRegisterFragment"
         android:label="fragment_register_del"
         tools:layout="@layout/fragment_register_del" />
->>>>>>> 193d476066915f65df57f8079f8cbfc2796ef53a
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="tw.dp103g3.itfood.person.RegisterFragment"
+        android:label="fragment_register"
+        tools:layout="@layout/fragment_register" />
+    <fragment
+        android:id="@+id/informationFragment"
+        android:name="tw.dp103g3.itfood.person.InformationFragment"
+        android:label="fragment_information"
+        tools:layout="@layout/fragment_information" />
+    <fragment
+        android:id="@+id/aboutFragment"
+        android:name="tw.dp103g3.itfood.person.AboutFragment"
+        android:label="fragment_about"
+        tools:layout="@layout/fragment_about" />
+
 </navigation>
