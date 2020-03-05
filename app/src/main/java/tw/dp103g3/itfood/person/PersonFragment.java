@@ -23,11 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-<<<<<<< HEAD:app/src/main/java/tw/dp103g3/itfood/person/PersonFragment.java
-import tw.dp103g3.itfood.Common;
-=======
+
 import tw.dp103g3.itfood.main.Common;
->>>>>>> 193d476066915f65df57f8079f8cbfc2796ef53a:app/src/main/java/tw/dp103g3/itfood/person/PersonFragment.java
+
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
 
@@ -87,7 +85,7 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
             listView.setAdapter(memberAdapter);
             listView.setOnItemClickListener(((parent, v, position, id) -> {
                 NavController navController = Navigation.findNavController(v);
-                if (position != 4) {
+                if (position != 7) {
                     navController.navigate(memberAction[position]);
                 } else {
                     preferences.edit().putInt("mem_id", 0).apply();
@@ -101,23 +99,27 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
     private void initListMap() {
         memberList = new ArrayList<>();
         int[] memberIcon = new int[]{R.drawable.person, R.drawable.payment,
-                R.drawable.location, R.drawable.ic_local_dining_black_24dp,
+                R.drawable.location, R.drawable.ic_local_dining_black_24dp, R.drawable.question,R.drawable.about,
                 R.drawable.logout, R.drawable.restaurant, R.drawable.delivery};
         String[] memberTitle = new String[]{getString(R.string.textPersonInfo), getString(R.string.textPayment),
-                getString(R.string.textSendLocation), getString(R.string.textFavoriteShops),
+                getString(R.string.textSendLocation), getString(R.string.textFavoriteShops),getString(R.string.textInformation),getString(R.string.textAbout),
                 getString(R.string.textLogout), getString(R.string.textBecomeShop), getString(R.string.textBecomeDelivery)};
         memberAction = new int[]{R.id.action_personFragment_to_personalInfoFragment,
                 R.id.action_personFragment_to_paymentFragment,
                 R.id.action_personFragment_to_addressFragment,
                 R.id.action_personFragment_to_favoriteFragment,
+                R.id.action_personFragment_to_informationFragment,
+                R.id.action_personFragment_to_aboutFragment,
                 0,
                 R.id.shopRegisterFragment,
                 R.id.delRegisterFragment};
         guestList = new ArrayList<>();
         int[] guestIcon = new int[]{R.drawable.login, R.drawable.restaurant, R.drawable.delivery};
-        String[] guestTitle = new String[]{getString(R.string.textLogin),
+        String[] guestTitle = new String[]{getString(R.string.textLogin),getString(R.string.textInformation),getString(R.string.textAbout),
                 getString(R.string.textBecomeShop), getString(R.string.textBecomeDelivery)};
         guestAction = new int[]{0,
+                R.id.action_personFragment_to_favoriteFragment,
+                R.id.action_personFragment_to_informationFragment,
                 R.id.shopRegisterFragment,
                 R.id.delRegisterFragment};
         for (int i = 0; i < memberIcon.length; i++) {

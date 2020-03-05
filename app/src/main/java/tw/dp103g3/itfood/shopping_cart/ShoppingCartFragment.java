@@ -424,7 +424,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
 
     @Override
     public void sendRegisterRequest() {
-        navController.navigate(R.id.registerFragment);
+       // navController.navigate(R.id.registerFragment);
     }
 
     private class DishAdapter extends RecyclerView.Adapter<DishAdapter.MyViewHolder> {

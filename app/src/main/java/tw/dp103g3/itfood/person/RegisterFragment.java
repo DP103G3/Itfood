@@ -22,8 +22,6 @@ import android.widget.EditText;
 
 import com.google.gson.JsonObject;
 
-import java.util.Calendar;
-
 import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.main.Url;
