@@ -126,14 +126,14 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
                 Log.d(TAG, "1");
                 if (location == null) {
                     if (memId == 0) {
-                        selectedAddress = new Address(0, "", "無法取得", -1, -1);
+                        selectedAddress = new Address(0, "", "無法取得", -181, -181);
                         Log.d(TAG, "3");
                     } else {
                         addresses = getAddresses(activity, memId);
                         if (addresses == null) {
                             selectedAddress = addresses.get(0);
                         } else {
-                            selectedAddress = new Address(0, "", "無法取得", -1, -1);
+                            selectedAddress = new Address(0, "", "無法取得", -181, -181);
                         }
                         model.selectAddress(selectedAddress);
                         Log.d(TAG, "4" + selectedAddress.getName());
