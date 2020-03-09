@@ -705,10 +705,8 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
                             String jsonString = gson.toJson(getAddressJson);
                             try {
                                 String result = new CommonTask(url, jsonString).execute().get();
-                                int adrsId = Integer.parseInt(result);
-                                if (adrsId != 0) {
-                                    address = new Address(adrsId);
-                                } else {
+                                adrs_id = Integer.parseInt(result);
+                                if (adrs_id == 0) {
                                     Common.showToast(activity, "訂單生成錯誤");
                                     return;
                                 }
@@ -728,7 +726,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
                 int pay_id = payment == null ? 0 : payment.getPay_id();
 
                 order = new Order(shop, mem_id, 0, pay_id, 0, orderIdeal,
-                        now.getTime(), new Address(adrs_id), member.getMemName(), member.getMemPhone(),
+                        null, new Address(adrs_id), member.getMemName(), member.getMemPhone(),
                         totalAfter, orderType, null);
 
                 order.setOrder_area(shop.getArea());
