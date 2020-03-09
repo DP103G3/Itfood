@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 
@@ -26,6 +27,7 @@ import android.widget.ImageView;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import tw.dp103g3.itfood.main.Common;
@@ -45,11 +47,14 @@ public class QRCodeFragment extends Fragment {
     private Order order;
     private LocalBroadcastManager broadcastManager;
     private NavController navController;
+    private int memId;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();
+        SharedPreferences pref = activity.getSharedPreferences(Common.PREFERENCES_MEMBER, Context.MODE_PRIVATE);
+        memId = pref.getInt("mem_id", 0);
     }
 
     @Override
@@ -60,6 +65,7 @@ public class QRCodeFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        Common.connectDeliveryServer(activity, memId);
         navController = Navigation.findNavController(view);
         ibBack = view.findViewById(R.id.ibBack);
         ibBack.setOnClickListener(v -> navController.popBackStack());
@@ -84,7 +90,9 @@ public class QRCodeFragment extends Fragment {
 
     private void registerOrderReceiver() {
         IntentFilter orderFilter = new IntentFilter("order");
+        IntentFilter deliveryFilter = new IntentFilter("delivery");
         broadcastManager.registerReceiver(orderReceiver, orderFilter);
+        broadcastManager.registerReceiver(deliveryReceiver, deliveryFilter);
     }
 
     private BroadcastReceiver orderReceiver = new BroadcastReceiver() {
@@ -100,9 +108,31 @@ public class QRCodeFragment extends Fragment {
         }
     };
 
+    private BroadcastReceiver deliveryReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("message");
+            DeliveryMessage deliveryMessage = Common.gson.fromJson(message, DeliveryMessage.class);
+            Order order = deliveryMessage.getOrder();
+            Set<Order> orders = OrderFragment.getOrders();
+            Set<Order> newOrders = new HashSet<>();
+            for (Order od : orders) {
+                if (od.getOrder_id() != order.getOrder_id()) {
+                    newOrders.add(od);
+                }
+            }
+            newOrders.add(order);
+            OrderFragment.setOrders(newOrders);
+            navController.popBackStack();
+            Common.showToast(activity, "訂單完成");
+            Log.d(TAG, message);
+        }
+    };
+
     @Override
     public void onStop() {
         super.onStop();
         broadcastManager.unregisterReceiver(orderReceiver);
+        Common.disconnectDeliveryServer();
     }
 }

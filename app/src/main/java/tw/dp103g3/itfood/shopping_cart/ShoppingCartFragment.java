@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -193,7 +194,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        Common.connectServer(activity, mem_id);
+        Common.connectOrderServer(activity, mem_id);
         ButterKnife.bind(this, view);
         handleViews();
         navController = Navigation.findNavController(view);
@@ -424,7 +425,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
 
     @Override
     public void sendRegisterRequest() {
-       // navController.navigate(R.id.registerFragment);
+        // navController.navigate(R.id.registerFragment);
     }
 
     private class DishAdapter extends RecyclerView.Adapter<DishAdapter.MyViewHolder> {
@@ -513,7 +514,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
                 for (int i = 0; i < totals.size(); i++) {
                     totalBefore += totals.valueAt(i);
                 }
-                totalAfter = totalBefore + 30;
+                totalAfter = totalBefore + 70;
                 tvTotalBefore.setText(String.format(Locale.getDefault(), "$ %d", totalBefore));
                 tvTotalAfter.setText(String.format(Locale.getDefault(), "$ %d", totalAfter));
                 tvBottomTotal.setText(String.format(Locale.getDefault(), "$ %d", totalAfter));
@@ -557,7 +558,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
             for (int i = 0; i < totals.size(); i++) {
                 totalBefore += totals.valueAt(i);
             }
-            totalAfter = totalBefore + 30;
+            totalAfter = totalBefore + 70;
             tvTotalBefore.setText(String.format(Locale.getDefault(), "$ %d", totalBefore));
             tvTotalAfter.setText(String.format(Locale.getDefault(), "$ %d", totalAfter));
             tvBottomTotal.setText(String.format(Locale.getDefault(), "$ %d", totalAfter));
@@ -575,8 +576,6 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
             divider.setVisibility(GONE);
         }
     }
-
-
 
 
     private Cart getCart(List<Integer> dishIds, int mem_id) {
@@ -688,6 +687,38 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
                 } else {
                     if (address != null) {
                         adrs_id = address.getId();
+                        if (adrs_id == 0) {
+                            double latitude = address.getLatitude();
+                            double longitude = address.getLongitude();
+                            android.location.Address adrs = reverseGeocode(latitude, longitude);
+                            if (adrs == null) {
+                                Common.showToast(activity, "無法取得現在位置地址，請選擇地址或換地方再試");
+                                return;
+                            }
+                            String info = adrs.getAddressLine(0);
+                            address = new Address(0, mem_id, "", info, 0, latitude, longitude);
+                            String url = Url.URL + "/AddressServlet";
+                            JsonObject getAddressJson = new JsonObject();
+                            getAddressJson.addProperty("action", "insertAnonymousAddress");
+                            String addressString = Common.gson.toJson(address);
+                            getAddressJson.addProperty("address", addressString);
+                            String jsonString = gson.toJson(getAddressJson);
+                            try {
+                                String result = new CommonTask(url, jsonString).execute().get();
+                                int adrsId = Integer.parseInt(result);
+                                if (adrsId != 0) {
+                                    address = new Address(adrsId);
+                                } else {
+                                    Common.showToast(activity, "訂單生成錯誤");
+                                    return;
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, e.toString());
+                                Common.showToast(activity, "訂單生成錯誤");
+                                return;
+                            }
+
+                        }
                     } else {
                         Common.showToast(activity, "送餐資料不可空白，請選取或新增地址");
                         return;
@@ -696,15 +727,11 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
                 Order order;
                 int pay_id = payment == null ? 0 : payment.getPay_id();
 
-                if (payment != null) {
-                    order = new Order(shop, mem_id, 0, pay_id, 0, orderIdeal,
-                            now.getTime(), new Address(adrs_id), member.getMemName(), member.getMemPhone(),
-                            totalAfter, orderType, null);
-                } else {
-                    order = new Order(shop, mem_id, 0, pay_id, 0, orderIdeal,
-                            now.getTime(), new Address(adrs_id), member.getMemName(), member.getMemPhone(),
-                            totalAfter, orderType, null);
-                }
+                order = new Order(shop, mem_id, 0, pay_id, 0, orderIdeal,
+                        now.getTime(), new Address(adrs_id), member.getMemName(), member.getMemPhone(),
+                        totalAfter, orderType, null);
+
+                order.setOrder_area(shop.getArea());
                 int orderCount = sendOrder(order);
                 String url = Url.URL + "/OrderServlet";
                 JsonObject getOrderJson = new JsonObject();
@@ -755,6 +782,22 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
     @Override
     public void onStop() {
         super.onStop();
-        Common.disconnectServer();
+        Common.disconnectOrderServer();
+    }
+
+    private android.location.Address reverseGeocode(double latitude, double longitude) {
+        Geocoder geocoder = new Geocoder(activity);
+        List<android.location.Address> addressList = null;
+        try {
+            addressList = geocoder.getFromLocation(latitude, longitude, 1);
+        } catch (IOException e) {
+            Log.e(TAG, e.toString());
+        }
+
+        if (addressList == null || addressList.isEmpty()) {
+            return null;
+        } else {
+            return addressList.get(0);
+        }
     }
 }

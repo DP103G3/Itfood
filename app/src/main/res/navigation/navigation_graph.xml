@@ -293,6 +293,11 @@
             android:id="@+id/action_passwordUpdateFragment_to_personFragment"
             app:destination="@id/personFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="tw.dp103g3.itfood.person.RegisterFragment"
+        android:label="fragment_register"
+        tools:layout="@layout/fragment_register" />
 
     <fragment
         android:id="@+id/shopRegisterFragment"

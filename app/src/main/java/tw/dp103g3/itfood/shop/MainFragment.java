@@ -92,7 +92,7 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        Common.disconnectServer();
+        Common.disconnectOrderServer();
         this.view = view;
         ivCart = view.findViewById(R.id.ivCart);
         navController = Navigation.findNavController(view);

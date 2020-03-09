@@ -39,6 +39,7 @@ import java.util.Map;
 
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.address.Address;
+import tw.dp103g3.itfood.order.DeliveryOrderWebSocketClient;
 import tw.dp103g3.itfood.order.OrderWebSocketClient;
 import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
 import tw.dp103g3.itfood.task.CommonTask;
@@ -56,8 +57,9 @@ public class Common {
     public static final String REGEX_IDENTITY_ID = "^[A-Za-z]{1}[0-9]{9}$";
     public static final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
     public static OrderWebSocketClient orderWebSocketClient;
+    public static DeliveryOrderWebSocketClient deliveryOrderWebSocketClient;
 
-    public static void connectServer(Context context, int memId) {
+    public static void connectOrderServer(Context context, int memId) {
         URI uri = null;
         try {
             uri = new URI(Url.ORDER_SOCKET_URI + memId);
@@ -70,10 +72,30 @@ public class Common {
         }
     }
 
-    public static void disconnectServer() {
+    public static void disconnectOrderServer() {
         if (orderWebSocketClient != null) {
             orderWebSocketClient.close();
             orderWebSocketClient = null;
+        }
+    }
+
+    public static void connectDeliveryServer(Context context, int memId) {
+        URI uri = null;
+        try {
+            uri = new URI(Url.DELIVERY_SOCKET_URI + memId);
+        } catch (URISyntaxException e) {
+            Log.e(TAG, e.toString());
+        }
+        if (deliveryOrderWebSocketClient == null) {
+            deliveryOrderWebSocketClient = new DeliveryOrderWebSocketClient(uri, context);
+            deliveryOrderWebSocketClient.connect();
+        }
+    }
+
+    public static void disconnectDeliveryServer() {
+        if (deliveryOrderWebSocketClient != null) {
+            deliveryOrderWebSocketClient.close();
+            deliveryOrderWebSocketClient = null;
         }
     }
 

@@ -147,10 +147,10 @@
 
                                 android:layout_weight="1"
                                 android:fontFamily="@font/noto_sans"
-                                android:text="$ 30"
+                                android:text="$ 70"
                                 android:textAlignment="viewEnd"
                                 android:textSize="16sp"
-                                tools:text="$ 30" />
+                                tools:text="$ 70" />
 
                         </LinearLayout>
 

@@ -100,7 +100,7 @@ public class OrderFragment extends Fragment implements LoginDialogFragment.Login
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        Common.connectServer(activity, Common.getMemId(activity));
+        Common.connectOrderServer(activity, Common.getMemId(activity));
 //        broadcastManager = LocalBroadcastManager.getInstance(activity);
 //        registerOrderReceiver();
         navController = Navigation.findNavController(view);

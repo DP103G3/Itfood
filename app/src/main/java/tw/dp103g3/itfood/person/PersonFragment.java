@@ -64,7 +64,7 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         this.view = view;
         activity.findViewById(R.id.bottomNavigation).setVisibility(View.VISIBLE);
-        Common.disconnectServer();
+        Common.disconnectOrderServer();
         initListMap();
         ivCart = view.findViewById(R.id.ivCart);
         ivCart.setVisibility(View.GONE);

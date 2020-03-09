@@ -65,7 +65,7 @@ public class PasswordUpdateFragment extends Fragment {
     }
 
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
-        Common.connectServer(activity, Common.getMemId(activity));
+        Common.connectOrderServer(activity, Common.getMemId(activity));
         etObsoletePassword = view.findViewById(R.id.etObsoletePassword);
         etPassword = view.findViewById(R.id.etPassword);
         etCheckPassword = view.findViewById(R.id.etCheckPassword);

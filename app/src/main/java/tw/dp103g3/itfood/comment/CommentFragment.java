@@ -21,8 +21,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.shop.Shop;

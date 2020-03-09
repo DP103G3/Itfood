@@ -129,13 +129,19 @@ public class OrderTabFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (OrderFragment.getOrders() == null || !OrderFragment.getOrders().isEmpty()) {
-            layoutEmpty.setVisibility(GONE);
-        }
+
         sortedOrders = OrderFragment.getOrders().stream().filter(order -> order_states.stream()
                 .anyMatch(v -> v == order.getOrder_state()))
                 .sorted(Comparator.comparing((Order order) -> order.getOrder_time().getTime()).reversed())
                 .collect(Collectors.toList());
+
+        if (!sortedOrders.isEmpty()) {
+            layoutEmpty.setVisibility(GONE);
+            rvOrder.setVisibility(View.VISIBLE);
+        } else {
+            layoutEmpty.setVisibility(View.VISIBLE);
+            rvOrder.setVisibility(GONE);
+        }
         ShowOrders(sortedOrders);
     }
 
