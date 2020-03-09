@@ -3,6 +3,7 @@ package tw.dp103g3.itfood.person;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.widget.SimpleAdapter;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
@@ -23,10 +25,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-import tw.dp103g3.itfood.main.Common;
-
 import tw.dp103g3.itfood.R;
+import tw.dp103g3.itfood.address.Address;
+import tw.dp103g3.itfood.main.Common;
+import tw.dp103g3.itfood.main.MainActivity;
+import tw.dp103g3.itfood.main.SharedViewModel;
 import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
 
 public class PersonFragment extends Fragment implements LoginDialogFragment.LoginDialogContract {
@@ -39,7 +42,7 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
     private SharedPreferences preferences;
     private ImageView ivCart;
     private View view;
-
+    private SharedViewModel model;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +50,7 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
         preferences =
                 activity.getSharedPreferences(Common.PREFERENCES_MEMBER, Context.MODE_PRIVATE);
         memId = Common.getMemId(activity);
+        model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
     }
 
     @Override
@@ -90,6 +94,9 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
                 } else {
                     preferences.edit().putInt("mem_id", 0).apply();
                     navController.popBackStack(R.id.mainFragment, false);
+                    Location lastLocation = MainActivity.getLocation();
+                    Address localAddress = new Address(lastLocation.getLatitude(), lastLocation.getLongitude());
+                    model.selectAddress(new Address(localAddress.getLatitude(), localAddress.getLongitude()));
                     Common.showToast(activity, "已登出。");
                 }
             }));

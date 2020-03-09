@@ -36,8 +36,8 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.task.CommonTask;
 
@@ -194,6 +194,7 @@ public class AddressFragment extends Fragment {
                                 if (count != 0){
                                     Common.showToast(activity, R.string.textDeleteSuccess);
                                     dialog12.dismiss();
+                                    ShowAddress(getAddresses(mem_id));
                                 } else {
                                     Common.showToast(activity, R.string.textDeleteFail);
                                 }

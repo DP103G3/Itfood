@@ -60,7 +60,7 @@ public class Common {
     public static void connectServer(Context context, int memId) {
         URI uri = null;
         try {
-            uri = new URI(Url.SOCKET_URI + memId);
+            uri = new URI(Url.ORDER_SOCKET_URI + memId);
         } catch (URISyntaxException e) {
             Log.e(TAG, e.toString());
         }

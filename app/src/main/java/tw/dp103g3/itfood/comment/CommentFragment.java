@@ -91,6 +91,14 @@ public class CommentFragment extends Fragment {
         btPost.setOnClickListener(v -> {
             int cmt_score = (int) rbRating.getRating();
             String cmt_detail = etComment.getText().toString();
+            if (cmt_detail.trim().length() == 0) {
+                Common.showToast(activity, "留言內容不可為空！");
+
+                return;
+            } else if (cmt_score == 0) {
+                Common.showToast(activity, "評分分數不可為零！");
+                return;
+            }
             int shop_id = shop.getId();
             int mem_id = member.getMemId();
             int cmt_state = 1;
