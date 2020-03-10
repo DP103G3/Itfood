@@ -224,6 +224,16 @@
                 android:background="@color/colorSecondary"
                 android:text="@string/textShopRegister"
                 android:textColor="@color/colorTextOnS" />
+
+            <TextView
+                android:id="@+id/tvShopDataInput"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorTextOnP"
+                android:layout_marginTop="50dp"
+                android:layout_gravity="right"
+                android:text="店家資料"/>
+
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

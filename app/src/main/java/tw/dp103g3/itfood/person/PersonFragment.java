@@ -121,12 +121,12 @@ public class PersonFragment extends Fragment implements LoginDialogFragment.Logi
                 R.id.shopRegisterFragment,
                 R.id.delRegisterFragment};
         guestList = new ArrayList<>();
-        int[] guestIcon = new int[]{R.drawable.login, R.drawable.restaurant, R.drawable.delivery};
+        int[] guestIcon = new int[]{R.drawable.login, R.drawable.question,R.drawable.about, R.drawable.restaurant, R.drawable.delivery};
         String[] guestTitle = new String[]{getString(R.string.textLogin),getString(R.string.textInformation),getString(R.string.textAbout),
                 getString(R.string.textBecomeShop), getString(R.string.textBecomeDelivery)};
         guestAction = new int[]{0,
-                R.id.action_personFragment_to_favoriteFragment,
                 R.id.action_personFragment_to_informationFragment,
+                R.id.action_personFragment_to_aboutFragment,
                 R.id.shopRegisterFragment,
                 R.id.delRegisterFragment};
         for (int i = 0; i < memberIcon.length; i++) {
