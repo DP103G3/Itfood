@@ -76,7 +76,7 @@ public class QRCodeFragment extends Fragment {
             order = (Order) bundle.getSerializable("order");
         }
         ivQRCode = view.findViewById(R.id.ivQRCode);
-        String qrCodeText = Common.gson.toJson(order);
+        String qrCodeText = String.valueOf(order.getOrder_id());
         int dimension = getResources().getDisplayMetrics().widthPixels * 2 / 3;
         QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(qrCodeText, null,
                 Contents.Type.TEXT, BarcodeFormat.QR_CODE.toString(), dimension);
