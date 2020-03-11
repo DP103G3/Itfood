@@ -51,8 +51,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.shop.Dish;
 import tw.dp103g3.itfood.shop.Shop;
@@ -469,30 +469,33 @@ public class OrderTabFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull OrderDetailAdapter.MyViewHolder holder, int position) {
-            final OrderDetail orderDetail = orderDetails.get(position);
-            Dish dish = orderDetail.getDish();
-            int dishPrice = orderDetail.getOd_price();
-
             DecimalFormatSymbols symbols = new DecimalFormatSymbols();
             symbols.setDecimalSeparator(',');
             DecimalFormat decimalFormat = new DecimalFormat("$ ###,###,###,###", symbols);
+            if (position != orderDetails.size()) {
+                final OrderDetail orderDetail = orderDetails.get(position);
+                Dish dish = orderDetail.getDish();
+                int dishPrice = orderDetail.getOd_price();
+                String tvDishCountText = "x" + orderDetail.getOd_count();
+                holder.tvDishCount.setText(tvDishCountText);
+                holder.tvDishPrice.setText(decimalFormat.format(dishPrice));
 
-            String tvDishCountText = "x" + orderDetail.getOd_count();
-            holder.tvDishCount.setText(tvDishCountText);
-            holder.tvDishPrice.setText(decimalFormat.format(dishPrice));
-
-            if (dish.getInfo() == null || dish.getInfo().isEmpty()) {
-                holder.tvDishInfo.setText("");
+                if (dish.getInfo() == null || dish.getInfo().isEmpty()) {
+                    holder.tvDishInfo.setText("");
+                } else {
+                    holder.tvDishInfo.setText(dish.getInfo());
+                }
+                holder.tvDishName.setText(dish.getName());
             } else {
-                holder.tvDishInfo.setText(dish.getInfo());
+                holder.tvDishName.setText("外送費");
+                holder.tvDishPrice.setText(decimalFormat.format(70));
             }
-            holder.tvDishName.setText(dish.getName());
         }
 
 
         @Override
         public int getItemCount() {
-            return orderDetails.size();
+            return orderDetails.size() + 1;
         }
 
         @NonNull

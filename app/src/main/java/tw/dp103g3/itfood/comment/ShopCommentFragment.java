@@ -43,10 +43,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.favorite.Favorite;
+import tw.dp103g3.itfood.main.Common;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.member.Member;
 import tw.dp103g3.itfood.order.OrderAnimations;
 import tw.dp103g3.itfood.shop.Shop;
@@ -72,6 +72,10 @@ public class ShopCommentFragment extends Fragment {
     private int cmt_id;
     private Fragment thisFragment;
     private View view;
+    private RatingBar ratingBar;
+    private ImageButton btCommentOptionMenu;
+    private TextView tvUsername, tvCommentTime, tvCommentDetail;
+    private int mem_id;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -94,9 +98,6 @@ public class ShopCommentFragment extends Fragment {
         layoutShopComment = view.findViewById(R.id.layoutShopComment);
         layoutReply = view.findViewById(R.id.layoutReply);
         layoutExpandable = view.findViewById(R.id.layoutExpandable);
-        TextView tvUsername, tvCommentTime, tvCommentDetail;
-        RatingBar ratingBar;
-        ImageButton btCommentOptionMenu;
         tvUsername = view.findViewById(R.id.tvUsername);
         tvCommentTime = view.findViewById(R.id.tvCommentTime);
         tvCommentDetail = view.findViewById(R.id.tvCommentDetail);
@@ -108,7 +109,7 @@ public class ShopCommentFragment extends Fragment {
         //確認使用者為訪客或會員，從SharedPreferences取得"mem_id"，如果是0的就是沒有登入
         SharedPreferences preferences = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
 
-        int mem_id = preferences.getInt("mem_id", 0);
+        mem_id = preferences.getInt("mem_id", 0);
         member = getMember(mem_id);
         Bundle sendBundle = new Bundle();
         Bundle gotBundle = getArguments();
@@ -567,5 +568,106 @@ public class ShopCommentFragment extends Fragment {
             OrderAnimations.collapse(cl);
         }
         return isExpanded;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setComments();
+    }
+
+    private void setComments() {
+        List<Comment> comments;
+        if (mem_id == 0) {
+            layoutCommentLoggedIn.setVisibility(GONE);
+        } else {
+            if (Common.networkConnected(activity)) {
+                String url = Url.URL + "/CommentServlet";
+                JsonObject jsonObject = new JsonObject();
+                Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                jsonObject.addProperty("action", "findByCaseWithState");
+                jsonObject.addProperty("id", mem_id);
+                jsonObject.addProperty("type", "member");
+                jsonObject.addProperty("state", 1);
+                String jsonOut = jsonObject.toString();
+                getCommentTask = new CommonTask(url, jsonOut);
+
+                try {
+                    Comment comment;
+                    String jsonIn = getCommentTask.execute().get();
+                    Type listType = new TypeToken<List<Comment>>() {
+                    }.getType();
+                    comments = gson.fromJson(jsonIn, listType);
+
+                    List<Comment> filteredComments = comments.stream()
+                            .filter(cmt -> cmt.getShop_id() == shop.getId())
+                            .collect(Collectors.toList());
+                    if (!filteredComments.isEmpty()) {
+                        comment = filteredComments.get(0);
+                    } else {
+                        comment = null;
+                    }
+
+                    System.out.println(TAG + "會員comment:" + jsonIn);
+                    if (comment != null) {
+                        layoutCommentedTrue.setVisibility(View.VISIBLE);
+                        layoutReply.setVisibility(GONE);
+                        layoutExpandable.setVisibility(GONE);
+
+                        Member member = getMember(mem_id);
+                        String rawMemberEmail = member.getMemEmail();
+                        String[] splitEmail = rawMemberEmail.split("@");
+                        //將會員的電子郵件由“＠”分開為兩部分，取前面顯示
+                        String memberEmail = splitEmail[0];
+
+                        Log.d(TAG, "COMMENT SCORE : " + comment.getCmt_score());
+
+                        ratingBar.setIsIndicator(true);
+                        ratingBar.setVisibility(View.VISIBLE);
+                        ratingBar.setNumStars(5);
+                        ratingBar.setStepSize(1);
+                        ratingBar.setRating(comment.getCmt_score());
+                        tvUsername.setText(memberEmail);
+                        tvCommentDetail.setText(comment.getCmt_detail());
+                        tvCommentTime.setText(new SimpleDateFormat("MM月 dd, yyyy", Locale.getDefault()).format(comment.getCmt_time()));
+
+                        btCommentOptionMenu.setOnClickListener(v -> {
+                            cmt_id = comment.getCmt_id();
+                            showOptionMenu();
+                        });
+
+                        if (comment.getCmt_feedback() != null && !comment.getCmt_feedback().isEmpty() && comment.getCmt_feedback_state() == 1) {
+                            TextView tvShopName = view.findViewById(R.id.tvShopName);
+                            TextView tvReplyDate = view.findViewById(R.id.tvReplyDate);
+                            TextView tvReplayContent = view.findViewById(R.id.tvReplyContent);
+                            TextView tvExpandReply = view.findViewById(R.id.tvExpandReply);
+                            ImageButton ibExpandable = view.findViewById(R.id.ibExpandable);
+                            layoutExpandable.setVisibility(View.VISIBLE);
+
+                            tvShopName.setText("店主");
+                            tvReplayContent.setText(comment.getCmt_feedback());
+                            tvReplyDate.setText(new SimpleDateFormat("MM月 dd, yyyy", Locale.getDefault()).format(comment.getCmt_feedback_time()));
+                            View.OnClickListener onClickListener = v -> {
+                                boolean show = toggleLayout(!comment.isExpanded(), ibExpandable, layoutReply);
+                                swapView(layoutExpandable, show);
+                                comment.setExpanded(show);
+                            };
+                            layoutExpandable.setOnClickListener(onClickListener);
+                            ibExpandable.setOnClickListener(onClickListener);
+                            tvExpandReply.setOnClickListener(onClickListener);
+
+
+                        }
+
+                    } else {
+                        layoutCommentedFalse.setVisibility(View.VISIBLE);
+                    }
+                } catch (Exception e) {
+                    System.out.println(TAG + e.toString());
+                }
+            } else {
+                Common.showToast(activity, R.string.textNoNetwork);
+            }
+        }
     }
 }
