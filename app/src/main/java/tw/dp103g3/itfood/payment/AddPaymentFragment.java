@@ -22,15 +22,16 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.main.Url;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.main.SharedViewModel;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.task.CommonTask;
 
 import static tw.dp103g3.itfood.main.Common.DATE_FORMAT;
@@ -50,6 +51,7 @@ public class AddPaymentFragment extends Fragment {
     private SharedViewModel model;
     private Payment payment;
     private Drawable warning;
+    private FloatingActionButton fabInsertData;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,7 +73,7 @@ public class AddPaymentFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        fabInsertData = view.findViewById(R.id.fabInsertData);
         toolbarAddPayment = view.findViewById(R.id.toolbarAddPayment);
         cardViewCheck = view.findViewById(R.id.cardViewCheck);
         etName = view.findViewById(R.id.etName);
@@ -125,6 +127,13 @@ public class AddPaymentFragment extends Fragment {
                     Navigation.findNavController(v).popBackStack();
                 }
             }
+        });
+
+        fabInsertData.setOnClickListener(v -> {
+            etName.getEditText().setText("吳伯毅");
+            etCardNum.getEditText().setText("5555444433332222");
+            etSafeCode.getEditText().setText("555");
+            etPhone.getEditText().setText("0912345678");
         });
 
     }

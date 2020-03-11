@@ -23,7 +23,20 @@
         android:layout_height="match_parent"
         android:background="@color/colorBackground">
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabInsertData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:clickable="true"
+            android:src="@drawable/ic_keyboard_black_24dp"
+            app:layout_constraintBottom_toBottomOf="@+id/linearLayout5"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <LinearLayout
+            android:id="@+id/linearLayout5"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:orientation="vertical"
@@ -37,10 +50,10 @@
                 android:layout_height="wrap_content"
                 android:background="@color/colorItemBackground"
                 android:orientation="horizontal"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp">
+                android:paddingTop="8dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="8dp">
 
                 <TextView
                     style="@android:style/Widget.Material.TextView"
@@ -83,10 +96,10 @@
                 android:layout_height="wrap_content"
                 android:background="@color/colorItemBackground"
                 android:orientation="horizontal"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp">
+                android:paddingTop="8dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="8dp">
 
                 <TextView
                     style="@android:style/Widget.Material.TextView"
@@ -133,10 +146,10 @@
                 android:layout_height="wrap_content"
                 android:background="@color/colorItemBackground"
                 android:orientation="horizontal"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp">
+                android:paddingTop="8dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="8dp">
 
                 <TextView
                     style="@android:style/Widget.Material.TextView"
@@ -182,10 +195,10 @@
                 android:layout_height="wrap_content"
                 android:background="@color/colorItemBackground"
                 android:orientation="horizontal"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp">
+                android:paddingTop="8dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="8dp">
 
                 <TextView
                     style="@android:style/Widget.Material.TextView"
@@ -231,10 +244,10 @@
                 android:layout_height="wrap_content"
                 android:background="@color/colorItemBackground"
                 android:orientation="horizontal"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp">
+                android:paddingTop="8dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="8dp">
 
                 <TextView
                     style="@android:style/Widget.Material.TextView"

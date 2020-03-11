@@ -26,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -33,10 +34,10 @@ import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.util.List;
 
-import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
-import tw.dp103g3.itfood.main.Url;
+import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.main.SharedViewModel;
+import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.task.CommonTask;
 
 import static tw.dp103g3.itfood.main.Common.DATE_FORMAT;
@@ -56,6 +57,7 @@ public class AddAddressFragment extends Fragment {
     private String TAG = "TAG_AddAddressFragment";
     private BottomNavigationView bottomNavigationView;
     private Animator animator;
+    private FloatingActionButton fabInsertData;
 
 
     public AddAddressFragment() {
@@ -84,6 +86,7 @@ public class AddAddressFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        fabInsertData = view.findViewById(R.id.fabInsertData);
         city = null;
         district = null;
 
@@ -139,6 +142,12 @@ public class AddAddressFragment extends Fragment {
                 InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
+        });
+
+        int insertDataCount = 0;
+        fabInsertData.setOnClickListener(v -> {
+            etAddressName.setText("中央大學");
+            etAddressDetail.setText("中大路300號");
         });
 
         cardViewConfirm.setOnClickListener(v -> {
