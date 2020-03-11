@@ -9,14 +9,14 @@ public class Delivery {
 	private String del_name;
 	private String del_identityid;
 	private String del_phone;
-	private String del_area;
+	private int del_area;
 	private Date del_jointime;
 	private Date del_leavetime;
 	private Date del_suspendtime;
 	private int del_state;
 
 	public Delivery(int del_id, String del_name, String del_password, String del_email, String del_identityid, String del_phone,
-			 String del_area,Date del_jointime, Date del_leavetime, Date del_suspendtime, int del_state) {
+			 int del_area,Date del_jointime, Date del_leavetime, Date del_suspendtime, int del_state) {
 		super();
 		this.del_id = del_id;
 		this.del_name = del_name;
@@ -32,13 +32,14 @@ public class Delivery {
 	}
 	
 	public Delivery(String del_name, String del_password, String del_email, String del_phone,
-					String del_identityid, int del_state) {
+					String del_identityid, int del_state, int del_area) {
 		this.del_name = del_name;
 		this.del_password = del_password;
 		this.del_email = del_email;
 		this.del_phone = del_phone;
 		this.del_identityid = del_identityid;
 		this.del_state = del_state;
+		this.del_area = del_area;
 	}
 	
 	public  Delivery(int del_id, int del_state) {
@@ -96,11 +97,11 @@ public class Delivery {
 		this.del_phone = del_phone;
 	}
 	
-	public String getDelArea() {
+	public int getDelArea() {
 		return del_area;
 	}
 
-	public void setDelArea(String del_area) {
+	public void setDelArea(int del_area) {
 		this.del_area = del_area;
 	}
 	

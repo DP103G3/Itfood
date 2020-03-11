@@ -119,7 +119,7 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
                         Log.d(TAG, "3");
                     } else {
                         addresses = getAddresses(activity, memId);
-                        if (addresses != null) {
+                        if (addresses != null && !addresses.isEmpty()) {
                             selectedAddress = addresses.get(0);
                         } else {
                             selectedAddress = new Address(0, "", "無法取得", -181, -181);
@@ -226,8 +226,9 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
         List<Shop> showShops = selectedAddress != null ? shops.stream().filter(v -> Common.Distance(v.getLatitude(), v.getLongitude(),
                 selectedAddress.getLatitude(), selectedAddress.getLongitude()) < 5000)
                 .collect(Collectors.toList()) : new ArrayList<>();
+        Comparator<Shop> timeCmp = Comparator.<Shop, Long>comparing(v -> v.getJointime().getTime()).reversed();
         List<Shop> newShop = showShops.stream()
-                .filter(v -> System.currentTimeMillis() - v.getJointime().getTime() <= 2592000000L)
+                .filter(v -> System.currentTimeMillis() - v.getJointime().getTime() <= 2592000000L).sorted(timeCmp)
                 .collect(Collectors.toList());
         setAdapter(rvNewShop, newShop, R.layout.small_shop_item_view);
         setAdapter(rvChineseShop, typeFilter("中式", showShops), R.layout.small_shop_item_view);

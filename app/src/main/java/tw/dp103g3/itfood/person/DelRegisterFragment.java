@@ -269,7 +269,7 @@ public class DelRegisterFragment extends Fragment {
                     JsonObject jsonObject = new JsonObject();
                     jsonObject.addProperty("action", "insert");
                     Delivery delivery = new Delivery(textName, textPassword, textEmail, textPhone,
-                            textIdentityId, 0);
+                            textIdentityId, 2, 1);
                     jsonObject.addProperty("delivery", Common.gson.toJson(delivery));
                     registerTask = new CommonTask(url, jsonObject.toString());
                     int count = 0;
