@@ -97,27 +97,37 @@ public class AddressSelectFragment extends Fragment {
 
         Location location = MainActivity.getLocation();
         addresses = new ArrayList<>();
-        if (selectedAddress.getId() == 0) {  //如果使用者選擇現在位置，就加入選擇的位置，不然就建立一個新的現在位置
-            addresses.add(selectedAddress);
-        } else {
-            addresses.add(new Address(location.getLatitude(), location.getLongitude()));
-        }
+        if (selectedAddress != null) {
+            if (selectedAddress.getId() == 0) {  //如果使用者選擇現在位置，就加入選擇的位置，不然就建立一個新的現在位置
+                addresses.add(selectedAddress);
+            } else {
+                addresses.add(new Address(location.getLatitude(), location.getLongitude()));
+            }
 
-        List<Address> addressList = Common.getAddresses(activity, mem_id);
-        Bundle bundle = getArguments();
+            List<Address> addressList = Common.getAddresses(activity, mem_id);
+            Bundle bundle = getArguments();
 
         /*
         進來此頁面的方式有兩個，一個從首頁，一個從餐車，這裡需要判斷如果是從餐車來的，
         就將餐車內餐廳可以送達的地址過濾出來
         */
-        if (bundle != null && bundle.getInt("FROM") == R.id.shoppingCartFragment) {
-            Shop shop = (Shop) bundle.getSerializable("shop");
-            addressList = addressList.stream().filter(v -> Common.Distance(v.getLatitude(), v.getLongitude(),
-                    shop.getLatitude(), shop.getLongitude()) < 5000)
-                    .collect(Collectors.toList());
+            if (bundle != null && bundle.getInt("FROM") == R.id.shoppingCartFragment) {
+                Shop shop = (Shop) bundle.getSerializable("shop");
+                addressList = addressList.stream().filter(v -> Common.Distance(v.getLatitude(), v.getLongitude(),
+                        shop.getLatitude(), shop.getLongitude()) < 5000)
+                        .collect(Collectors.toList());
+                if ((Common.Distance(addresses.get(0).getLatitude(), addresses.get(0).getLongitude(),
+                        shop.getLatitude(), shop.getLongitude()) > 5000)) {
+                    addresses.clear();
+                    if (!addressList.isEmpty()) {
+                        model.selectAddress(addressList.get(0));
+                    }
+                }
+            }
+//        addresses = Stream.concat(addresses.stream(), addressList.stream())
+//                .collect(Collectors.toList());
+            addresses.addAll(addressList);
         }
-        addresses = Stream.concat(addresses.stream(), addressList.stream())
-                .collect(Collectors.toList());
         ShowAddress(addresses);
     }
 

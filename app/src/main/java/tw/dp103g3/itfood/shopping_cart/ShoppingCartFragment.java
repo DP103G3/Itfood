@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -147,6 +148,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
         activity = getActivity();
         payment = null;
         date = null;
+        address = null;
         model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         model.selectDeliveryTime(null);
         model.selectPayment(null);
@@ -205,7 +207,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
                 String addressString = address.getName() + " " + address.getInfo();
                 tvAddress.setText(addressString);
             } else {
-                tvAddress.setText("");
+                tvAddress.setText("無可用地址");
             }
         });
 
@@ -316,25 +318,42 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
     @Override
     public void onResume() {
         super.onResume();
-        /* 確認餐車內的店家可以送達選取的地址 */
-        if (Common.Distance(address.getLatitude(), address.getLongitude()
-                , shop.getLatitude(), shop.getLongitude()) > 5000) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-            builder.setTitle("送餐地址無法送達");
-            builder.setMessage("餐車內的店家無法送達你所選取的地址，你要移除餐車嗎？");
-            builder.setNegativeButton("返回", (dialog, which) -> {
-                navController.popBackStack();
-                dialog.cancel();
-            });
-            builder.setPositiveButton("好", (dialog, which) -> {
-                clearCart();
-                navController.popBackStack();
-                dialog.dismiss();
-            });
-            Dialog dialog = builder.create();
-            setDialogUi(dialog, activity);
-            dialog.show();
+
+        if (address != null) {
+            List<Address> addressList = Common.getAddresses(activity, mem_id);
+            addressList = addressList.stream().filter(v -> Common.Distance(v.getLatitude(), v.getLongitude(),
+                    shop.getLatitude(), shop.getLongitude()) < 5000)
+                    .collect(Collectors.toList());
+            if ((Common.Distance(address.getLatitude(), address.getLongitude(),
+                    shop.getLatitude(), shop.getLongitude()) > 5000)) {
+                if (addressList.isEmpty()) {
+                    model.selectAddress(null);
+                    tvAddress.setText("無可用地址");
+                } else {
+                    model.selectAddress(addressList.get(0));
+                }
+            }
         }
+
+        /* 確認餐車內的店家可以送達選取的地址 */
+//        if (Common.Distance(address.getLatitude(), address.getLongitude()
+//                , shop.getLatitude(), shop.getLongitude()) > 5000) {
+//            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+//            builder.setTitle("送餐地址無法送達");
+//            builder.setMessage("餐車內的店家無法送達你所選取的地址，你要移除餐車嗎？");
+//            builder.setNegativeButton("返回", (dialog, which) -> {
+//                navController.popBackStack();
+//                dialog.cancel();
+//            });
+//            builder.setPositiveButton("好", (dialog, which) -> {
+//                clearCart();
+//                navController.popBackStack();
+//                dialog.dismiss();
+//            });
+//            Dialog dialog = builder.create();
+//            setDialogUi(dialog, activity);
+//            dialog.show();
+//        }
     }
 
     @Override
@@ -667,6 +686,10 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
 
     private View.OnClickListener layoutCheckListener() {
         return v -> {
+            if (address == null) {
+                Common.showToast(activity, "請選擇住址");
+                return;
+            }
             if (mem_id != LOGIN_FALSE) {
                 Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
                 int adrs_id;
