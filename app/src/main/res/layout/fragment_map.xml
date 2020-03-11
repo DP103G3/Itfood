@@ -36,14 +36,19 @@
                     app:layout_constraintStart_toStartOf="parent"
                     android:src="@drawable/logo" />
 
-                <Spinner
-                    android:id="@+id/spAddress"
+                <Button
+                    android:id="@+id/btAddress"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toTopOf="parent"
+                    android:background="@color/colorSecondary"
+                    android:padding="8dp"
+                    android:spinnerMode="dropdown"
+                    android:theme="@style/ItFoodTheme.spinner"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/logo"
-                    app:layout_constraintEnd_toStartOf="@id/ivCart" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="@string/textLocalPosition" />
 
                 <ImageView
                     android:id="@+id/ivCart"
