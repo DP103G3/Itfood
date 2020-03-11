@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -41,7 +42,8 @@ public class LoginDialogFragment extends DialogFragment {
     private TextInputLayout textInputLayoutUsername;
     private Button btCancel;
     private Button btLogin;
-    private Button btSignUp;
+    private Button btSignUp, btMemberInput;
+    private EditText etPassword,etName;
     private View view;
     private CommonTask getMemberTask;
     private Activity activity;
@@ -87,12 +89,21 @@ public class LoginDialogFragment extends DialogFragment {
         btLogin = view.findViewById(R.id.btLogin);
         btCancel = view.findViewById(R.id.btCancel);
         btSignUp = view.findViewById(R.id.btSignUp);
+        btMemberInput = view.findViewById(R.id.btMemberInput);
+        etName = view.findViewById(R.id.etName);
+        etPassword = view.findViewById(R.id.etPassword);
         textInputLayoutUsername = view.findViewById(R.id.textInputLayoutUsername);
         textInputLayoutPassword = view.findViewById(R.id.textInputLayoutPassword);
 
         btSignUp.setOnClickListener(v -> {
             mHost.sendRegisterRequest();
             dismiss();
+        });
+
+        //設定按下文字後輸入預設資料
+        btMemberInput.setOnClickListener(v -> {
+            etName.setText(R.string.textEmailInput);
+            etPassword.setText(R.string.textPasswordInput);
         });
 
         btLogin.setOnClickListener(v -> {

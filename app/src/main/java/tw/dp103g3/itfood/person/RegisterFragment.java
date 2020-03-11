@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.gson.JsonObject;
 
@@ -33,6 +34,7 @@ public class RegisterFragment extends Fragment {
     private Activity activity;
     private EditText etEmail, etPassword, etConfirm, etName, etPhone;
     private Button btRegister;
+    private TextView tvMemberDataInput;
     private String textEmail, textPassword, textName, textPhone;
     private boolean emailCheck, passwordCheck, confrimCheck, nameCheck, phoneCheck;
     private CommonTask registerTask;
@@ -218,6 +220,14 @@ public class RegisterFragment extends Fragment {
                 Common.showToast(activity, R.string.textCheckEditText);
             }
         });
+        //設定按下文字後輸入預設會員資料
+        tvMemberDataInput.setOnClickListener(v -> {
+            etEmail.setText(R.string.textEmailInput);
+            etPassword.setText(R.string.textPasswordInput);
+            etConfirm.setText(R.string.textConfirmInput);
+            etName.setText(R.string.textNameInput);
+            etPhone.setText(R.string.textPhoneInput);
+        });
     }
 
     private void handledViews(View view) {
@@ -227,6 +237,7 @@ public class RegisterFragment extends Fragment {
         etName = view.findViewById(R.id.etName);
         etPhone = view.findViewById(R.id.etPhone);
         btRegister = view.findViewById(R.id.btRegister);
+        tvMemberDataInput = view.findViewById(R.id.tvMemberDataInput);
     }
 
     private void focusChanged(View v, boolean hasFocus) {

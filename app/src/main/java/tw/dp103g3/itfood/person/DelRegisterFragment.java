@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,6 +22,8 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.google.gson.JsonObject;
+
+import org.w3c.dom.Text;
 
 import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.main.Common;
@@ -33,6 +36,7 @@ public class DelRegisterFragment extends Fragment {
     private ImageButton ibBack;
     private EditText etEmail, etPassword, etConfirm, etName, etPhone, etIdentityId;
     private Button btRegister;
+    private TextView tvDeliveryDataInput;
     private String textEmail, textPassword, textName, textPhone, textIdentityId;
     private boolean emailCheck, passwordCheck, confirmCheck, nameCheck, phoneCheck, identityIdCheck;
     private CommonTask registerTask;
@@ -58,6 +62,7 @@ public class DelRegisterFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         handledViews(view);
         ibBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
+
         etEmail.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -281,10 +286,7 @@ public class DelRegisterFragment extends Fragment {
                     } else if (count == -2) {
                         Common.showToast(activity, R.string.textIdentityIdUsed);
                     } else {
-                        SharedPreferences pref = activity.getSharedPreferences(
-                                Common.PREFERENCES_MEMBER, Context.MODE_PRIVATE);
-                        pref.edit().putInt("mem_id", count)
-                                .putString("mem_password", textPassword).apply();
+
                         Common.showToast(activity, R.string.textRegisterSuccess);
                         Navigation.findNavController(v).popBackStack(R.id.mainFragment, false);
                     }
@@ -295,6 +297,17 @@ public class DelRegisterFragment extends Fragment {
                 Common.showToast(activity, R.string.textCheckEditText);
             }
         });
+        //設定按下文字後輸入預設外送員資料
+         tvDeliveryDataInput.setOnClickListener(v -> {
+            etEmail.setText(R.string.textDeliveryEmailInput);
+            etPassword.setText(R.string.textPasswordInput);
+            etConfirm.setText(R.string.textConfirmInput);
+            etName.setText(R.string.textDeliveryNameInput);
+            etPhone.setText(R.string.textPhoneInput);
+            etIdentityId.setText(R.string.textIdentityIdInput);
+
+        });
+
     }
 
     private void handledViews(View view) {
@@ -306,6 +319,8 @@ public class DelRegisterFragment extends Fragment {
         etIdentityId = view.findViewById(R.id.etIdentityId);
         etPhone = view.findViewById(R.id.etPhone);
         btRegister = view.findViewById(R.id.btRegister);
+        tvDeliveryDataInput = view.findViewById(R.id.tvDeliveryDataInput);
+
     }
 
     private void focusChanged(View v, boolean hasFocus) {

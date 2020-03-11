@@ -232,4 +232,17 @@ itfood.com.tw的所有權為itfood GmbH。 若您有任何訂餐相關問題，�
     <string name="textIdentityIdUsed">身分證字號已被註冊</string>
     <string name="textInformation">相關資訊</string>
     <string name="textAbout">關於我們</string>
+    <string name="textIdentityIdInput">E123745338</string>
+    <string name="textPhoneInput">0987654321</string>
+    <string name="textNameInput">王小華</string>
+    <string name="textConfirmInput">123456789</string>
+    <string name="textPasswordInput">123456789</string>
+    <string name="textEmailInput">itfood2020@gmail.com</string>
+    <string name="textAddressInput">中央大學</string>
+    <string name="textInfoInput">一間新開的店。</string>
+    <string name="textTaxInput">16439323</string>
+    <string name="textShopEmailInput">Shop2020@gmail.com</string>
+    <string name="textDeliveryEmailInput">Delivery2020@gmail.com</string>
+    <string name="textShopNameInput">古早味</string>
+    <string name="textDeliveryNameInput">宋很快</string>
 </resources>

@@ -24,6 +24,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -66,6 +67,7 @@ public class ShopRegisterFragment extends Fragment {
     private boolean emailCheck, passwordCheck, confirmCheck, nameCheck, phoneCheck, taxCheck, addressCheck;
     private CommonTask registerTask;
     private AddressTask addressTask;
+    private TextView tvShopDataInput;
     private android.location.Address address;
 
     @Override
@@ -371,6 +373,18 @@ public class ShopRegisterFragment extends Fragment {
                 Common.showToast(activity, R.string.textCheckEditText);
             }
         });
+
+        //設定按下文字後輸入預設店家資料
+        tvShopDataInput.setOnClickListener(v -> {
+            etEmail.setText(R.string.textShopEmailInput);
+            etPassword.setText(R.string.textPasswordInput);
+            etConfirm.setText(R.string.textConfirmInput);
+            etName.setText(R.string.textShopNameInput);
+            etPhone.setText(R.string.textPhoneInput);
+            etTax.setText(R.string.textTaxInput);
+            etAddress.setText(R.string.textAddressInput);
+            etInfo.setText(R.string.textInfoInput);
+        });
     }
 
     private void handledViews(View view) {
@@ -389,6 +403,7 @@ public class ShopRegisterFragment extends Fragment {
         tilInfo = view.findViewById(R.id.tilInfo);
         etInfo = view.findViewById(R.id.etInfo);
         btRegister = view.findViewById(R.id.btRegister);
+        tvShopDataInput = view.findViewById(R.id.tvShopDataInput);
     }
 
     private void checkPermission(Intent intent) {
