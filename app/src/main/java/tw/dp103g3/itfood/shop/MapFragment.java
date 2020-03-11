@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -30,6 +32,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -49,10 +52,13 @@ import java.util.stream.Collectors;
 
 import tw.dp103g3.itfood.main.Common;
 import tw.dp103g3.itfood.R;
+import tw.dp103g3.itfood.main.SharedViewModel;
 import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.address.Address;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
+
+import static android.view.View.GONE;
 
 
 /**
@@ -74,11 +80,20 @@ public class MapFragment extends Fragment {
     private List<Shop> shops;
     private RecyclerView rvShop;
     private List<Marker> markers;
+    private SharedViewModel model;
+    private Button btAddress;
+    private MapView mapView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        selectedAddress = null;
         activity = getActivity();
+        model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            selectedAddress = (Address) bundle.getSerializable("address");
+        }
     }
 
     @Override
@@ -89,47 +104,52 @@ public class MapFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        btAddress = view.findViewById(R.id.btAddress);
+        btAddress.setOnClickListener(v -> {
+            navController.navigate(R.id.action_mapFragment_to_addressSelectFragment);
+        });
+        btAddress.setText(selectedAddress.getName());
         navController = Navigation.findNavController(view);
         memId = Common.getMemId(activity);
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-        Address localAddress = null;
+//        Address localAddress = null;
         addresses = getAddresses(memId);
-        File file = new File(activity.getFilesDir(), "localAddress");
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
-            localAddress = (Address) in.readObject();
-            Log.d(TAG, String.valueOf(localAddress.getLatitude()));
-        } catch (IOException | ClassNotFoundException e) {
-            Log.e(TAG, e.toString());
-        }
-        addresses.add(0, localAddress);
-        List<String> addressNames = new ArrayList<>();
-        for (int i = 0; i < addresses.size(); i++) {
-            addressNames.add(addresses.get(i).getName());
-        }
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(activity,
-                android.R.layout.simple_spinner_dropdown_item, addressNames);
-        spAddress = view.findViewById(R.id.spAddress);
-        spAddress.setAdapter(arrayAdapter);
-        spAddress.setSelection(0, true);
-        selectedAddress = addresses.get(0);
-        spAddress.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedAddress = addresses.get(position);
-                moveMap(selectedAddress.getLatLng());
-                showShops();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
+//        File file = new File(activity.getFilesDir(), "localAddress");
+//        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+//            localAddress = (Address) in.readObject();
+//            Log.d(TAG, String.valueOf(localAddress.getLatitude()));
+//        } catch (IOException | ClassNotFoundException e) {
+//            Log.e(TAG, e.toString());
+//        }
+//        addresses.add(0, localAddress);
+//        List<String> addressNames = new ArrayList<>();
+//        for (int i = 0; i < addresses.size(); i++) {
+//            addressNames.add(addresses.get(i).getName());
+//        }
+//        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(activity,
+//                android.R.layout.simple_spinner_dropdown_item, addressNames);
+//        spAddress = view.findViewById(R.id.spAddress);
+//        spAddress.setAdapter(arrayAdapter);
+//        spAddress.setSelection(0, true);
+////        selectedAddress = addresses.get(0);
+//        spAddress.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                selectedAddress = addresses.get(position);
+//                moveMap(selectedAddress.getLatLng());
+//                showShops();
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {}
+//        });
         ivCart = view.findViewById(R.id.ivCart);
         ivCart.setOnClickListener(v -> {
             navController.navigate(R.id.action_mapFragment_to_shoppingCartFragment);
         });
         shops = getShops();
         markers = new ArrayList<>();
-        MapView mapView = view.findViewById(R.id.mapView);
+        mapView = view.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.onStart();
         mapView.getMapAsync(googleMap -> {
@@ -163,6 +183,17 @@ public class MapFragment extends Fragment {
         rvShop.setLayoutManager(new GridLayoutManager(activity, 1,
                 RecyclerView.HORIZONTAL, false));
         showShops();
+        model.getSelectedAddress().observe(getViewLifecycleOwner(), address -> {
+            if (map == null) {
+                return;
+            }
+            if (address != null) {
+                selectedAddress = address;
+                moveMap(selectedAddress.getLatLng());
+                showShops();
+                btAddress.setText(address.getName());
+            }
+        });
     }
 
     private List<Address> getAddresses(int mem_id) {
@@ -189,6 +220,7 @@ public class MapFragment extends Fragment {
     }
 
     private void moveMap(LatLng latLng) {
+        Log.d(TAG, latLng.toString());
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(latLng)
                 .zoom(17)
@@ -322,6 +354,10 @@ public class MapFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Common.checkCart(activity, ivCart);
+        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottomNavigation);
+        if (bottomNavigationView.getVisibility() == GONE) {
+            Common.showBottomNav(activity);
+        }
     }
 
     @Override

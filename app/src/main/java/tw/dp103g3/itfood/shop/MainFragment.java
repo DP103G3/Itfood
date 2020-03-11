@@ -148,7 +148,11 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
             shops = getShops(memId);
         }
         ivMap = view.findViewById(R.id.ivMap);
-        ivMap.setOnClickListener(v -> navController.navigate(R.id.action_mainFragment_to_mapFragment));
+        ivMap.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("address", selectedAddress);
+            navController.navigate(R.id.action_mainFragment_to_mapFragment, bundle);
+        });
         scrollView = view.findViewById(R.id.scrollView);
         scrollView.setVisibility(Common.networkConnected(activity) || !shops.isEmpty() ?
                 View.VISIBLE : View.GONE);

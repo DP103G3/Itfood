@@ -318,6 +318,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
     @Override
     public void onResume() {
         super.onResume();
+        updateDisplayOrderType();
 
         if (address != null) {
             List<Address> addressList = Common.getAddresses(activity, mem_id);
@@ -686,8 +687,8 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
 
     private View.OnClickListener layoutCheckListener() {
         return v -> {
-            if (address == null) {
-                Common.showToast(activity, "請選擇住址");
+            if (tvAddress.getText().toString().trim().equals("無可用地址")) {
+                Common.showToast(activity, "請選擇或新增地址！");
                 return;
             }
             if (mem_id != LOGIN_FALSE) {
