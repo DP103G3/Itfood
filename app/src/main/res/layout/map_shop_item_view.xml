@@ -43,15 +43,15 @@
                 android:textSize="16sp"
                 android:textColor="#5B3F36" />
 
-            <TextView
-                android:id="@+id/tvType"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginBottom="8dp"
-                tools:text="店內價，中餐"
-                android:textSize="12sp"
-                android:textColor="#8d6e63" />
+<!--            <TextView-->
+<!--                android:id="@+id/tvType"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginStart="8dp"-->
+<!--                android:layout_marginBottom="8dp"-->
+<!--                tools:text="店內價，中餐"-->
+<!--                android:textSize="12sp"-->
+<!--                android:textColor="#8d6e63" />-->
 
 
             <LinearLayout

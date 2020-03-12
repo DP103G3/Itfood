@@ -10,6 +10,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -85,6 +88,7 @@ public class OrderTabFragment extends Fragment {
     private List<Order> sortedOrders;
     private CommonTask editOrderTask;
     private LocalBroadcastManager broadcastManager;
+    private ImageView imageView8;
 
     OrderTabFragment(int counter) {
         this.counter = counter;
@@ -120,6 +124,10 @@ public class OrderTabFragment extends Fragment {
                 order_states.add(5);
             }
         }
+        imageView8 = view.findViewById(R.id.imageView8);
+        PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(getResources()
+                .getColor(R.color.colorTextOnP, activity.getTheme()), PorterDuff.Mode.SRC_ATOP);
+        imageView8.getDrawable().setColorFilter(colorFilter);
         rvOrder = view.findViewById(R.id.rvOrder);
         layoutEmpty = view.findViewById(R.id.layoutEmpty);
         rvOrder.setLayoutManager(new LinearLayoutManager(activity));

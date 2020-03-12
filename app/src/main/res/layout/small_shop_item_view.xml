@@ -30,25 +30,25 @@
             android:id="@+id/tvName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
             android:layout_marginStart="8dp"
-            app:layout_constraintBottom_toBottomOf="@id/tvType"
+            app:layout_constraintTop_toBottomOf="@id/ivShop"
+            app:layout_constraintBottom_toTopOf="@id/tvRate"
             app:layout_constraintStart_toStartOf="parent"
             tools:text="四海遊龍（新店北新店）"
             android:textSize="16sp"
-            android:textColor="#5B3F36" />
+            android:textColor="@color/colorTextOnP" />
 
-        <TextView
-            android:id="@+id/tvType"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginBottom="24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="@id/tvRate"
-            tools:text="店內價，中餐"
-            android:textSize="12sp"
-            android:textColor="#8d6e63" />
+<!--        <TextView-->
+<!--            android:id="@+id/tvType"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginStart="8dp"-->
+<!--            android:layout_marginBottom="24dp"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintBottom_toBottomOf="@id/tvRate"-->
+<!--            tools:text="店內價，中餐"-->
+<!--            android:textSize="12sp"-->
+<!--            android:textColor="#8d6e63" />-->
 
         <TextView
             android:id="@+id/tvRate"

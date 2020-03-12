@@ -245,4 +245,5 @@ itfood.com.tw的所有權為itfood GmbH。 若您有任何訂餐相關問題，�
     <string name="textDeliveryEmailInput">Delivery2020@gmail.com</string>
     <string name="textShopNameInput">古早味</string>
     <string name="textDeliveryNameInput">宋很快</string>
+    <string name="textNoRate">目前尚無評分</string>
 </resources>

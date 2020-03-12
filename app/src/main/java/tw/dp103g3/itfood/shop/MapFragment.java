@@ -301,13 +301,14 @@ public class MapFragment extends Fragment {
 
         private class MyViewHolder extends RecyclerView.ViewHolder {
             ImageView ivShop;
-            TextView tvName, tvType, tvRate;
+            TextView tvName, tvRate;
+//            TextView tvType;
 
             private MyViewHolder(View itemView) {
                 super(itemView);
                 ivShop = itemView.findViewById(R.id.ivShop);
                 tvName = itemView.findViewById(R.id.tvName);
-                tvType = itemView.findViewById(R.id.tvType);
+//                tvType = itemView.findViewById(R.id.tvType);
                 tvRate = itemView.findViewById(R.id.tvRate);
             }
         }
@@ -329,15 +330,16 @@ public class MapFragment extends Fragment {
             for (String line : types) {
                 typeSb.append(line).append(" ");
             }
-            String type = typeSb.toString().trim().replaceAll(" ", "，");
+//            String type = typeSb.toString().trim().replaceAll(" ", "，");
             int id = shop.getId();
             double rate = (double) shop.getTtscore() / shop.getTtrate();
             shopImageTask = new ImageTask(url, id, imageSize, holder.ivShop);
             shopImageTask.execute();
             holder.tvName.setText(shop.getName());
-            holder.tvType.setText(type);
-            holder.tvRate.setText(String.format(Locale.getDefault(),
-                    "%.1f(%d)", rate, shop.getTtrate()));
+//            holder.tvType.setText(type);
+            String rateStr = shop.getTtrate() == 0 ? getResources().getString(R.string.textNoRate) :
+                    String.format(Locale.getDefault(), "%.1f (%d)", rate, shop.getTtrate());
+            holder.tvRate.setText(rateStr);
             holder.itemView.setOnClickListener(v -> {
                 moveMap(shop.getLatLng());
             });

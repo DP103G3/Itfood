@@ -56,7 +56,8 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
     private final static String TAG = "TAG_MainFragment";
     private MainActivity activity;
     private ImageView ivCart, ivMap;
-    private RecyclerView rvNewShop, rvAllShop, rvChineseShop, rvAmericanShop;
+    private RecyclerView rvNewShop, rvAllShop;
+//    private RecyclerView rvChineseShop, rvAmericanShop;
     private List<Shop> shops;
     private List<Address> addresses;
     private CommonTask getAllShopTask, getAllAddressTask;
@@ -159,12 +160,12 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
         rvNewShop = view.findViewById(R.id.rvNewShop);
         rvNewShop.setLayoutManager(new GridLayoutManager(
                 activity, 1, RecyclerView.HORIZONTAL, false));
-        rvChineseShop = view.findViewById(R.id.rvChineseShop);
-        rvChineseShop.setLayoutManager(new GridLayoutManager(
-                activity, 1, RecyclerView.HORIZONTAL, false));
-        rvAmericanShop = view.findViewById(R.id.rvAmericanShop);
-        rvAmericanShop.setLayoutManager(new GridLayoutManager(
-                activity, 1, RecyclerView.HORIZONTAL, false));
+//        rvChineseShop = view.findViewById(R.id.rvChineseShop);
+//        rvChineseShop.setLayoutManager(new GridLayoutManager(
+//                activity, 1, RecyclerView.HORIZONTAL, false));
+//        rvAmericanShop = view.findViewById(R.id.rvAmericanShop);
+//        rvAmericanShop.setLayoutManager(new GridLayoutManager(
+//                activity, 1, RecyclerView.HORIZONTAL, false));
         rvAllShop = view.findViewById(R.id.rvAllShop);
         rvAllShop.setPadding(0, 0, 0, Common.getNavigationBarHeight(activity));
         rvAllShop.setLayoutManager(new LinearLayoutManager(activity));
@@ -235,8 +236,8 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
                 .filter(v -> System.currentTimeMillis() - v.getJointime().getTime() <= 2592000000L).sorted(timeCmp)
                 .collect(Collectors.toList());
         setAdapter(rvNewShop, newShop, R.layout.small_shop_item_view);
-        setAdapter(rvChineseShop, typeFilter("中式", showShops), R.layout.small_shop_item_view);
-        setAdapter(rvAmericanShop, typeFilter("美式料理", showShops), R.layout.small_shop_item_view);
+//        setAdapter(rvChineseShop, typeFilter("中式", showShops), R.layout.small_shop_item_view);
+//        setAdapter(rvAmericanShop, typeFilter("美式料理", showShops), R.layout.small_shop_item_view);
         Comparator<Shop> cmp = Comparator.comparing(v ->
                 Common.Distance(v.getLatitude(), v.getLongitude(),
                         selectedAddress.getLatitude(), selectedAddress.getLongitude()));
@@ -288,12 +289,13 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
 
         private class MyViewHolder extends RecyclerView.ViewHolder {
             ImageView ivShop;
-            TextView tvName, tvType, tvRate;
+            TextView tvName, tvRate;
+//            TextView tvType;
             private MyViewHolder(View itemView) {
                 super(itemView);
                 ivShop = itemView.findViewById(R.id.ivShop);
                 tvName = itemView.findViewById(R.id.tvName);
-                tvType = itemView.findViewById(R.id.tvType);
+//                tvType = itemView.findViewById(R.id.tvType);
                 tvRate = itemView.findViewById(R.id.tvRate);
             }
         }
@@ -315,16 +317,17 @@ public class MainFragment extends Fragment implements LoginDialogFragment.LoginD
             for (String line : types) {
                 typeSb.append(line).append(" ");
             }
-            String type = typeSb.toString().trim().replaceAll(" ", "，");
+//            String type = typeSb.toString().trim().replaceAll(" ", "，");
             int id = shop.getId();
             double rate = (double) shop.getTtscore() / shop.getTtrate();
             holder.ivShop.setImageResource(R.drawable.no_image);
             shopImageTask = new ImageTask(url, id, imageSize, holder.ivShop);
             shopImageTask.execute();
             holder.tvName.setText(shop.getName());
-            holder.tvType.setText(type);
-            holder.tvRate.setText(String.format(Locale.getDefault(),
-                    "%.1f(%d)", rate, shop.getTtrate()));
+//            holder.tvType.setText(type);
+            String rateStr = shop.getTtrate() == 0 ? getResources().getString(R.string.textNoRate) :
+                    String.format(Locale.getDefault(), "%.1f (%d)", rate, shop.getTtrate());
+            holder.tvRate.setText(rateStr);
             holder.itemView.setOnClickListener(v -> {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("shop", shop);
