@@ -278,10 +278,13 @@ public class MapFragment extends Fragment implements LoginDialogFragment.LoginDi
             }
             shops = new ArrayList<>();
         }
+        List<Shop> showShops = selectedAddress != null ? shops.stream().filter(v -> Common.Distance(v.getLatitude(), v.getLongitude(),
+                selectedAddress.getLatitude(), selectedAddress.getLongitude()) < 5000)
+                .collect(Collectors.toList()) : new ArrayList<>();
         Comparator<Shop> cmp = Comparator.comparing(v ->
                 Common.Distance(v.getLatitude(), v.getLongitude(),
                         selectedAddress.getLatitude(), selectedAddress.getLongitude()));
-        List<Shop> sortedShops = shops.stream().sorted(cmp)
+        List<Shop> sortedShops = showShops.stream().sorted(cmp)
                 .collect(Collectors.toList());
         setAdapter(rvShop, sortedShops, R.layout.map_shop_item_view);
     }
