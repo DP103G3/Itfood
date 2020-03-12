@@ -313,7 +313,9 @@ public class OrderTabFragment extends Fragment {
                             }.getType();
                             jsonObject.addProperty("orderDetails", gson.toJson(orderDetailsMap, type));
                             out.write(jsonObject.toString());
-                            Navigation.findNavController(v).navigate(R.id.action_orderFragment_to_shoppingCartFragment);
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable("shop", shop);
+                            Navigation.findNavController(v).navigate(R.id.action_orderFragment_to_shoppingCartFragment, bundle);
                         } catch (IOException e) {
                             Log.e(TAG, e.toString());
                         }
@@ -338,7 +340,9 @@ public class OrderTabFragment extends Fragment {
                             }.getType();
                             jsonObject.addProperty("orderDetails", gson.toJson(orderDetailsMap, type));
                             out.write(jsonObject.toString());
-                            Navigation.findNavController(v).navigate(R.id.action_orderFragment_to_shoppingCartFragment);
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable("shop", shop);
+                            Navigation.findNavController(v).navigate(R.id.action_orderFragment_to_shoppingCartFragment, bundle);
                         } catch (IOException e) {
                             Log.e(TAG, e.toString());
                         }

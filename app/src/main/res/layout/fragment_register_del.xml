@@ -37,7 +37,7 @@
                 android:id="@+id/tvTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/textRegister"
+                android:text="@string/textDelRegister"
                 android:textSize="20sp"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -133,7 +133,7 @@
             android:id="@+id/btRegister"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/textRegister"
+            android:text="@string/textDelRegister"
             android:textColor="@color/colorTextOnS"
             android:background="@color/colorSecondary" />
 

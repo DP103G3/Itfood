@@ -200,7 +200,7 @@ itfood.com.tw的所有權為itfood GmbH。 若您有任何訂餐相關問題，�
     <string name="textPhoneIsInvalid">請輸入電話號碼！</string>
     <string name="textPhoneError">號碼數不足,請再確認！</string>
     <string name="textUpdateFail">修改失敗！請聯絡系統人員。</string>
-    <string name="textRegister">會員注册</string>
+    <string name="textRegister">會員注冊</string>
     <string name="textName">姓名</string>
     <string name="textPasswordConfirm">確認密碼</string>
     <string name="textPhone">電話</string>
@@ -246,4 +246,5 @@ itfood.com.tw的所有權為itfood GmbH。 若您有任何訂餐相關問題，�
     <string name="textShopNameInput">古早味</string>
     <string name="textDeliveryNameInput">宋很快</string>
     <string name="textNoRate">目前尚無評分</string>
+    <string name="textDelRegister">外送員註冊</string>
 </resources>

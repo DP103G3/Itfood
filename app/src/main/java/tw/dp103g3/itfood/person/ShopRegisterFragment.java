@@ -410,6 +410,7 @@ public class ShopRegisterFragment extends Fragment {
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA)) {
                 Common.showToast(activity, R.string.textOpenCameraPermission);
+                ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, 100);
             } else {
                 ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, 100);
             }

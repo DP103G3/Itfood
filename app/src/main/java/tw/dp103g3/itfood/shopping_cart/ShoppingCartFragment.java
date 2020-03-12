@@ -146,6 +146,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();
+        mem_id = Common.getMemId(activity);
         payment = null;
         date = null;
         address = null;
@@ -155,7 +156,6 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
         orderType = DELIVERY;
         totals = new SparseIntArray();
         memberPref = activity.getSharedPreferences(PREFERENCES_MEMBER, Context.MODE_PRIVATE);
-        mem_id = Common.getMemId(activity);
 
         orderDetail = new File(activity.getFilesDir(), "orderDetail");
 
@@ -174,17 +174,9 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
         dishIds = new ArrayList<>();
         orderDetails.forEach((id, count) -> dishIds.add(id));
         cart = getCart(dishIds, mem_id);
-
-        if (mem_id != LOGIN_FALSE) {
-            payment = cart.getPayments().isEmpty() ? null : cart.getPayments().get(0);
-            model.selectPayment(payment);
-            member = cart.getMember();
-        }
     }
 
     @Override
@@ -197,7 +189,16 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Common.connectOrderServer(activity, mem_id);
+        Bundle bundle = new Bundle();
+        if (bundle != null && bundle.getSerializable("shop") != null) {
+            shop = (Shop) bundle.getSerializable("shop");
+        }
         ButterKnife.bind(this, view);
+        if (mem_id != LOGIN_FALSE) {
+            payment = cart.getPayments().isEmpty() ? null : cart.getPayments().get(0);
+            model.selectPayment(payment);
+            member = cart.getMember();
+        }
         handleViews();
         navController = Navigation.findNavController(view);
 
@@ -430,8 +431,9 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
     @Override
     public void sendLoginResult(boolean isSuccessful) {
         if (isSuccessful) {
-            mem_id = memberPref.getInt("mem_id", 0);
+            mem_id = Common.getMemId(activity);
             cart = getCart(dishIds, mem_id);
+            member = cart.getMember();
             address = cart.getAddresses().isEmpty() ? null : cart.getAddresses().get(0);
             payment = cart.getPayments().isEmpty() ? null : cart.getPayments().get(0);
             model.selectPayment(payment);
@@ -445,7 +447,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
 
     @Override
     public void sendRegisterRequest() {
-        // navController.navigate(R.id.registerFragment);
+         navController.navigate(R.id.registerFragment);
     }
 
     private class DishAdapter extends RecyclerView.Adapter<DishAdapter.MyViewHolder> {
@@ -687,7 +689,7 @@ public class ShoppingCartFragment extends Fragment implements LoginDialogFragmen
 
     private View.OnClickListener layoutCheckListener() {
         return v -> {
-            if (tvAddress.getText().toString().trim().equals("無可用地址")) {
+            if (tvAddress.getText().toString().trim().equals("無可用地址") && orderType != 0) {
                 Common.showToast(activity, "請選擇或新增地址！");
                 return;
             }

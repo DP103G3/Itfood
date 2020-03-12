@@ -206,8 +206,9 @@ public class ShopFragment extends Fragment {
             }
         });
         double rate = (double) shop.getTtscore() / shop.getTtrate();
-        tvRate.setText(String.format(Locale.getDefault(),
-                "%.1f(%d)", rate, shop.getTtrate()));
+        String rateStr = shop.getTtrate() == 0 ? getResources().getString(R.string.textNoRate) :
+                String.format(Locale.getDefault(), "%.1f (%d)", rate, shop.getTtrate());
+        tvRate.setText(rateStr);
 
         rvDish = view.findViewById(R.id.rvDish);
 //        rvDish.setPadding(0, rvDish.getPaddingTop(), 0, Common.getNavigationBarHeight(activity) + 20);
