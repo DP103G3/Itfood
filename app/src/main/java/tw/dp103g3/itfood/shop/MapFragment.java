@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -55,6 +56,7 @@ import tw.dp103g3.itfood.R;
 import tw.dp103g3.itfood.main.SharedViewModel;
 import tw.dp103g3.itfood.main.Url;
 import tw.dp103g3.itfood.address.Address;
+import tw.dp103g3.itfood.shopping_cart.LoginDialogFragment;
 import tw.dp103g3.itfood.task.CommonTask;
 import tw.dp103g3.itfood.task.ImageTask;
 
@@ -64,7 +66,7 @@ import static android.view.View.GONE;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MapFragment extends Fragment {
+public class MapFragment extends Fragment implements LoginDialogFragment.LoginDialogContract {
     private static final String TAG = "TAG_MapFragment";
     private Activity activity;
     private GoogleMap map;
@@ -83,6 +85,7 @@ public class MapFragment extends Fragment {
     private SharedViewModel model;
     private Button btAddress;
     private MapView mapView;
+    private View view;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -104,10 +107,16 @@ public class MapFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        this.view = view;
         btAddress = view.findViewById(R.id.btAddress);
         btAddress.setOnClickListener(v -> {
-            navController.navigate(R.id.action_mapFragment_to_addressSelectFragment);
+            if (memId != 0) {
+             navController.navigate(R.id.action_mapFragment_to_addressSelectFragment);
+            } else {
+                Common.showLoginDialog(this);
+            }
         });
+
         btAddress.setText(selectedAddress.getName());
         navController = Navigation.findNavController(view);
         memId = Common.getMemId(activity);
@@ -275,6 +284,22 @@ public class MapFragment extends Fragment {
         List<Shop> sortedShops = shops.stream().sorted(cmp)
                 .collect(Collectors.toList());
         setAdapter(rvShop, sortedShops, R.layout.map_shop_item_view);
+    }
+
+    @Override
+    public void sendLoginResult(boolean isSuccessful) {
+        if (isSuccessful) {
+            NavOptions.Builder builder = new NavOptions.Builder();
+            builder.setPopUpTo(R.id.mainFragment, false);
+            NavOptions navOptions = builder.build();
+            Navigation.findNavController(view).navigate(R.id.mainFragment, null, navOptions);
+        }
+    }
+
+    @Override
+    public void sendRegisterRequest() {
+        Navigation.findNavController(view).popBackStack(R.id.mainFragment, false);
+        Navigation.findNavController(view).navigate(R.id.registerFragment);
     }
 
     private class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> {

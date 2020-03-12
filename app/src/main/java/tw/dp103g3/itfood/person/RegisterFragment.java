@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.gson.JsonObject;
@@ -34,6 +35,7 @@ public class RegisterFragment extends Fragment {
     private Activity activity;
     private EditText etEmail, etPassword, etConfirm, etName, etPhone;
     private Button btRegister;
+    private ImageButton ibBack;
     private TextView tvMemberDataInput;
     private String textEmail, textPassword, textName, textPhone;
     private boolean emailCheck, passwordCheck, confrimCheck, nameCheck, phoneCheck;
@@ -59,6 +61,10 @@ public class RegisterFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         handledViews(view);
+        ibBack = view.findViewById(R.id.ibBack);
+        ibBack.setOnClickListener(v -> {
+            Navigation.findNavController(view).popBackStack();
+        });
         etEmail.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
